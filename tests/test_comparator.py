@@ -127,19 +127,23 @@ class TestBlackFridayWatchComparator(unittest.TestCase):
             cfg_copy = os.path.join(tmpdir, "watches.yaml")
             shutil.copyfile(DEFAULT_CONFIG_PATH, cfg_copy)
 
-            target_url = "https://www.montresandco.com/montre-casio-g-shock-gw-m5610u-1er-p-74248.html"
-            removed = remove_url_from_config(target_url, watch_id="casio-gwm5610u", config_path=cfg_copy)
+            _, initial_watches = load_config(cfg_copy)
+            first_watch = initial_watches[0]
+            target_url = first_watch.urls[0].url
+
+            removed = remove_url_from_config(target_url, watch_id=first_watch.id, config_path=cfg_copy)
             self.assertTrue(removed)
 
             _, watches = load_config(cfg_copy)
-            casio = next(w for w in watches if w.id == "casio-gwm5610u")
-            remaining_urls = [u.url for u in casio.urls]
+            updated = next(w for w in watches if w.id == first_watch.id)
+            remaining_urls = [u.url for u in updated.urls]
             self.assertNotIn(target_url, remaining_urls)
 
     def test_add_and_remove_watch_model(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             cfg_copy = os.path.join(tmpdir, "watches.yaml")
             shutil.copyfile(DEFAULT_CONFIG_PATH, cfg_copy)
+            _, before = load_config(cfg_copy)
 
             added = add_watch_to_config(
                 name="Casio Oceanus OCW-T200S-1AJF",
@@ -152,24 +156,25 @@ class TestBlackFridayWatchComparator(unittest.TestCase):
             )
             self.assertTrue(added)
             _, watches = load_config(cfg_copy)
-            self.assertEqual(len(watches), 6)
+            self.assertEqual(len(watches), len(before) + 1)
 
             removed = remove_watch_from_config("OCW-T200S-1AJF", config_path=cfg_copy)
             self.assertTrue(removed)
             _, watches_after = load_config(cfg_copy)
-            self.assertEqual(len(watches_after), 5)
+            self.assertEqual(len(watches_after), len(before))
 
     def test_end_to_end_demo_pipeline(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             hist_path = os.path.join(tmpdir, "history.json")
             docs_dir = os.path.join(tmpdir, "docs")
+            _, configured = load_config(DEFAULT_CONFIG_PATH)
             analyses = run_comparator(
                 history_path=hist_path,
                 docs_dir=docs_dir,
                 demo_mode=True,
                 no_notify=True,
             )
-            self.assertEqual(len(analyses), 5)
+            self.assertEqual(len(analyses), len(configured))
             self.assertTrue(os.path.isfile(os.path.join(docs_dir, "index.html")))
             self.assertTrue(os.path.isfile(os.path.join(docs_dir, "sw.js")))
             self.assertTrue(os.path.isfile(os.path.join(docs_dir, "latest_summary.json")))

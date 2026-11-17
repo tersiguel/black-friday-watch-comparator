@@ -1,23 +1,12 @@
 {
-  "updated_at": "2026-11-17T23:52:22.879083+00:00",
-  "updated_at_human": "17/11/2026 à 23:52 UTC",
-  "notification_title": "🔥 OBJECTIF ATTEINT : Casio G-Shock GW-M5610U-1ER à 89.99 € !",
-  "notification_body": "• GW-M5610U-1ER : 89.99 € chez Dealabs • Amazon DE (-40% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100)\n• LCW-M100TSE-1AER : 179.90 € chez Idealo Comparateur (-36% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100)\n• CB0250-84E : 264.00 € chez Ocarat (-34% vs neuf, ✅ 5€ sous ta cible, Score BF 100/100)\n• SBTM323 : 272.00 € chez Sakura Watches (-31% vs neuf, ✅ 7€ sous ta cible, Score BF 100/100)\n• AT8110-61E : 349.00 € chez Amazon FR (-24% vs neuf, cible 319€ (+30€), Score BF 50/100)",
-  "click_url": "https://www.dealabs.com/search?q=GW-M5610U-1ER",
+  "updated_at": "2026-11-17T23:55:58.090204+00:00",
+  "updated_at_human": "17/11/2026 à 23:55 UTC",
+  "notification_title": "🔥 OBJECTIF ATTEINT : Casio Lineage LCW-M100TSE-1AER (Titane & Saphir) à 179.90 € !",
+  "notification_body": "• LCW-M100TSE-1AER : 179.90 € chez Idealo Comparateur (-36% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100)\n• CB0250-84E : 264.00 € chez Ocarat (-34% vs neuf, ✅ 5€ sous ta cible, Score BF 100/100)\n• SBTM323 : 272.00 € chez Sakura Watches (-31% vs neuf, ✅ 7€ sous ta cible, Score BF 100/100)\n• AT8110-61E : 349.00 € chez Amazon FR (-24% vs neuf, cible 319€ (+30€), Score BF 50/100)",
+  "click_url": "https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER",
   "ntfy_topic": "bf-montres-solaires-2026",
   "ntfy_server": "https://ntfy.sh",
   "watches": [
-    {
-      "id": "casio-gwm5610u",
-      "name": "Casio G-Shock GW-M5610U-1ER",
-      "reference": "GW-M5610U-1ER",
-      "best_price": 89.99,
-      "best_merchant": "Dealabs • Amazon DE",
-      "best_url": "https://www.dealabs.com/search?q=GW-M5610U-1ER",
-      "target_price": 99.0,
-      "bf_score": 100,
-      "verdict": "🔥 Deal Black Friday Exceptionnel"
-    },
     {
       "id": "casio-lineage-titanium",
       "name": "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)",

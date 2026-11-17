@@ -1,107 +1,73 @@
-# ==============================================================================
-# Configuration du Comparateur de Prix Black Friday — Montres Solaires Radio-Pilotées
-# ==============================================================================
-# Tu peux ajouter autant de modèles que tu veux en compétition.
-# Pour chaque montre :
-#   - target_price : Le prix en € sous lequel c'est une super affaire à acheter
-#   - reference_price : Le prix public conseillé (MSRP) officiel pour vérifier les vraies/fausses promos
-#   - urls : Colle ici N'IMPORTE QUELLE URL de boutique (Amazon, Ocarat, Montres & Co, Fnac, Cdiscount, Chrono24, etc.)
-#   - search_queries : Mots-clés utilisés par le moteur de découverte auto (Dealabs, Idealo, Web)
-
 settings:
-  currency: "EUR"
-  # Canal ntfy.sh pour recevoir les notifications Web Push directement dans Google Chrome (même onglet fermé)
-  # Ouvre https://ntfy.sh/app dans Chrome et abonne-toi à ce sujet :
-  ntfy_topic: "bf-montres-solaires-2026"
-  ntfy_server: "https://ntfy.sh"
-  # Toujours envoyer le récapitulatif quotidien du meilleur prix trouvé (même s'il n'a pas baissé)
+  currency: EUR
+  ntfy_topic: bf-montres-solaires-2026
+  ntfy_server: https://ntfy.sh
   daily_recap: true
-  # Activer la découverte automatique de nouvelles offres par référence
   auto_discovery: true
-  # Délai maximum par requête HTTP (en secondes)
   request_timeout: 15
-  # Activer le fallback Playwright (navigateur headless Chromium) si un site bloque les requêtes simples
   use_playwright_fallback: true
-
 watches:
-  - id: "casio-gwm5610u"
-    name: "Casio G-Shock GW-M5610U-1ER"
-    brand: "Casio"
-    reference: "GW-M5610U-1ER"
-    features: "Tough Solar • Multi-Band 6 (Radio-pilotée) • Étanche 20 bar • LED Super Illuminator"
-    target_price: 99.00
-    reference_price: 149.00
-    search_queries:
-      - "GW-M5610U-1ER"
-      - "Casio GW-M5610U"
-    urls:
-      - url: "https://www.amazon.fr/dp/B09CGR4FFM"
-        merchant: "Amazon FR"
-      - url: "https://ocarat.com/montre-g-shock-origin-gw-m5610u-1er-casio-79831.html"
-        merchant: "Ocarat"
-      - url: "https://www.montresandco.com/montre-casio-g-shock-gw-m5610u-1er-p-74248.html"
-        merchant: "Montres & Co"
-
-  - id: "casio-lineage-titanium"
-    name: "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)"
-    brand: "Casio"
-    reference: "LCW-M100TSE-1AER"
-    features: "Boîtier & Bracelet Titane • Verre Saphir • Tough Solar • Radio-pilotée Multi-Band 6"
-    target_price: 189.00
-    reference_price: 279.00
-    search_queries:
-      - "LCW-M100TSE-1AER"
-      - "Casio Lineage LCW-M100TSE"
-    urls:
-      - url: "https://www.amazon.fr/dp/B07571V4V5"
-        merchant: "Amazon FR"
-      - url: "https://ocarat.com/montre-lineage-lcw-m100tse-1aer-casio-48155.html"
-        merchant: "Ocarat"
-
-  - id: "citizen-ecodrive-cb0250"
-    name: "Citizen Eco-Drive Radio-Controlled CB0250-84E"
-    brand: "Citizen"
-    reference: "CB0250-84E"
-    features: "Eco-Drive Solaire • Radio-pilotée 4 zones • Verre Saphir • Calendrier Perpétuel • 10 bar"
-    target_price: 269.00
-    reference_price: 399.00
-    search_queries:
-      - "CB0250-84E"
-      - "Citizen CB0250"
-    urls:
-      - url: "https://www.amazon.fr/dp/B09WVH883J"
-        merchant: "Amazon FR"
-      - url: "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html"
-        merchant: "Ocarat"
-
-  - id: "citizen-promaster-as4020"
-    name: "Citizen Promaster Sky Eco-Drive AT8110-61E"
-    brand: "Citizen"
-    reference: "AT8110-61E"
-    features: "Chronographe Eco-Drive Solaire • Radio-pilotée • Verre Saphir •Heure Mondiale 26 villes"
-    target_price: 319.00
-    reference_price: 459.00
-    search_queries:
-      - "AT8110-61E"
-      - "Citizen AT8110"
-    urls:
-      - url: "https://www.amazon.fr/dp/B00WG04A1M"
-        merchant: "Amazon FR"
-      - url: "https://ocarat.com/montre-chrono-radio-controlled-at8110-61e-citizen-42191.html"
-        merchant: "Ocarat"
-
-  - id: "seiko-solar-radio-sbtm323"
-    name: "Seiko Selection Solar Radio-Controlled SBTM323"
-    brand: "Seiko"
-    reference: "SBTM323"
-    features: "Calibre 7B72 Solaire Radio-piloté • Verre Saphir Super-Clear • Finition Zaratsu-style"
-    target_price: 279.00
-    reference_price: 395.00
-    search_queries:
-      - "Seiko SBTM323"
-      - "SBTM323"
-    urls:
-      - url: "https://www.chrono24.fr/search/index.htm?query=SBTM323"
-        merchant: "Chrono24"
-      - url: "https://www.sakurawatches.com/seiko-selection-sbtm323"
-        merchant: "Sakura Watches"
+- id: casio-lineage-titanium
+  name: Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)
+  brand: Casio
+  reference: LCW-M100TSE-1AER
+  features: Boîtier & Bracelet Titane • Verre Saphir • Tough Solar • Radio-pilotée
+    Multi-Band 6
+  target_price: 189.0
+  reference_price: 279.0
+  search_queries:
+  - LCW-M100TSE-1AER
+  - Casio Lineage LCW-M100TSE
+  urls:
+  - url: https://www.amazon.fr/dp/B07571V4V5
+    merchant: Amazon FR
+  - url: https://ocarat.com/montre-lineage-lcw-m100tse-1aer-casio-48155.html
+    merchant: Ocarat
+- id: citizen-ecodrive-cb0250
+  name: Citizen Eco-Drive Radio-Controlled CB0250-84E
+  brand: Citizen
+  reference: CB0250-84E
+  features: Eco-Drive Solaire • Radio-pilotée 4 zones • Verre Saphir • Calendrier
+    Perpétuel • 10 bar
+  target_price: 269.0
+  reference_price: 399.0
+  search_queries:
+  - CB0250-84E
+  - Citizen CB0250
+  urls:
+  - url: https://www.amazon.fr/dp/B09WVH883J
+    merchant: Amazon FR
+  - url: https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html
+    merchant: Ocarat
+- id: citizen-promaster-as4020
+  name: Citizen Promaster Sky Eco-Drive AT8110-61E
+  brand: Citizen
+  reference: AT8110-61E
+  features: Chronographe Eco-Drive Solaire • Radio-pilotée • Verre Saphir •Heure Mondiale
+    26 villes
+  target_price: 319.0
+  reference_price: 459.0
+  search_queries:
+  - AT8110-61E
+  - Citizen AT8110
+  urls:
+  - url: https://www.amazon.fr/dp/B00WG04A1M
+    merchant: Amazon FR
+  - url: https://ocarat.com/montre-chrono-radio-controlled-at8110-61e-citizen-42191.html
+    merchant: Ocarat
+- id: seiko-solar-radio-sbtm323
+  name: Seiko Selection Solar Radio-Controlled SBTM323
+  brand: Seiko
+  reference: SBTM323
+  features: Calibre 7B72 Solaire Radio-piloté • Verre Saphir Super-Clear • Finition
+    Zaratsu-style
+  target_price: 279.0
+  reference_price: 395.0
+  search_queries:
+  - Seiko SBTM323
+  - SBTM323
+  urls:
+  - url: https://www.chrono24.fr/search/index.htm?query=SBTM323
+    merchant: Chrono24
+  - url: https://www.sakurawatches.com/seiko-selection-sbtm323
+    merchant: Sakura Watches
