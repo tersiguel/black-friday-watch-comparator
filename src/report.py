@@ -1,4 +1,4 @@
-"""Interactive HTML report generator for GitHub Pages with built-in Chrome Notifications and Chart.js."""
+"""Interactive HTML report generator for GitHub Pages with Dark/Light Mode toggle, Chrome Notifications, and Chart.js."""
 
 import html
 import json
@@ -25,11 +25,9 @@ def generate_html_report(
     ntfy_server = settings.get("ntfy_server", "https://ntfy.sh").rstrip("/")
     ntfy_web_url = f"{ntfy_server}/app"
 
-    # Sort analyses by BF Score descending for podium
     sorted_analyses = sorted(analyses, key=lambda a: a.bf_score, reverse=True)
     champion = sorted_analyses[0] if sorted_analyses else None
 
-    # Save latest_summary.json so the open Chrome tab can poll and trigger native Notification API
     latest_payload = {
         "updated_at": now_iso,
         "updated_at_human": now_str,
@@ -57,7 +55,6 @@ def generate_html_report(
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(latest_payload, f, indent=2, ensure_ascii=False)
 
-    # Prepare Chart.js datasets per watch
     chart_data_by_watch: Dict[str, Any] = {}
     for a in sorted_analyses:
         w_hist = history.get("watches", {}).get(a.watch.id, {})
@@ -82,17 +79,16 @@ def generate_html_report(
             "msrp_line": msrp_line,
         }
 
-    # Build HTML rows for competing watches table
     comparison_rows_html = []
     watch_cards_html = []
     discovered_cards_html = []
 
     badge_colors = {
-        "exceptional": "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
-        "target_reached": "bg-green-500/20 text-green-300 border-green-500/40",
-        "good": "bg-amber-500/20 text-amber-300 border-amber-500/40",
-        "fake_promo": "bg-rose-500/20 text-rose-300 border-rose-500/40",
-        "wait": "bg-slate-700/60 text-slate-300 border-slate-600",
+        "exceptional": "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/40",
+        "target_reached": "bg-green-500/15 text-green-700 dark:text-green-300 border-green-500/40",
+        "good": "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/40",
+        "fake_promo": "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/40",
+        "wait": "bg-slate-200 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600",
     }
 
     for rank, a in enumerate(sorted_analyses, start=1):
@@ -106,9 +102,9 @@ def generate_html_report(
         diff_target = a.discount_vs_target_diff
         if best and best.price is not None:
             if diff_target <= 0:
-                target_badge = f'<span class="text-emerald-400 font-semibold">{diff_target:+.2f} € (Sous la cible !)</span>'
+                target_badge = f'<span class="text-emerald-600 dark:text-emerald-400 font-semibold">{diff_target:+.2f} € (Sous la cible !)</span>'
             else:
-                target_badge = f'<span class="text-amber-300">+{diff_target:.2f} € vs cible ({w.target_price:.0f} €)</span>'
+                target_badge = f'<span class="text-amber-600 dark:text-amber-300 font-medium">+{diff_target:.2f} € vs cible ({w.target_price:.0f} €)</span>'
         else:
             target_badge = "—"
 
@@ -118,33 +114,33 @@ def generate_html_report(
         fake_alert_banner = ""
         if a.is_fake_promo and a.fake_promo_reason:
             fake_alert_banner = f"""
-            <div class="mt-2 rounded-lg bg-rose-950/70 border border-rose-500/40 px-3 py-2 text-xs text-rose-200 flex items-center gap-2">
+            <div class="mt-2 rounded-lg bg-rose-50 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-500/40 px-3 py-2 text-xs text-rose-700 dark:text-rose-200 flex items-center gap-2">
                 <span>🚨</span>
                 <span><strong>Alerte Anti-Fausse Promo :</strong> {html.escape(a.fake_promo_reason)}</span>
             </div>
             """
 
         comparison_rows_html.append(f"""
-        <tr class="border-b border-slate-800 hover:bg-slate-800/50 transition">
-            <td class="py-3.5 px-4 font-bold text-amber-400">#{rank}</td>
+        <tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition">
+            <td class="py-3.5 px-4 font-bold text-amber-600 dark:text-amber-400">#{rank}</td>
             <td class="py-3.5 px-4">
-                <div class="font-semibold text-white">{html.escape(w.name)}</div>
-                <div class="text-xs text-slate-400">Réf: <code class="text-slate-300">{html.escape(w.reference)}</code> • {html.escape(w.features)}</div>
+                <div class="font-semibold text-slate-900 dark:text-white">{html.escape(w.name)}</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">Réf: <code class="text-slate-700 dark:text-slate-300 font-mono">{html.escape(w.reference)}</code> • {html.escape(w.features)}</div>
                 {fake_alert_banner}
             </td>
             <td class="py-3.5 px-4">
-                <div class="text-xl font-extrabold text-white">{price_str}</div>
-                <div class="text-xs text-slate-400">Prix public: <span class="line-through">{w.reference_price:.0f} €</span> (<span class="text-emerald-400 font-semibold">{msrp_discount_str}</span>)</div>
+                <div class="text-xl font-extrabold text-slate-900 dark:text-white">{price_str}</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">Prix public: <span class="line-through">{w.reference_price:.0f} €</span> (<span class="text-emerald-600 dark:text-emerald-400 font-semibold">{msrp_discount_str}</span>)</div>
             </td>
             <td class="py-3.5 px-4 text-sm">{target_badge}</td>
-            <td class="py-3.5 px-4 text-sm text-slate-300">{low_hist_str}</td>
+            <td class="py-3.5 px-4 text-sm text-slate-700 dark:text-slate-300 font-medium">{low_hist_str}</td>
             <td class="py-3.5 px-4">
                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border {badge_cls}">
                     {html.escape(a.bf_verdict)}
                 </span>
             </td>
             <td class="py-3.5 px-4 text-center">
-                <div class="inline-flex items-center justify-center w-11 h-11 rounded-full bg-slate-800 border border-slate-700 font-bold text-amber-400">
+                <div class="inline-flex items-center justify-center w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-bold text-amber-600 dark:text-amber-400">
                     {a.bf_score}
                 </div>
             </td>
@@ -157,7 +153,6 @@ def generate_html_report(
         </tr>
         """)
 
-        # Per-watch merchant offers list
         offer_items_html = []
         all_watch_offers = sorted(
             a.offers,
@@ -165,68 +160,68 @@ def generate_html_report(
         )
         for o in all_watch_offers:
             if o.price is not None:
-                old_p = f'<span class="line-through text-xs text-slate-500 ml-1">{o.original_price:.2f} €</span>' if o.original_price else ""
-                promo_b = f'<span class="ml-2 px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-mono">Code: {html.escape(o.promo_code)}</span>' if o.promo_code else ""
-                stock_b = '<span class="text-emerald-400 text-xs">● En stock</span>' if o.in_stock else '<span class="text-rose-400 text-xs">● Rupture</span>'
+                old_p = f'<span class="line-through text-xs text-slate-400 dark:text-slate-500 ml-1">{o.original_price:.2f} €</span>' if o.original_price else ""
+                promo_b = f'<span class="ml-2 px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 text-[10px] font-mono">Code: {html.escape(o.promo_code)}</span>' if o.promo_code else ""
+                stock_b = '<span class="text-emerald-600 dark:text-emerald-400 text-xs">● En stock</span>' if o.in_stock else '<span class="text-rose-600 dark:text-rose-400 text-xs">● Rupture</span>'
                 offer_items_html.append(f"""
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-900/70 border border-slate-800/80">
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80">
                     <div>
-                        <span class="font-medium text-slate-200 text-sm">{html.escape(o.merchant)}</span>
+                        <span class="font-medium text-slate-800 dark:text-slate-200 text-sm">{html.escape(o.merchant)}</span>
                         <span class="ml-2">{stock_b}</span>
                         {promo_b}
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="text-right">
-                            <span class="font-bold text-white">{o.price:.2f} €</span>
+                            <span class="font-bold text-slate-900 dark:text-white">{o.price:.2f} €</span>
                             {old_p}
                         </div>
-                        <a href="{html.escape(o.url)}" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300">Lien ↗</a>
+                        <a href="{html.escape(o.url)}" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 font-semibold transition">Lien ↗</a>
                     </div>
                 </div>
                 """)
             else:
                 offer_items_html.append(f"""
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-900/40 border border-slate-800/40 opacity-70">
-                    <span class="text-sm text-slate-400">{html.escape(o.merchant)}</span>
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-100/60 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800/40 opacity-70">
+                    <span class="text-sm text-slate-500 dark:text-slate-400">{html.escape(o.merchant)}</span>
                     <div class="flex items-center gap-2">
-                        <span class="text-xs text-slate-500">{html.escape(o.error or 'Non relevé')}</span>
-                        <a href="{html.escape(o.url)}" target="_blank" rel="noopener" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300">Vérifier ↗</a>
+                        <span class="text-xs text-slate-400 dark:text-slate-500">{html.escape(o.error or 'Non relevé')}</span>
+                        <a href="{html.escape(o.url)}" target="_blank" rel="noopener" class="text-xs px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Vérifier ↗</a>
                     </div>
                 </div>
                 """)
 
         watch_cards_html.append(f"""
-        <div class="rounded-2xl bg-slate-900 border border-slate-800 p-5 flex flex-col justify-between shadow-lg">
+        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between shadow-lg transition-colors">
             <div>
                 <div class="flex items-start justify-between gap-2 mb-3">
                     <div>
-                        <span class="text-xs font-bold uppercase tracking-wider text-amber-400">{html.escape(w.brand)} • Réf. {html.escape(w.reference)}</span>
-                        <h3 class="text-lg font-bold text-white mt-0.5">{html.escape(w.name)}</h3>
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">{html.escape(w.brand)} • Réf. {html.escape(w.reference)}</span>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mt-0.5">{html.escape(w.name)}</h3>
                     </div>
                     <span class="px-2.5 py-1 rounded-full text-xs font-semibold border {badge_cls}">Score {a.bf_score}/100</span>
                 </div>
-                <p class="text-xs text-slate-400 mb-4">{html.escape(w.features)}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">{html.escape(w.features)}</p>
                 <div class="grid grid-cols-3 gap-2 mb-4 text-center">
-                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
-                        <div class="text-[11px] text-slate-400">Meilleur Prix</div>
-                        <div class="text-base font-extrabold text-emerald-400">{price_str}</div>
+                    <div class="rounded-lg bg-slate-50 dark:bg-slate-950/70 p-2.5 border border-slate-200 dark:border-slate-800">
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Meilleur Prix</div>
+                        <div class="text-base font-extrabold text-emerald-600 dark:text-emerald-400">{price_str}</div>
                     </div>
-                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
-                        <div class="text-[11px] text-slate-400">Ton Prix Cible</div>
-                        <div class="text-base font-bold text-amber-300">{w.target_price:.0f} €</div>
+                    <div class="rounded-lg bg-slate-50 dark:bg-slate-950/70 p-2.5 border border-slate-200 dark:border-slate-800">
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Ton Prix Cible</div>
+                        <div class="text-base font-bold text-amber-600 dark:text-amber-300">{w.target_price:.0f} €</div>
                     </div>
-                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
-                        <div class="text-[11px] text-slate-400">Plus Bas Observé</div>
-                        <div class="text-base font-bold text-sky-300">{low_hist_str}</div>
+                    <div class="rounded-lg bg-slate-50 dark:bg-slate-950/70 p-2.5 border border-slate-200 dark:border-slate-800">
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Plus Bas Observé</div>
+                        <div class="text-base font-bold text-sky-600 dark:text-sky-300">{low_hist_str}</div>
                     </div>
                 </div>
                 <div class="space-y-2 mb-4">
-                    <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Offres Marchands Surveillées</div>
+                    <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Offres Marchands Surveillées</div>
                     {''.join(offer_items_html)}
                 </div>
             </div>
-            <div class="pt-3 border-t border-slate-800">
-                <button onclick="selectWatchChart('{html.escape(w.id)}')" class="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-sky-300 transition">
+            <div class="pt-3 border-t border-slate-200 dark:border-slate-800">
+                <button onclick="selectWatchChart('{html.escape(w.id)}')" class="w-full py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-sky-700 dark:text-sky-300 transition">
                     📈 Afficher la courbe d'évolution de cette montre
                 </button>
             </div>
@@ -235,21 +230,21 @@ def generate_html_report(
 
         for d in a.discovered_offers:
             if d.price is not None:
-                temp_badge = f'<span class="px-2 py-0.5 rounded bg-orange-500/20 text-orange-300 text-xs font-bold">🔥 {html.escape(d.temperature)}</span>' if d.temperature else ""
+                temp_badge = f'<span class="px-2 py-0.5 rounded bg-orange-500/15 text-orange-600 dark:text-orange-300 text-xs font-bold">🔥 {html.escape(d.temperature)}</span>' if d.temperature else ""
                 discovered_cards_html.append(f"""
-                <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 flex items-center justify-between gap-4">
+                <div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between gap-4 shadow-sm transition-colors">
                     <div>
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-amber-400">{html.escape(w.reference)}</span>
-                            <span class="text-xs text-slate-400">via {html.escape(d.merchant)}</span>
+                            <span class="text-xs font-bold text-amber-600 dark:text-amber-400">{html.escape(w.reference)}</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">via {html.escape(d.merchant)}</span>
                             {temp_badge}
                         </div>
-                        <div class="text-sm font-semibold text-white mt-1">{html.escape(d.title or w.name)}</div>
+                        <div class="text-sm font-semibold text-slate-900 dark:text-white mt-1">{html.escape(d.title or w.name)}</div>
                     </div>
                     <div class="flex items-center gap-3 shrink-0">
-                        <div class="text-lg font-extrabold text-emerald-400">{d.price:.2f} €</div>
+                        <div class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{d.price:.2f} €</div>
                         <a href="{html.escape(d.url)}" target="_blank" rel="noopener"
-                           class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs">
+                           class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition">
                            Voir l'offre ↗
                         </a>
                     </div>
@@ -260,7 +255,7 @@ def generate_html_report(
         "".join(discovered_cards_html)
         if discovered_cards_html
         else """
-        <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-6 text-center text-sm text-slate-400">
+        <div class="rounded-xl bg-white/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
             Aucune offre externe supplémentaire découverte sur ce cycle — les offres principales ci-dessus couvrent déjà les meilleurs tarifs trouvés.
         </div>
         """
@@ -271,14 +266,14 @@ def generate_html_report(
         c_w = champion.watch
         c_o = champion.best_offer
         champion_banner = f"""
-        <div class="rounded-2xl bg-gradient-to-r from-amber-500/20 via-emerald-500/10 to-slate-900 border border-amber-500/40 p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="rounded-2xl bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-white dark:from-amber-500/20 dark:via-emerald-500/10 dark:to-slate-900 border border-amber-500/40 p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-md transition-colors">
             <div>
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500 text-slate-950 font-extrabold text-xs uppercase tracking-wider mb-2">
                     🏆 Meilleure Opportunité Black Friday du Jour (Score {champion.bf_score}/100)
                 </div>
-                <h2 class="text-2xl font-extrabold text-white">{html.escape(c_w.name)}</h2>
-                <p class="text-sm text-slate-300 mt-1">
-                    En tête de la compétition à <strong class="text-emerald-400 text-lg">{c_o.price:.2f} €</strong> chez <strong>{html.escape(c_o.merchant)}</strong>
+                <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white">{html.escape(c_w.name)}</h2>
+                <p class="text-sm text-slate-700 dark:text-slate-300 mt-1">
+                    En tête de la compétition à <strong class="text-emerald-600 dark:text-emerald-400 text-lg">{c_o.price:.2f} €</strong> chez <strong>{html.escape(c_o.merchant)}</strong>
                     (Prix public {c_w.reference_price:.0f} € • Remise réelle <strong>-{champion.discount_vs_msrp_pct:.0f}%</strong> • Cible {c_w.target_price:.0f} €)
                 </p>
             </div>
@@ -296,36 +291,60 @@ def generate_html_report(
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Radar Black Friday — Montres Solaires Radio-Pilotées</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {{
+            darkMode: 'class'
+        }};
+        // Initialisation immédiate du thème (Dark Mode par défaut ou préférence sauvegardée/système)
+        (function() {{
+            const savedTheme = localStorage.getItem('bf_watch_theme');
+            if (savedTheme === 'light') {{
+                document.documentElement.classList.remove('dark');
+            }} else if (savedTheme === 'dark') {{
+                document.documentElement.classList.add('dark');
+            }} else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {{
+                document.documentElement.classList.remove('dark');
+            }} else {{
+                document.documentElement.classList.add('dark');
+            }}
+        }})();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-amber-400 selection:text-slate-950">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen font-sans selection:bg-amber-400 selection:text-slate-950 transition-colors duration-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Header -->
-        <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-6 mb-8 border-b border-slate-800">
+        <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-6 mb-8 border-b border-slate-200 dark:border-slate-800">
             <div>
-                <div class="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-widest">
+                <div class="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-widest">
                     <span>⌚ Tough Solar / Eco-Drive • Multi-Band 6 Radio-Controlled</span>
                 </div>
-                <h1 class="text-3xl sm:text-4xl font-extrabold text-white mt-1">
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mt-1">
                     Comparateur Black Friday — Montres Solaires Radio-Pilotées
                 </h1>
-                <p class="text-sm text-slate-400 mt-1">
-                    Dernier relevé automatique : <strong class="text-slate-200">{now_str}</strong> • Anti-fausse promo & récapitulatif quotidien actif
+                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                    Dernier relevé automatique : <strong class="text-slate-900 dark:text-slate-200">{now_str}</strong> • Anti-fausse promo & récapitulatif quotidien actif
                 </p>
             </div>
 
-            <!-- Chrome Notification Controls -->
-            <div class="flex flex-wrap items-center gap-3">
+            <!-- Theme Toggle & Chrome Notification Controls -->
+            <div class="flex flex-wrap items-center gap-2.5">
+                <button id="btnThemeToggle" onclick="toggleDarkMode()"
+                    class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs border border-slate-300 dark:border-slate-700 shadow-sm transition"
+                    title="Basculer entre le mode sombre (Dark Mode) et le mode clair">
+                    <span id="themeToggleIcon">☀️</span>
+                    <span id="themeToggleText">Mode Clair</span>
+                </button>
                 <button id="btnChromeNotif" onclick="enableBrowserNotifications()"
                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs shadow transition">
                     🔔 Activer les notifications Chrome (Onglet)
                 </button>
                 <button onclick="sendTestChromeNotification()"
-                    class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition">
+                    class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs border border-slate-300 dark:border-slate-700 shadow-sm transition">
                     🧪 Tester la notif Chrome
                 </button>
                 <a href="{html.escape(ntfy_web_url)}" target="_blank" rel="noopener"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-semibold text-xs transition"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 font-semibold text-xs transition"
                     title="Recevoir les notifications Chrome même quand cet onglet est fermé">
                     📲 Web Push Chrome (Canal: {html.escape(ntfy_topic)}) ↗
                 </a>
@@ -333,15 +352,15 @@ def generate_html_report(
         </header>
 
         <!-- Chrome Notification Setup Helper Box -->
-        <div class="rounded-xl bg-slate-900/90 border border-slate-800 p-4 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-slate-300">
+        <div class="rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 p-4 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-slate-600 dark:text-slate-300 shadow-sm transition-colors">
             <div class="space-y-1">
-                <div class="font-bold text-white flex items-center gap-2">
+                <div class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <span>💡 Deux modes de notifications Google Chrome sont prêts :</span>
-                    <span id="chromePermStatus" class="px-2 py-0.5 rounded bg-slate-800 text-amber-300">Statut : Non activé</span>
+                    <span id="chromePermStatus" class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-amber-600 dark:text-amber-300">Statut : Non activé</span>
                 </div>
                 <p>
                     1. <strong>Directement depuis cette page :</strong> clique sur <em>« Activer les notifications Chrome »</em> ci-dessus. La page vérifie automatiquement les nouveaux relevés et affiche une notification Chrome.<br/>
-                    2. <strong>Même onglet fermé (Web Push via ntfy.sh) :</strong> ouvre <a href="{html.escape(ntfy_web_url)}" target="_blank" class="text-sky-400 underline">ntfy.sh/app</a> dans Chrome, clique sur <em>« Subscribe to topic »</em> et entre <code class="px-1.5 py-0.5 rounded bg-slate-950 text-amber-300 font-mono">{html.escape(ntfy_topic)}</code>.
+                    2. <strong>Même onglet fermé (Web Push via ntfy.sh) :</strong> ouvre <a href="{html.escape(ntfy_web_url)}" target="_blank" class="text-sky-600 dark:text-sky-400 underline font-medium">ntfy.sh/app</a> dans Chrome, clique sur <em>« Subscribe to topic »</em> et entre <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-950 text-amber-700 dark:text-amber-300 font-mono">{html.escape(ntfy_topic)}</code>.
                 </p>
             </div>
         </div>
@@ -351,13 +370,13 @@ def generate_html_report(
         <!-- Podium / Comparison Table -->
         <section class="mb-10">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold text-white">🏁 Classement des Modèles en Compétition</h2>
-                <span class="text-xs text-slate-400">Trié par Score Black Friday (vraie remise vs prix public & prix cible)</span>
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">🏁 Classement des Modèles en Compétition</h2>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Trié par Score Black Friday (vraie remise vs prix public & prix cible)</span>
             </div>
-            <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/80 shadow-xl">
+            <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 shadow-xl transition-colors">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 bg-slate-950/60">
+                        <tr class="border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 bg-slate-100/80 dark:bg-slate-950/60">
                             <th class="py-3 px-4">Rang</th>
                             <th class="py-3 px-4">Modèle & Caractéristiques</th>
                             <th class="py-3 px-4">Meilleur Prix</th>
@@ -376,14 +395,14 @@ def generate_html_report(
         </section>
 
         <!-- Price Evolution Chart -->
-        <section class="mb-10 rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-xl">
+        <section class="mb-10 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-xl transition-colors">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                 <div>
-                    <h2 class="text-xl font-bold text-white">📈 Historique des Prix & Détection des Fausses Promos</h2>
-                    <p class="text-xs text-slate-400">Compare le meilleur prix relevé (vert) avec ton prix cible (ambre) et le prix public officiel (gris)</p>
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">📈 Historique des Prix & Détection des Fausses Promos</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Compare le meilleur prix relevé (vert) avec ton prix cible (ambre) et le prix public officiel (gris)</p>
                 </div>
                 <select id="watchChartSelector" onchange="selectWatchChart(this.value)"
-                    class="rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white font-medium">
+                    class="rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 px-3.5 py-2 text-sm text-slate-900 dark:text-white font-medium">
                     {''.join(f'<option value="{html.escape(a.watch.id)}">{html.escape(a.watch.name)}</option>' for a in sorted_analyses)}
                 </select>
             </div>
@@ -394,7 +413,7 @@ def generate_html_report(
 
         <!-- Detailed Cards per Watch -->
         <section class="mb-10">
-            <h2 class="text-xl font-bold text-white mb-4">🔍 Détail des Offres par Montre</h2>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-4">🔍 Détail des Offres par Montre</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {''.join(watch_cards_html)}
             </div>
@@ -403,15 +422,15 @@ def generate_html_report(
         <!-- Auto-Discovered Deals Section -->
         <section class="mb-12">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold text-white">🛰️ Nouvelles Offres & Deals Découverts par Référence</h2>
-                <span class="text-xs text-slate-400">Recherche automatique Dealabs & comparateurs</span>
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">🛰️ Nouvelles Offres & Deals Découverts par Référence</h2>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Recherche automatique Dealabs & comparateurs</span>
             </div>
             <div class="space-y-3">
                 {discovered_section_html}
             </div>
         </section>
 
-        <footer class="text-center text-xs text-slate-500 pt-6 border-t border-slate-900">
+        <footer class="text-center text-xs text-slate-500 dark:text-slate-500 pt-6 border-t border-slate-200 dark:border-slate-900">
             Propulsé par GitHub Actions & Python • Configuration dans <code>watches.yaml</code> • Historique versionné dans <code>data/history.json</code>
         </footer>
     </div>
@@ -420,15 +439,54 @@ def generate_html_report(
         const CHART_DATA = {json.dumps(chart_data_by_watch, ensure_ascii=False)};
         const LATEST_SUMMARY = {json.dumps(latest_payload, ensure_ascii=False)};
         let priceChart = null;
+        let currentWatchId = null;
         let lastSeenTimestamp = LATEST_SUMMARY.updated_at;
 
+        function isDarkMode() {{
+            return document.documentElement.classList.contains('dark');
+        }}
+
+        function updateThemeToggleButton() {{
+            const icon = document.getElementById('themeToggleIcon');
+            const text = document.getElementById('themeToggleText');
+            if (!icon || !text) return;
+            if (isDarkMode()) {{
+                icon.textContent = '☀️';
+                text.textContent = 'Mode Clair';
+            }} else {{
+                icon.textContent = '🌙';
+                text.textContent = 'Dark Mode';
+            }}
+        }}
+
+        function toggleDarkMode() {{
+            const root = document.documentElement;
+            if (root.classList.contains('dark')) {{
+                root.classList.remove('dark');
+                localStorage.setItem('bf_watch_theme', 'light');
+            }} else {{
+                root.classList.add('dark');
+                localStorage.setItem('bf_watch_theme', 'dark');
+            }}
+            updateThemeToggleButton();
+            if (currentWatchId) {{
+                selectWatchChart(currentWatchId);
+            }}
+        }}
+
         function selectWatchChart(watchId) {{
+            currentWatchId = watchId;
             const selector = document.getElementById('watchChartSelector');
             if (selector && selector.value !== watchId) {{
                 selector.value = watchId;
             }}
             const item = CHART_DATA[watchId];
             if (!item) return;
+
+            const dark = isDarkMode();
+            const legendColor = dark ? '#cbd5e1' : '#334155';
+            const tickColor = dark ? '#94a3b8' : '#475569';
+            const gridColor = dark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(100, 116, 139, 0.16)';
 
             const ctx = document.getElementById('priceHistoryChart').getContext('2d');
             if (priceChart) {{
@@ -442,8 +500,8 @@ def generate_html_report(
                         {{
                             label: 'Meilleur Prix Relevé (€)',
                             data: item.best_prices,
-                            borderColor: '#34d399',
-                            backgroundColor: 'rgba(52, 211, 153, 0.12)',
+                            borderColor: dark ? '#34d399' : '#059669',
+                            backgroundColor: dark ? 'rgba(52, 211, 153, 0.12)' : 'rgba(5, 150, 105, 0.12)',
                             borderWidth: 3,
                             tension: 0.25,
                             fill: true,
@@ -452,7 +510,7 @@ def generate_html_report(
                         {{
                             label: 'Ton Prix Cible (€)',
                             data: item.target_line,
-                            borderColor: '#fbbf24',
+                            borderColor: dark ? '#fbbf24' : '#d97706',
                             borderWidth: 2,
                             borderDash: [6, 6],
                             pointRadius: 0,
@@ -461,7 +519,7 @@ def generate_html_report(
                         {{
                             label: 'Prix Public Officiel MSRP (€)',
                             data: item.msrp_line,
-                            borderColor: '#64748b',
+                            borderColor: dark ? '#64748b' : '#94a3b8',
                             borderWidth: 1.5,
                             borderDash: [3, 3],
                             pointRadius: 0,
@@ -474,20 +532,20 @@ def generate_html_report(
                     maintainAspectRatio: false,
                     plugins: {{
                         legend: {{
-                            labels: {{ color: '#cbd5e1' }}
+                            labels: {{ color: legendColor }}
                         }}
                     }},
                     scales: {{
                         x: {{
-                            ticks: {{ color: '#94a3b8' }},
-                            grid: {{ color: 'rgba(148, 163, 184, 0.1)' }}
+                            ticks: {{ color: tickColor }},
+                            grid: {{ color: gridColor }}
                         }},
                         y: {{
                             ticks: {{
-                                color: '#94a3b8',
+                                color: tickColor,
                                 callback: (v) => v + ' €'
                             }},
-                            grid: {{ color: 'rgba(148, 163, 184, 0.1)' }}
+                            grid: {{ color: gridColor }}
                         }}
                     }}
                 }}
@@ -503,11 +561,11 @@ def generate_html_report(
             }}
             if (Notification.permission === 'granted') {{
                 badge.textContent = '✅ Notifications Chrome actives';
-                badge.className = 'px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300';
+                badge.className = 'px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300';
                 btn.textContent = '🔔 Notifications Chrome Activées';
             }} else if (Notification.permission === 'denied') {{
                 badge.textContent = '❌ Bloqué dans les paramètres Chrome';
-                badge.className = 'px-2 py-0.5 rounded bg-rose-500/20 text-rose-300';
+                badge.className = 'px-2 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300';
             }}
         }}
 
@@ -541,7 +599,6 @@ def generate_html_report(
             }};
         }}
 
-        // Poll latest_summary.json every 15 minutes when tab is kept open in Chrome
         setInterval(async () => {{
             try {{
                 const res = await fetch('latest_summary.json?t=' + Date.now());
@@ -561,6 +618,7 @@ def generate_html_report(
         }}, 15 * 60 * 1000);
 
         window.addEventListener('DOMContentLoaded', () => {{
+            updateThemeToggleButton();
             updateChromePermUI();
             const firstId = Object.keys(CHART_DATA)[0];
             if (firstId) selectWatchChart(firstId);
