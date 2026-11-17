@@ -470,6 +470,89 @@ def remove_url_from_config(
     return False
 
 
+def slugify_id(text: str) -> str:
+    import re
+    s = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+    return s or "montre"
+
+
+def add_watch_to_config(
+    name: str,
+    brand: str,
+    reference: str,
+    target_price: float,
+    reference_price: float,
+    url: str = "",
+    features: str = "Solaire • Radio-pilotée",
+    watch_id: str = "",
+    config_path: str = DEFAULT_CONFIG_PATH,
+) -> bool:
+    """Add a new competing watch model to watches.yaml."""
+    with open(config_path, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+
+    watches = data.setdefault("watches", [])
+    final_id = watch_id.strip() or slugify_id(f"{brand}-{reference}")
+
+    if any(w.get("id") == final_id for w in watches):
+        print(f"⚠️ Un modèle avec l'identifiant '{final_id}' existe déjà.")
+        return False
+
+    urls_list = []
+    if url.strip():
+        urls_list.append({"url": url.strip(), "merchant": infer_merchant_name(url.strip())})
+
+    new_entry = {
+        "id": final_id,
+        "name": name,
+        "brand": brand,
+        "reference": reference,
+        "features": features,
+        "target_price": float(target_price),
+        "reference_price": float(reference_price),
+        "search_queries": [reference, f"{brand} {reference}"],
+        "urls": urls_list,
+    }
+    watches.append(new_entry)
+
+    with open(config_path, "w", encoding="utf-8") as out:
+        yaml.safe_dump(data, out, allow_unicode=True, sort_keys=False)
+
+    print(f"✅ Nouveau modèle ajouté : {name} (id: {final_id})")
+    return True
+
+
+def remove_watch_from_config(
+    watch_id_or_ref: str,
+    config_path: str = DEFAULT_CONFIG_PATH,
+) -> bool:
+    """Remove an entire watch model by its id or reference from watches.yaml."""
+    key = watch_id_or_ref.strip().lower()
+    with open(config_path, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+
+    watches = data.get("watches", [])
+    kept = []
+    removed = []
+    for w in watches:
+        if str(w.get("id", "")).lower() == key or str(w.get("reference", "")).lower() == key:
+            removed.append(w.get("name", key))
+        else:
+            kept.append(w)
+
+    if not removed:
+        print(f"⚠️ Aucune montre trouvée avec l'id ou la référence '{watch_id_or_ref}'.")
+        return False
+
+    data["watches"] = kept
+    with open(config_path, "w", encoding="utf-8") as out:
+        yaml.safe_dump(data, out, allow_unicode=True, sort_keys=False)
+
+    for r in removed:
+        print(f"🗑️ Modèle supprimé : {r}")
+    return True
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Comparateur de Prix Black Friday — Montres Solaires Radio-Pilotées"
@@ -480,6 +563,21 @@ def main() -> None:
     run_p.add_argument("--demo", action="store_true", help="Utiliser des données de simulation Black Friday réalistes")
     run_p.add_argument("--no-notify", action="store_true", help="Ne pas envoyer de notification push")
     run_p.add_argument("--config", default=DEFAULT_CONFIG_PATH, help="Chemin vers watches.yaml")
+
+    add_w = sub.add_parser("add-watch", help="Ajouter un nouveau modèle de montre en compétition dans watches.yaml")
+    add_w.add_argument("--name", required=True, help="Nom complet (ex: 'Casio Oceanus OCW-T200S-1AJF')")
+    add_w.add_argument("--brand", required=True, help="Marque (ex: Casio, Citizen, Seiko, Junghans)")
+    add_w.add_argument("--ref", required=True, help="Référence exacte (ex: OCW-T200S-1AJF)")
+    add_w.add_argument("--target", required=True, type=float, help="Prix cible Black Friday en € (ex: 349)")
+    add_w.add_argument("--msrp", required=True, type=float, help="Prix public conseillé officiel en € (ex: 499)")
+    add_w.add_argument("--url", default="", help="Première URL marchand (optionnel)")
+    add_w.add_argument("--features", default="Solaire • Radio-pilotée", help="Caractéristiques clés")
+    add_w.add_argument("--id", default="", help="Identifiant court personnalisé (optionnel)")
+    add_w.add_argument("--config", default=DEFAULT_CONFIG_PATH, help="Chemin vers watches.yaml")
+
+    rem_w = sub.add_parser("remove-watch", help="Supprimer un modèle de montre de watches.yaml")
+    rem_w.add_argument("--watch", required=True, help="ID ou référence de la montre (ex: citizen-promaster-as4020 ou AT8110-61E)")
+    rem_w.add_argument("--config", default=DEFAULT_CONFIG_PATH, help="Chemin vers watches.yaml")
 
     add_p = sub.add_parser("add-url", help="Ajouter une URL de marchand à une montre dans watches.yaml")
     add_p.add_argument("--watch", required=True, help="Identifiant de la montre (ex: casio-gwm5610u)")
@@ -495,7 +593,21 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    if args.command == "add-url":
+    if args.command == "add-watch":
+        add_watch_to_config(
+            name=args.name,
+            brand=args.brand,
+            reference=args.ref,
+            target_price=args.target,
+            reference_price=args.msrp,
+            url=args.url,
+            features=args.features,
+            watch_id=args.id,
+            config_path=args.config,
+        )
+    elif args.command == "remove-watch":
+        remove_watch_from_config(args.watch, config_path=args.config)
+    elif args.command == "add-url":
         add_url_to_config(args.watch, args.url, args.merchant)
     elif args.command == "remove-url":
         remove_url_from_config(args.url, args.watch, config_path=args.config)

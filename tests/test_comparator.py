@@ -12,7 +12,14 @@ from src.analyzer import (
     detect_fake_promo,
     compute_bf_score_and_verdict,
 )
-from tracker import run_comparator, remove_url_from_config, load_config, DEFAULT_CONFIG_PATH
+from tracker import (
+    run_comparator,
+    remove_url_from_config,
+    add_watch_to_config,
+    remove_watch_from_config,
+    load_config,
+    DEFAULT_CONFIG_PATH,
+)
 
 
 class TestBlackFridayWatchComparator(unittest.TestCase):
@@ -128,6 +135,29 @@ class TestBlackFridayWatchComparator(unittest.TestCase):
             casio = next(w for w in watches if w.id == "casio-gwm5610u")
             remaining_urls = [u.url for u in casio.urls]
             self.assertNotIn(target_url, remaining_urls)
+
+    def test_add_and_remove_watch_model(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cfg_copy = os.path.join(tmpdir, "watches.yaml")
+            shutil.copyfile(DEFAULT_CONFIG_PATH, cfg_copy)
+
+            added = add_watch_to_config(
+                name="Casio Oceanus OCW-T200S-1AJF",
+                brand="Casio",
+                reference="OCW-T200S-1AJF",
+                target_price=349.0,
+                reference_price=499.0,
+                url="https://www.sakurawatches.com/casio-oceanus-ocw-t200s-1ajf",
+                config_path=cfg_copy,
+            )
+            self.assertTrue(added)
+            _, watches = load_config(cfg_copy)
+            self.assertEqual(len(watches), 6)
+
+            removed = remove_watch_from_config("OCW-T200S-1AJF", config_path=cfg_copy)
+            self.assertTrue(removed)
+            _, watches_after = load_config(cfg_copy)
+            self.assertEqual(len(watches_after), 5)
 
     def test_end_to_end_demo_pipeline(self):
         with tempfile.TemporaryDirectory() as tmpdir:
