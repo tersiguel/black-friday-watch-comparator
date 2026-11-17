@@ -1,0 +1,63 @@
+name: Black Friday Watch Price Comparator
+
+on:
+  schedule:
+    # Tourne toutes les 6 heures pendant la période du Black Friday (02:00, 08:00, 14:00, 20:00 UTC)
+    - cron: "0 2,8,14,20 * * *"
+  workflow_dispatch:
+    inputs:
+      demo_mode:
+        description: "Lancer en mode démo (simulation)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  track-prices:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Playwright Chromium for protected pages
+        run: |
+          playwright install --with-deps chromium
+
+      - name: Run Black Friday Watch Comparator
+        env:
+          # Optionnel : tu peux surcharger ton sujet ntfy.sh dans les Secrets GitHub (Settings > Secrets > Actions)
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          GITHUB_PAGES_URL: "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+        run: |
+          if [ "${{ github.event.inputs.demo_mode }}" = "true" ]; then
+            python3 tracker.py run --demo
+          else
+            python3 tracker.py run
+          fi
+
+      - name: Commit updated price history & HTML dashboard
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/history.json docs/index.html docs/latest_summary.json
+          git diff --staged --quiet || git commit -m "chore(prices): update Black Friday watch prices and HTML report [skip ci]"
+          git push

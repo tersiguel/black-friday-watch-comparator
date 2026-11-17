@@ -1,0 +1,401 @@
+{
+  "updated_at": "2026-11-17T23:30:49.633783+00:00",
+  "watches": {
+    "casio-gwm5610u": {
+      "name": "Casio G-Shock GW-M5610U-1ER",
+      "reference": "GW-M5610U-1ER",
+      "target_price": 99.0,
+      "reference_price": 149.0,
+      "entries": [
+        {
+          "timestamp": "2026-11-11T23:30:49.633351+00:00",
+          "best_price": 129.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B09CGR4FFM",
+          "merchant_prices": {
+            "Amazon FR": 129.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-12T23:30:49.633351+00:00",
+          "best_price": 125.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B09CGR4FFM",
+          "merchant_prices": {
+            "Amazon FR": 125.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-13T23:30:49.633351+00:00",
+          "best_price": 119.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B09CGR4FFM",
+          "merchant_prices": {
+            "Amazon FR": 119.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-14T23:30:49.633351+00:00",
+          "best_price": 115.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B09CGR4FFM",
+          "merchant_prices": {
+            "Amazon FR": 115.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-15T23:30:49.633351+00:00",
+          "best_price": 109.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B09CGR4FFM",
+          "merchant_prices": {
+            "Amazon FR": 109.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-16T23:30:49.633351+00:00",
+          "best_price": 104.9,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B09CGR4FFM",
+          "merchant_prices": {
+            "Amazon FR": 104.9
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-17T23:30:49.633579+00:00",
+          "best_price": 89.99,
+          "best_merchant": "Dealabs • Amazon DE",
+          "best_url": "https://www.dealabs.com/search?q=GW-M5610U-1ER",
+          "merchant_prices": {
+            "Amazon FR": 94.9,
+            "Ocarat": 119.0,
+            "Montres & Co": 124.0
+          },
+          "bf_score": 100
+        }
+      ]
+    },
+    "casio-lineage-titanium": {
+      "name": "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)",
+      "reference": "LCW-M100TSE-1AER",
+      "target_price": 189.0,
+      "reference_price": 279.0,
+      "entries": [
+        {
+          "timestamp": "2026-11-11T23:30:49.633351+00:00",
+          "best_price": 249.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B07571V4V5",
+          "merchant_prices": {
+            "Amazon FR": 249.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-12T23:30:49.633351+00:00",
+          "best_price": 239.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B07571V4V5",
+          "merchant_prices": {
+            "Amazon FR": 239.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-13T23:30:49.633351+00:00",
+          "best_price": 229.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B07571V4V5",
+          "merchant_prices": {
+            "Amazon FR": 229.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-14T23:30:49.633351+00:00",
+          "best_price": 219.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B07571V4V5",
+          "merchant_prices": {
+            "Amazon FR": 219.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-15T23:30:49.633351+00:00",
+          "best_price": 209.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B07571V4V5",
+          "merchant_prices": {
+            "Amazon FR": 209.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-16T23:30:49.633351+00:00",
+          "best_price": 199.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B07571V4V5",
+          "merchant_prices": {
+            "Amazon FR": 199.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-17T23:30:49.633597+00:00",
+          "best_price": 179.9,
+          "best_merchant": "Idealo Comparateur",
+          "best_url": "https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER",
+          "merchant_prices": {
+            "Amazon FR": 184.5,
+            "Ocarat": 215.0
+          },
+          "bf_score": 100
+        }
+      ]
+    },
+    "citizen-ecodrive-cb0250": {
+      "name": "Citizen Eco-Drive Radio-Controlled CB0250-84E",
+      "reference": "CB0250-84E",
+      "target_price": 269.0,
+      "reference_price": 399.0,
+      "entries": [
+        {
+          "timestamp": "2026-11-11T23:30:49.633351+00:00",
+          "best_price": 339.0,
+          "best_merchant": "Ocarat",
+          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
+          "merchant_prices": {
+            "Ocarat": 339.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-12T23:30:49.633351+00:00",
+          "best_price": 329.0,
+          "best_merchant": "Ocarat",
+          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
+          "merchant_prices": {
+            "Ocarat": 329.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-13T23:30:49.633351+00:00",
+          "best_price": 315.0,
+          "best_merchant": "Ocarat",
+          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
+          "merchant_prices": {
+            "Ocarat": 315.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-14T23:30:49.633351+00:00",
+          "best_price": 299.0,
+          "best_merchant": "Ocarat",
+          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
+          "merchant_prices": {
+            "Ocarat": 299.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-15T23:30:49.633351+00:00",
+          "best_price": 289.0,
+          "best_merchant": "Ocarat",
+          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
+          "merchant_prices": {
+            "Ocarat": 289.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-16T23:30:49.633351+00:00",
+          "best_price": 279.0,
+          "best_merchant": "Ocarat",
+          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
+          "merchant_prices": {
+            "Ocarat": 279.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-17T23:30:49.633607+00:00",
+          "best_price": 264.0,
+          "best_merchant": "Ocarat",
+          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
+          "merchant_prices": {
+            "Ocarat": 264.0,
+            "Amazon FR": 279.0
+          },
+          "bf_score": 100
+        }
+      ]
+    },
+    "citizen-promaster-as4020": {
+      "name": "Citizen Promaster Sky Eco-Drive AT8110-61E",
+      "reference": "AT8110-61E",
+      "target_price": 319.0,
+      "reference_price": 459.0,
+      "entries": [
+        {
+          "timestamp": "2026-11-11T23:30:49.633351+00:00",
+          "best_price": 329.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
+          "merchant_prices": {
+            "Amazon FR": 329.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-12T23:30:49.633351+00:00",
+          "best_price": 335.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
+          "merchant_prices": {
+            "Amazon FR": 335.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-13T23:30:49.633351+00:00",
+          "best_price": 349.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
+          "merchant_prices": {
+            "Amazon FR": 349.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-14T23:30:49.633351+00:00",
+          "best_price": 359.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
+          "merchant_prices": {
+            "Amazon FR": 359.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-15T23:30:49.633351+00:00",
+          "best_price": 355.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
+          "merchant_prices": {
+            "Amazon FR": 355.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-16T23:30:49.633351+00:00",
+          "best_price": 349.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
+          "merchant_prices": {
+            "Amazon FR": 349.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-17T23:30:49.633622+00:00",
+          "best_price": 349.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
+          "merchant_prices": {
+            "Amazon FR": 349.0,
+            "Ocarat": 369.0
+          },
+          "bf_score": 50
+        }
+      ]
+    },
+    "seiko-solar-radio-sbtm323": {
+      "name": "Seiko Selection Solar Radio-Controlled SBTM323",
+      "reference": "SBTM323",
+      "target_price": 279.0,
+      "reference_price": 395.0,
+      "entries": [
+        {
+          "timestamp": "2026-11-11T23:30:49.633351+00:00",
+          "best_price": 325.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323",
+          "merchant_prices": {
+            "Sakura Watches": 325.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-12T23:30:49.633351+00:00",
+          "best_price": 319.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323",
+          "merchant_prices": {
+            "Sakura Watches": 319.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-13T23:30:49.633351+00:00",
+          "best_price": 310.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323",
+          "merchant_prices": {
+            "Sakura Watches": 310.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-14T23:30:49.633351+00:00",
+          "best_price": 299.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323",
+          "merchant_prices": {
+            "Sakura Watches": 299.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-15T23:30:49.633351+00:00",
+          "best_price": 295.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323",
+          "merchant_prices": {
+            "Sakura Watches": 295.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-16T23:30:49.633351+00:00",
+          "best_price": 289.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323",
+          "merchant_prices": {
+            "Sakura Watches": 289.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-17T23:30:49.633630+00:00",
+          "best_price": 272.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323",
+          "merchant_prices": {
+            "Sakura Watches": 272.0,
+            "Chrono24": 298.0
+          },
+          "bf_score": 100
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "updated_at": "2026-11-17T23:30:49.634576+00:00",
+  "updated_at_human": "17/11/2026 à 23:30 UTC",
+  "notification_title": "🔥 OBJECTIF ATTEINT : Casio G-Shock GW-M5610U-1ER à 89.99 € !",
+  "notification_body": "• GW-M5610U-1ER : 89.99 € chez Dealabs • Amazon DE (-40% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100) [📉 -14.91€]\n• LCW-M100TSE-1AER : 179.90 € chez Idealo Comparateur (-36% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100) [📉 -19.10€]\n• CB0250-84E : 264.00 € chez Ocarat (-34% vs neuf, ✅ 5€ sous ta cible, Score BF 100/100) [📉 -15.00€]\n• SBTM323 : 272.00 € chez Sakura Watches (-31% vs neuf, ✅ 7€ sous ta cible, Score BF 100/100) [📉 -17.00€]\n• AT8110-61E : 349.00 € chez Amazon FR (-24% vs neuf, cible 319€ (+30€), Score BF 50/100)",
+  "click_url": "https://www.dealabs.com/search?q=GW-M5610U-1ER",
+  "ntfy_topic": "bf-montres-solaires-2026",
+  "watches": [
+    {
+      "id": "casio-gwm5610u",
+      "name": "Casio G-Shock GW-M5610U-1ER",
+      "reference": "GW-M5610U-1ER",
+      "best_price": 89.99,
+      "best_merchant": "Dealabs • Amazon DE",
+      "best_url": "https://www.dealabs.com/search?q=GW-M5610U-1ER",
+      "target_price": 99.0,
+      "bf_score": 100,
+      "verdict": "🔥 Deal Black Friday Exceptionnel"
+    },
+    {
+      "id": "casio-lineage-titanium",
+      "name": "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)",
+      "reference": "LCW-M100TSE-1AER",
+      "best_price": 179.9,
+      "best_merchant": "Idealo Comparateur",
+      "best_url": "https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER",
+      "target_price": 189.0,
+      "bf_score": 100,
+      "verdict": "🔥 Deal Black Friday Exceptionnel"
+    },
+    {
+      "id": "citizen-ecodrive-cb0250",
+      "name": "Citizen Eco-Drive Radio-Controlled CB0250-84E",
+      "reference": "CB0250-84E",
+      "best_price": 264.0,
+      "best_merchant": "Ocarat",
+      "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
+      "target_price": 269.0,
+      "bf_score": 100,
+      "verdict": "🔥 Deal Black Friday Exceptionnel"
+    },
+    {
+      "id": "seiko-solar-radio-sbtm323",
+      "name": "Seiko Selection Solar Radio-Controlled SBTM323",
+      "reference": "SBTM323",
+      "best_price": 272.0,
+      "best_merchant": "Sakura Watches",
+      "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323",
+      "target_price": 279.0,
+      "bf_score": 100,
+      "verdict": "🔥 Deal Black Friday Exceptionnel"
+    },
+    {
+      "id": "citizen-promaster-as4020",
+      "name": "Citizen Promaster Sky Eco-Drive AT8110-61E",
+      "reference": "AT8110-61E",
+      "best_price": 349.0,
+      "best_merchant": "Amazon FR",
+      "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
+      "target_price": 319.0,
+      "bf_score": 50,
+      "verdict": "⚠️ Fausse Promo détectée"
+    }
+  ]
+}

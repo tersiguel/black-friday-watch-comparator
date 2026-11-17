@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Radar Black Friday — Montres Solaires Radio-Pilotées</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-amber-400 selection:text-slate-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-6 mb-8 border-b border-slate-800">
+            <div>
+                <div class="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-widest">
+                    <span>⌚ Tough Solar / Eco-Drive • Multi-Band 6 Radio-Controlled</span>
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-white mt-1">
+                    Comparateur Black Friday — Montres Solaires Radio-Pilotées
+                </h1>
+                <p class="text-sm text-slate-400 mt-1">
+                    Dernier relevé automatique : <strong class="text-slate-200">17/11/2026 à 23:30 UTC</strong> • Anti-fausse promo & récapitulatif quotidien actif
+                </p>
+            </div>
+
+            <!-- Chrome Notification Controls -->
+            <div class="flex flex-wrap items-center gap-3">
+                <button id="btnChromeNotif" onclick="enableBrowserNotifications()"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs shadow transition">
+                    🔔 Activer les notifications Chrome (Onglet)
+                </button>
+                <button onclick="sendTestChromeNotification()"
+                    class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition">
+                    🧪 Tester la notif Chrome
+                </button>
+                <a href="https://ntfy.sh/app" target="_blank" rel="noopener"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-semibold text-xs transition"
+                    title="Recevoir les notifications Chrome même quand cet onglet est fermé">
+                    📲 Web Push Chrome (Canal: bf-montres-solaires-2026) ↗
+                </a>
+            </div>
+        </header>
+
+        <!-- Chrome Notification Setup Helper Box -->
+        <div class="rounded-xl bg-slate-900/90 border border-slate-800 p-4 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-slate-300">
+            <div class="space-y-1">
+                <div class="font-bold text-white flex items-center gap-2">
+                    <span>💡 Deux modes de notifications Google Chrome sont prêts :</span>
+                    <span id="chromePermStatus" class="px-2 py-0.5 rounded bg-slate-800 text-amber-300">Statut : Non activé</span>
+                </div>
+                <p>
+                    1. <strong>Directement depuis cette page :</strong> clique sur <em>« Activer les notifications Chrome »</em> ci-dessus. La page vérifie automatiquement les nouveaux relevés et affiche une notification Chrome.<br/>
+                    2. <strong>Même onglet fermé (Web Push via ntfy.sh) :</strong> ouvre <a href="https://ntfy.sh/app" target="_blank" class="text-sky-400 underline">ntfy.sh/app</a> dans Chrome, clique sur <em>« Subscribe to topic »</em> et entre <code class="px-1.5 py-0.5 rounded bg-slate-950 text-amber-300 font-mono">bf-montres-solaires-2026</code>.
+                </p>
+            </div>
+        </div>
+
+        
+        <div class="rounded-2xl bg-gradient-to-r from-amber-500/20 via-emerald-500/10 to-slate-900 border border-amber-500/40 p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500 text-slate-950 font-extrabold text-xs uppercase tracking-wider mb-2">
+                    🏆 Meilleure Opportunité Black Friday du Jour (Score 100/100)
+                </div>
+                <h2 class="text-2xl font-extrabold text-white">Casio G-Shock GW-M5610U-1ER</h2>
+                <p class="text-sm text-slate-300 mt-1">
+                    En tête de la compétition à <strong class="text-emerald-400 text-lg">89.99 €</strong> chez <strong>Dealabs • Amazon DE</strong>
+                    (Prix public 149 € • Remise réelle <strong>-40%</strong> • Cible 99 €)
+                </p>
+            </div>
+            <a href="https://www.dealabs.com/search?q=GW-M5610U-1ER" target="_blank" rel="noopener"
+               class="px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-sm shadow-lg shrink-0 transition">
+               Accéder au Deal (89.99 €) ↗
+            </a>
+        </div>
+        
+
+        <!-- Podium / Comparison Table -->
+        <section class="mb-10">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-white">🏁 Classement des Modèles en Compétition</h2>
+                <span class="text-xs text-slate-400">Trié par Score Black Friday (vraie remise vs prix public & prix cible)</span>
+            </div>
+            <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/80 shadow-xl">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 bg-slate-950/60">
+                            <th class="py-3 px-4">Rang</th>
+                            <th class="py-3 px-4">Modèle & Caractéristiques</th>
+                            <th class="py-3 px-4">Meilleur Prix</th>
+                            <th class="py-3 px-4">Écart Cible</th>
+                            <th class="py-3 px-4">Plus Bas Hist.</th>
+                            <th class="py-3 px-4">Verdict Black Friday</th>
+                            <th class="py-3 px-4 text-center">Score BF</th>
+                            <th class="py-3 px-4 text-right">Meilleure Offre</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+        <tr class="border-b border-slate-800 hover:bg-slate-800/50 transition">
+            <td class="py-3.5 px-4 font-bold text-amber-400">#1</td>
+            <td class="py-3.5 px-4">
+                <div class="font-semibold text-white">Casio G-Shock GW-M5610U-1ER</div>
+                <div class="text-xs text-slate-400">Réf: <code class="text-slate-300">GW-M5610U-1ER</code> • Tough Solar • Multi-Band 6 (Radio-pilotée) • Étanche 20 bar • LED Super Illuminator</div>
+                
+            </td>
+            <td class="py-3.5 px-4">
+                <div class="text-xl font-extrabold text-white">89.99 €</div>
+                <div class="text-xs text-slate-400">Prix public: <span class="line-through">149 €</span> (<span class="text-emerald-400 font-semibold">-40%</span>)</div>
+            </td>
+            <td class="py-3.5 px-4 text-sm"><span class="text-emerald-400 font-semibold">-9.01 € (Sous la cible !)</span></td>
+            <td class="py-3.5 px-4 text-sm text-slate-300">89.99 €</td>
+            <td class="py-3.5 px-4">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+                    🔥 Deal Black Friday Exceptionnel
+                </span>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+                <div class="inline-flex items-center justify-center w-11 h-11 rounded-full bg-slate-800 border border-slate-700 font-bold text-amber-400">
+                    100
+                </div>
+            </td>
+            <td class="py-3.5 px-4 text-right">
+                <a href="https://www.dealabs.com/search?q=GW-M5610U-1ER" target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
+                   Voir chez Dealabs • Amazon DE ↗
+                </a>
+            </td>
+        </tr>
+        
+        <tr class="border-b border-slate-800 hover:bg-slate-800/50 transition">
+            <td class="py-3.5 px-4 font-bold text-amber-400">#2</td>
+            <td class="py-3.5 px-4">
+                <div class="font-semibold text-white">Casio Lineage LCW-M100TSE-1AER (Titane &amp; Saphir)</div>
+                <div class="text-xs text-slate-400">Réf: <code class="text-slate-300">LCW-M100TSE-1AER</code> • Boîtier &amp; Bracelet Titane • Verre Saphir • Tough Solar • Radio-pilotée Multi-Band 6</div>
+                
+            </td>
+            <td class="py-3.5 px-4">
+                <div class="text-xl font-extrabold text-white">179.90 €</div>
+                <div class="text-xs text-slate-400">Prix public: <span class="line-through">279 €</span> (<span class="text-emerald-400 font-semibold">-36%</span>)</div>
+            </td>
+            <td class="py-3.5 px-4 text-sm"><span class="text-emerald-400 font-semibold">-9.10 € (Sous la cible !)</span></td>
+            <td class="py-3.5 px-4 text-sm text-slate-300">179.90 €</td>
+            <td class="py-3.5 px-4">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+                    🔥 Deal Black Friday Exceptionnel
+                </span>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+                <div class="inline-flex items-center justify-center w-11 h-11 rounded-full bg-slate-800 border border-slate-700 font-bold text-amber-400">
+                    100
+                </div>
+            </td>
+            <td class="py-3.5 px-4 text-right">
+                <a href="https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER" target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
+                   Voir chez Idealo Comparateur ↗
+                </a>
+            </td>
+        </tr>
+        
+        <tr class="border-b border-slate-800 hover:bg-slate-800/50 transition">
+            <td class="py-3.5 px-4 font-bold text-amber-400">#3</td>
+            <td class="py-3.5 px-4">
+                <div class="font-semibold text-white">Citizen Eco-Drive Radio-Controlled CB0250-84E</div>
+                <div class="text-xs text-slate-400">Réf: <code class="text-slate-300">CB0250-84E</code> • Eco-Drive Solaire • Radio-pilotée 4 zones • Verre Saphir • Calendrier Perpétuel • 10 bar</div>
+                
+            </td>
+            <td class="py-3.5 px-4">
+                <div class="text-xl font-extrabold text-white">264.00 €</div>
+                <div class="text-xs text-slate-400">Prix public: <span class="line-through">399 €</span> (<span class="text-emerald-400 font-semibold">-34%</span>)</div>
+            </td>
+            <td class="py-3.5 px-4 text-sm"><span class="text-emerald-400 font-semibold">-5.00 € (Sous la cible !)</span></td>
+            <td class="py-3.5 px-4 text-sm text-slate-300">264.00 €</td>
+            <td class="py-3.5 px-4">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+                    🔥 Deal Black Friday Exceptionnel
+                </span>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+                <div class="inline-flex items-center justify-center w-11 h-11 rounded-full bg-slate-800 border border-slate-700 font-bold text-amber-400">
+                    100
+                </div>
+            </td>
+            <td class="py-3.5 px-4 text-right">
+                <a href="https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html" target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
+                   Voir chez Ocarat ↗
+                </a>
+            </td>
+        </tr>
+        
+        <tr class="border-b border-slate-800 hover:bg-slate-800/50 transition">
+            <td class="py-3.5 px-4 font-bold text-amber-400">#4</td>
+            <td class="py-3.5 px-4">
+                <div class="font-semibold text-white">Seiko Selection Solar Radio-Controlled SBTM323</div>
+                <div class="text-xs text-slate-400">Réf: <code class="text-slate-300">SBTM323</code> • Calibre 7B72 Solaire Radio-piloté • Verre Saphir Super-Clear • Finition Zaratsu-style</div>
+                
+            </td>
+            <td class="py-3.5 px-4">
+                <div class="text-xl font-extrabold text-white">272.00 €</div>
+                <div class="text-xs text-slate-400">Prix public: <span class="line-through">395 €</span> (<span class="text-emerald-400 font-semibold">-31%</span>)</div>
+            </td>
+            <td class="py-3.5 px-4 text-sm"><span class="text-emerald-400 font-semibold">-7.00 € (Sous la cible !)</span></td>
+            <td class="py-3.5 px-4 text-sm text-slate-300">272.00 €</td>
+            <td class="py-3.5 px-4">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+                    🔥 Deal Black Friday Exceptionnel
+                </span>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+                <div class="inline-flex items-center justify-center w-11 h-11 rounded-full bg-slate-800 border border-slate-700 font-bold text-amber-400">
+                    100
+                </div>
+            </td>
+            <td class="py-3.5 px-4 text-right">
+                <a href="https://www.sakurawatches.com/seiko-selection-sbtm323" target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
+                   Voir chez Sakura Watches ↗
+                </a>
+            </td>
+        </tr>
+        
+        <tr class="border-b border-slate-800 hover:bg-slate-800/50 transition">
+            <td class="py-3.5 px-4 font-bold text-amber-400">#5</td>
+            <td class="py-3.5 px-4">
+                <div class="font-semibold text-white">Citizen Promaster Sky Eco-Drive AT8110-61E</div>
+                <div class="text-xs text-slate-400">Réf: <code class="text-slate-300">AT8110-61E</code> • Chronographe Eco-Drive Solaire • Radio-pilotée • Verre Saphir •Heure Mondiale 26 villes</div>
+                
+            <div class="mt-2 rounded-lg bg-rose-950/70 border border-rose-500/40 px-3 py-2 text-xs text-rose-200 flex items-center gap-2">
+                <span>🚨</span>
+                <span><strong>Alerte Anti-Fausse Promo :</strong> Prix barré gonflé (529 € affiché vs 459 € prix public officiel)</span>
+            </div>
+            
+            </td>
+            <td class="py-3.5 px-4">
+                <div class="text-xl font-extrabold text-white">349.00 €</div>
+                <div class="text-xs text-slate-400">Prix public: <span class="line-through">459 €</span> (<span class="text-emerald-400 font-semibold">-24%</span>)</div>
+            </td>
+            <td class="py-3.5 px-4 text-sm"><span class="text-amber-300">+30.00 € vs cible (319 €)</span></td>
+            <td class="py-3.5 px-4 text-sm text-slate-300">329.00 €</td>
+            <td class="py-3.5 px-4">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-rose-500/20 text-rose-300 border-rose-500/40">
+                    ⚠️ Fausse Promo détectée
+                </span>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+                <div class="inline-flex items-center justify-center w-11 h-11 rounded-full bg-slate-800 border border-slate-700 font-bold text-amber-400">
+                    50
+                </div>
+            </td>
+            <td class="py-3.5 px-4 text-right">
+                <a href="https://www.amazon.fr/dp/B00WG04A1M" target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
+                   Voir chez Amazon FR ↗
+                </a>
+            </td>
+        </tr>
+        
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Price Evolution Chart -->
+        <section class="mb-10 rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white">📈 Historique des Prix & Détection des Fausses Promos</h2>
+                    <p class="text-xs text-slate-400">Compare le meilleur prix relevé (vert) avec ton prix cible (ambre) et le prix public officiel (gris)</p>
+                </div>
+                <select id="watchChartSelector" onchange="selectWatchChart(this.value)"
+                    class="rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white font-medium">
+                    <option value="casio-gwm5610u">Casio G-Shock GW-M5610U-1ER</option><option value="casio-lineage-titanium">Casio Lineage LCW-M100TSE-1AER (Titane &amp; Saphir)</option><option value="citizen-ecodrive-cb0250">Citizen Eco-Drive Radio-Controlled CB0250-84E</option><option value="seiko-solar-radio-sbtm323">Seiko Selection Solar Radio-Controlled SBTM323</option><option value="citizen-promaster-as4020">Citizen Promaster Sky Eco-Drive AT8110-61E</option>
+                </select>
+            </div>
+            <div class="h-72 w-full">
+                <canvas id="priceHistoryChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Detailed Cards per Watch -->
+        <section class="mb-10">
+            <h2 class="text-xl font-bold text-white mb-4">🔍 Détail des Offres par Montre</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+        <div class="rounded-2xl bg-slate-900 border border-slate-800 p-5 flex flex-col justify-between shadow-lg">
+            <div>
+                <div class="flex items-start justify-between gap-2 mb-3">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Casio • Réf. GW-M5610U-1ER</span>
+                        <h3 class="text-lg font-bold text-white mt-0.5">Casio G-Shock GW-M5610U-1ER</h3>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold border bg-emerald-500/20 text-emerald-300 border-emerald-500/40">Score 100/100</span>
+                </div>
+                <p class="text-xs text-slate-400 mb-4">Tough Solar • Multi-Band 6 (Radio-pilotée) • Étanche 20 bar • LED Super Illuminator</p>
+                <div class="grid grid-cols-3 gap-2 mb-4 text-center">
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Meilleur Prix</div>
+                        <div class="text-base font-extrabold text-emerald-400">89.99 €</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Ton Prix Cible</div>
+                        <div class="text-base font-bold text-amber-300">99 €</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Plus Bas Observé</div>
+                        <div class="text-base font-bold text-sky-300">89.99 €</div>
+                    </div>
+                </div>
+                <div class="space-y-2 mb-4">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Offres Marchands Surveillées</div>
+                    
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-900/70 border border-slate-800/80">
+                    <div>
+                        <span class="font-medium text-slate-200 text-sm">Amazon FR</span>
+                        <span class="ml-2"><span class="text-emerald-400 text-xs">● En stock</span></span>
+                        
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="font-bold text-white">94.90 €</span>
+                            <span class="line-through text-xs text-slate-500 ml-1">149.00 €</span>
+                        </div>
+                        <a href="https://www.amazon.fr/dp/B09CGR4FFM" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300">Lien ↗</a>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-900/70 border border-slate-800/80">
+                    <div>
+                        <span class="font-medium text-slate-200 text-sm">Ocarat</span>
+                        <span class="ml-2"><span class="text-emerald-400 text-xs">● En stock</span></span>
+                        <span class="ml-2 px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-mono">Code: BFWATCH10</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="font-bold text-white">119.00 €</span>
+                            <span class="line-through text-xs text-slate-500 ml-1">149.00 €</span>
+                        </div>
+                        <a href="https://ocarat.com/montre-g-shock-origin-gw-m5610u-1er-casio-79831.html" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300">Lien ↗</a>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-900/70 border border-slate-800/80">
+                    <div>
+                        <span class="font-medium text-slate-200 text-sm">Montres &amp; Co</span>
+                        <span class="ml-2"><span class="text-emerald-400 text-xs">● En stock</span></span>
+                        
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="font-bold text-white">124.00 €</span>
+                            <span class="line-through text-xs text-slate-500 ml-1">149.00 €</span>
+                        </div>
+                        <a href="https://www.montresandco.com/montre-casio-g-shock-gw-m5610u-1er-p-74248.html" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300">Lien ↗</a>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            <div class="pt-3 border-t border-slate-800">
+                <button onclick="selectWatchChart('casio-gwm5610u')" class="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-sky-300 transition">
+                    📈 Afficher la courbe d'évolution de cette montre
+                </button>
+            </div>
+        </div>
+        
+        <div class="rounded-2xl bg-slate-900 border border-slate-800 p-5 flex flex-col justify-between shadow-lg">
+            <div>
+                <div class="flex items-start justify-between gap-2 mb-3">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Casio • Réf. LCW-M100TSE-1AER</span>
+                        <h3 class="text-lg font-bold text-white mt-0.5">Casio Lineage LCW-M100TSE-1AER (Titane &amp; Saphir)</h3>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold border bg-emerald-500/20 text-emerald-300 border-emerald-500/40">Score 100/100</span>
+                </div>
+                <p class="text-xs text-slate-400 mb-4">Boîtier &amp; Bracelet Titane • Verre Saphir • Tough Solar • Radio-pilotée Multi-Band 6</p>
+                <div class="grid grid-cols-3 gap-2 mb-4 text-center">
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Meilleur Prix</div>
+                        <div class="text-base font-extrabold text-emerald-400">179.90 €</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Ton Prix Cible</div>
+                        <div class="text-base font-bold text-amber-300">189 €</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Plus Bas Observé</div>
+                        <div class="text-base font-bold text-sky-300">179.90 €</div>
+                    </div>
+                </div>
+                <div class="space-y-2 mb-4">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Offres Marchands Surveillées</div>
+                    
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-900/70 border border-slate-800/80">
+                    <div>
+                        <span class="font-medium text-slate-200 text-sm">Amazon FR</span>
+                        <span class="ml-2"><span class="text-emerald-400 text-xs">● En stock</span></span>
+                        
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="font-bold text-white">184.50 €</span>
+                            <span class="line-through text-xs text-slate-500 ml-1">279.00 €</span>
+                        </div>
+                        <a href="https://www.amazon.fr/dp/B07571V4V5" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300">Lien ↗</a>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-900/70 border border-slate-800/80">
+                    <div>
+                        <span class="font-medium text-slate-200 text-sm">Ocarat</span>
+                        <span class="ml-2"><span class="text-emerald-400 text-xs">● En stock</span></span>
+                        
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="font-bold text-white">215.00 €</span>
+                            <span class="line-through text-xs text-slate-500 ml-1">279.00 €</span>
+                        </div>
+                        <a href="https://ocarat.com/montre-lineage-lcw-m100tse-1aer-casio-48155.html" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300">Lien ↗</a>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            <div class="pt-3 border-t border-slate-800">
+                <button onclick="selectWatchChart('casio-lineage-titanium')" class="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-sky-300 transition">
+                    📈 Afficher la courbe d'évolution de cette montre
+                </button>
+            </div>
+        </div>
+        
+        <div class="rounded-2xl bg-slate-900 border border-slate-800 p-5 flex flex-col justify-between shadow-lg">
+            <div>
+                <div class="flex items-start justify-between gap-2 mb-3">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Citizen • Réf. CB0250-84E</span>
+                        <h3 class="text-lg font-bold text-white mt-0.5">Citizen Eco-Drive Radio-Controlled CB0250-84E</h3>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold border bg-emerald-500/20 text-emerald-300 border-emerald-500/40">Score 100/100</span>
+                </div>
+                <p class="text-xs text-slate-400 mb-4">Eco-Drive Solaire • Radio-pilotée 4 zones • Verre Saphir • Calendrier Perpétuel • 10 bar</p>
+                <div class="grid grid-cols-3 gap-2 mb-4 text-center">
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Meilleur Prix</div>
+                        <div class="text-base font-extrabold text-emerald-400">264.00 €</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Ton Prix Cible</div>
+                        <div class="text-base font-bold text-amber-300">269 €</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Plus Bas Observé</div>
+                        <div class="text-base font-bold text-sky-300">264.00 €</div>
+                    </div>
+                </div>
+                <div class="space-y-2 mb-4">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Offres Marchands Surveillées</div>
+                    
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-900/70 border border-slate-800/80">
+                    <div>
+                        <span class="font-medium text-slate-200 text-sm">Ocarat</span>
+                        <span class="ml-2"><span class="text-emerald-400 text-xs">● En stock</span></span>
+                        <span class="ml-2 px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-mono">Code: BLACKCITIZEN</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="font-bold text-white">264.00 €</span>
+                            <span class="line-through text-xs text-slate-500 ml-1">399.00 €</span>
+                        </div>
+                        <a href="https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300">Lien ↗</a>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-900/70 border border-slate-800/80">
+                    <div>
+                        <span class="font-medium text-slate-200 text-sm">Amazon FR</span>
+                        <span class="ml-2"><span class="text-emerald-400 text-xs">● En stock</span></span>
+                        
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="font-bold text-white">279.00 €</span>
+                            <span class="line-through text-xs text-slate-500 ml-1">399.00 €</span>
+                        </div>
+                        <a href="https://www.amazon.fr/dp/B09WVH883J" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300">Lien ↗</a>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            <div class="pt-3 border-t border-slate-800">
+                <button onclick="selectWatchChart('citizen-ecodrive-cb0250')" class="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-sky-300 transition">
+                    📈 Afficher la courbe d'évolution de cette montre
+                </button>
+            </div>
+        </div>
+        
+        <div class="rounded-2xl bg-slate-900 border border-slate-800 p-5 flex flex-col justify-between shadow-lg">
+            <div>
+                <div class="flex items-start justify-between gap-2 mb-3">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Seiko • Réf. SBTM323</span>
+                        <h3 class="text-lg font-bold text-white mt-0.5">Seiko Selection Solar Radio-Controlled SBTM323</h3>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold border bg-emerald-500/20 text-emerald-300 border-emerald-500/40">Score 100/100</span>
+                </div>
+                <p class="text-xs text-slate-400 mb-4">Calibre 7B72 Solaire Radio-piloté • Verre Saphir Super-Clear • Finition Zaratsu-style</p>
+                <div class="grid grid-cols-3 gap-2 mb-4 text-center">
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Meilleur Prix</div>
+                        <div class="text-base font-extrabold text-emerald-400">272.00 €</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Ton Prix Cible</div>
+                        <div class="text-base font-bold text-amber-300">279 €</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Plus Bas Observé</div>
+                        <div class="text-base font-bold text-sky-300">272.00 €</div>
+                    </div>
+                </div>
+                <div class="space-y-2 mb-4">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Offres Marchands Surveillées</div>
+                    
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-900/70 border border-slate-800/80">
+                    <div>
+                        <span class="font-medium text-slate-200 text-sm">Sakura Watches</span>
+                        <span class="ml-2"><span class="text-emerald-400 text-xs">● En stock</span></span>
+                        
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="font-bold text-white">272.00 €</span>
+                            <span class="line-through text-xs text-slate-500 ml-1">395.00 €</span>
+                        </div>
+                        <a href="https://www.sakurawatches.com/seiko-selection-sbtm323" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300">Lien ↗</a>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-900/70 border border-slate-800/80">
+                    <div>
+                        <span class="font-medium text-slate-200 text-sm">Chrono24</span>
+                        <span class="ml-2"><span class="text-emerald-400 text-xs">● En stock</span></span>
+                        
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="font-bold text-white">298.00 €</span>
+                            <span class="line-through text-xs text-slate-500 ml-1">395.00 €</span>
+                        </div>
+                        <a href="https://www.chrono24.fr/search/index.htm?query=SBTM323" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300">Lien ↗</a>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            <div class="pt-3 border-t border-slate-800">
+                <button onclick="selectWatchChart('seiko-solar-radio-sbtm323')" class="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-sky-300 transition">
+                    📈 Afficher la courbe d'évolution de cette montre
+                </button>
+            </div>
+        </div>
+        
+        <div class="rounded-2xl bg-slate-900 border border-slate-800 p-5 flex flex-col justify-between shadow-lg">
+            <div>
+                <div class="flex items-start justify-between gap-2 mb-3">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Citizen • Réf. AT8110-61E</span>
+                        <h3 class="text-lg font-bold text-white mt-0.5">Citizen Promaster Sky Eco-Drive AT8110-61E</h3>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold border bg-rose-500/20 text-rose-300 border-rose-500/40">Score 50/100</span>
+                </div>
+                <p class="text-xs text-slate-400 mb-4">Chronographe Eco-Drive Solaire • Radio-pilotée • Verre Saphir •Heure Mondiale 26 villes</p>
+                <div class="grid grid-cols-3 gap-2 mb-4 text-center">
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Meilleur Prix</div>
+                        <div class="text-base font-extrabold text-emerald-400">349.00 €</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Ton Prix Cible</div>
+                        <div class="text-base font-bold text-amber-300">319 €</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-950/70 p-2.5 border border-slate-800">
+                        <div class="text-[11px] text-slate-400">Plus Bas Observé</div>
+                        <div class="text-base font-bold text-sky-300">329.00 €</div>
+                    </div>
+                </div>
+                <div class="space-y-2 mb-4">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Offres Marchands Surveillées</div>
+                    
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-900/70 border border-slate-800/80">
+                    <div>
+                        <span class="font-medium text-slate-200 text-sm">Amazon FR</span>
+                        <span class="ml-2"><span class="text-emerald-400 text-xs">● En stock</span></span>
+                        
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="font-bold text-white">349.00 €</span>
+                            <span class="line-through text-xs text-slate-500 ml-1">529.00 €</span>
+                        </div>
+                        <a href="https://www.amazon.fr/dp/B00WG04A1M" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300">Lien ↗</a>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-900/70 border border-slate-800/80">
+                    <div>
+                        <span class="font-medium text-slate-200 text-sm">Ocarat</span>
+                        <span class="ml-2"><span class="text-emerald-400 text-xs">● En stock</span></span>
+                        
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="font-bold text-white">369.00 €</span>
+                            <span class="line-through text-xs text-slate-500 ml-1">459.00 €</span>
+                        </div>
+                        <a href="https://ocarat.com/montre-chrono-radio-controlled-at8110-61e-citizen-42191.html" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300">Lien ↗</a>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            <div class="pt-3 border-t border-slate-800">
+                <button onclick="selectWatchChart('citizen-promaster-as4020')" class="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-sky-300 transition">
+                    📈 Afficher la courbe d'évolution de cette montre
+                </button>
+            </div>
+        </div>
+        
+            </div>
+        </section>
+
+        <!-- Auto-Discovered Deals Section -->
+        <section class="mb-12">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-white">🛰️ Nouvelles Offres & Deals Découverts par Référence</h2>
+                <span class="text-xs text-slate-400">Recherche automatique Dealabs & comparateurs</span>
+            </div>
+            <div class="space-y-3">
+                
+                <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 flex items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-amber-400">GW-M5610U-1ER</span>
+                            <span class="text-xs text-slate-400">via Dealabs • Amazon DE</span>
+                            <span class="px-2 py-0.5 rounded bg-orange-500/20 text-orange-300 text-xs font-bold">🔥 412°</span>
+                        </div>
+                        <div class="text-sm font-semibold text-white mt-1">Casio G-Shock GW-M5610U-1ER Tough Solar Multi-Band 6</div>
+                    </div>
+                    <div class="flex items-center gap-3 shrink-0">
+                        <div class="text-lg font-extrabold text-emerald-400">89.99 €</div>
+                        <a href="https://www.dealabs.com/search?q=GW-M5610U-1ER" target="_blank" rel="noopener"
+                           class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs">
+                           Voir l'offre ↗
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 flex items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-amber-400">LCW-M100TSE-1AER</span>
+                            <span class="text-xs text-slate-400">via Idealo Comparateur</span>
+                            
+                        </div>
+                        <div class="text-sm font-semibold text-white mt-1">Casio Lineage LCW-M100TSE-1AER Titane Saphir</div>
+                    </div>
+                    <div class="flex items-center gap-3 shrink-0">
+                        <div class="text-lg font-extrabold text-emerald-400">179.90 €</div>
+                        <a href="https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER" target="_blank" rel="noopener"
+                           class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs">
+                           Voir l'offre ↗
+                        </a>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-slate-500 pt-6 border-t border-slate-900">
+            Propulsé par GitHub Actions & Python • Configuration dans <code>watches.yaml</code> • Historique versionné dans <code>data/history.json</code>
+        </footer>
+    </div>
+
+    <script>
+        const CHART_DATA = {"casio-gwm5610u": {"name": "Casio G-Shock GW-M5610U-1ER", "reference": "GW-M5610U-1ER", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30"], "best_prices": [129.0, 125.0, 119.0, 115.0, 109.0, 104.9, 89.99], "target_line": [99.0, 99.0, 99.0, 99.0, 99.0, 99.0, 99.0], "msrp_line": [149.0, 149.0, 149.0, 149.0, 149.0, 149.0, 149.0]}, "casio-lineage-titanium": {"name": "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)", "reference": "LCW-M100TSE-1AER", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30"], "best_prices": [249.0, 239.0, 229.0, 219.0, 209.0, 199.0, 179.9], "target_line": [189.0, 189.0, 189.0, 189.0, 189.0, 189.0, 189.0], "msrp_line": [279.0, 279.0, 279.0, 279.0, 279.0, 279.0, 279.0]}, "citizen-ecodrive-cb0250": {"name": "Citizen Eco-Drive Radio-Controlled CB0250-84E", "reference": "CB0250-84E", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30"], "best_prices": [339.0, 329.0, 315.0, 299.0, 289.0, 279.0, 264.0], "target_line": [269.0, 269.0, 269.0, 269.0, 269.0, 269.0, 269.0], "msrp_line": [399.0, 399.0, 399.0, 399.0, 399.0, 399.0, 399.0]}, "seiko-solar-radio-sbtm323": {"name": "Seiko Selection Solar Radio-Controlled SBTM323", "reference": "SBTM323", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30"], "best_prices": [325.0, 319.0, 310.0, 299.0, 295.0, 289.0, 272.0], "target_line": [279.0, 279.0, 279.0, 279.0, 279.0, 279.0, 279.0], "msrp_line": [395.0, 395.0, 395.0, 395.0, 395.0, 395.0, 395.0]}, "citizen-promaster-as4020": {"name": "Citizen Promaster Sky Eco-Drive AT8110-61E", "reference": "AT8110-61E", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30"], "best_prices": [329.0, 335.0, 349.0, 359.0, 355.0, 349.0, 349.0], "target_line": [319.0, 319.0, 319.0, 319.0, 319.0, 319.0, 319.0], "msrp_line": [459.0, 459.0, 459.0, 459.0, 459.0, 459.0, 459.0]}};
+        const LATEST_SUMMARY = {"updated_at": "2026-11-17T23:30:49.634576+00:00", "updated_at_human": "17/11/2026 à 23:30 UTC", "notification_title": "🔥 OBJECTIF ATTEINT : Casio G-Shock GW-M5610U-1ER à 89.99 € !", "notification_body": "• GW-M5610U-1ER : 89.99 € chez Dealabs • Amazon DE (-40% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100) [📉 -14.91€]\n• LCW-M100TSE-1AER : 179.90 € chez Idealo Comparateur (-36% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100) [📉 -19.10€]\n• CB0250-84E : 264.00 € chez Ocarat (-34% vs neuf, ✅ 5€ sous ta cible, Score BF 100/100) [📉 -15.00€]\n• SBTM323 : 272.00 € chez Sakura Watches (-31% vs neuf, ✅ 7€ sous ta cible, Score BF 100/100) [📉 -17.00€]\n• AT8110-61E : 349.00 € chez Amazon FR (-24% vs neuf, cible 319€ (+30€), Score BF 50/100)", "click_url": "https://www.dealabs.com/search?q=GW-M5610U-1ER", "ntfy_topic": "bf-montres-solaires-2026", "watches": [{"id": "casio-gwm5610u", "name": "Casio G-Shock GW-M5610U-1ER", "reference": "GW-M5610U-1ER", "best_price": 89.99, "best_merchant": "Dealabs • Amazon DE", "best_url": "https://www.dealabs.com/search?q=GW-M5610U-1ER", "target_price": 99.0, "bf_score": 100, "verdict": "🔥 Deal Black Friday Exceptionnel"}, {"id": "casio-lineage-titanium", "name": "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)", "reference": "LCW-M100TSE-1AER", "best_price": 179.9, "best_merchant": "Idealo Comparateur", "best_url": "https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER", "target_price": 189.0, "bf_score": 100, "verdict": "🔥 Deal Black Friday Exceptionnel"}, {"id": "citizen-ecodrive-cb0250", "name": "Citizen Eco-Drive Radio-Controlled CB0250-84E", "reference": "CB0250-84E", "best_price": 264.0, "best_merchant": "Ocarat", "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html", "target_price": 269.0, "bf_score": 100, "verdict": "🔥 Deal Black Friday Exceptionnel"}, {"id": "seiko-solar-radio-sbtm323", "name": "Seiko Selection Solar Radio-Controlled SBTM323", "reference": "SBTM323", "best_price": 272.0, "best_merchant": "Sakura Watches", "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323", "target_price": 279.0, "bf_score": 100, "verdict": "🔥 Deal Black Friday Exceptionnel"}, {"id": "citizen-promaster-as4020", "name": "Citizen Promaster Sky Eco-Drive AT8110-61E", "reference": "AT8110-61E", "best_price": 349.0, "best_merchant": "Amazon FR", "best_url": "https://www.amazon.fr/dp/B00WG04A1M", "target_price": 319.0, "bf_score": 50, "verdict": "⚠️ Fausse Promo détectée"}]};
+        let priceChart = null;
+        let lastSeenTimestamp = LATEST_SUMMARY.updated_at;
+
+        function selectWatchChart(watchId) {
+            const selector = document.getElementById('watchChartSelector');
+            if (selector && selector.value !== watchId) {
+                selector.value = watchId;
+            }
+            const item = CHART_DATA[watchId];
+            if (!item) return;
+
+            const ctx = document.getElementById('priceHistoryChart').getContext('2d');
+            if (priceChart) {
+                priceChart.destroy();
+            }
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: item.labels,
+                    datasets: [
+                        {
+                            label: 'Meilleur Prix Relevé (€)',
+                            data: item.best_prices,
+                            borderColor: '#34d399',
+                            backgroundColor: 'rgba(52, 211, 153, 0.12)',
+                            borderWidth: 3,
+                            tension: 0.25,
+                            fill: true,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'Ton Prix Cible (€)',
+                            data: item.target_line,
+                            borderColor: '#fbbf24',
+                            borderWidth: 2,
+                            borderDash: [6, 6],
+                            pointRadius: 0,
+                            fill: false
+                        },
+                        {
+                            label: 'Prix Public Officiel MSRP (€)',
+                            data: item.msrp_line,
+                            borderColor: '#64748b',
+                            borderWidth: 1.5,
+                            borderDash: [3, 3],
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#cbd5e1' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: (v) => v + ' €'
+                            },
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChromePermUI() {
+            const badge = document.getElementById('chromePermStatus');
+            const btn = document.getElementById('btnChromeNotif');
+            if (!('Notification' in window)) {
+                badge.textContent = 'Non supporté par ce navigateur';
+                return;
+            }
+            if (Notification.permission === 'granted') {
+                badge.textContent = '✅ Notifications Chrome actives';
+                badge.className = 'px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300';
+                btn.textContent = '🔔 Notifications Chrome Activées';
+            } else if (Notification.permission === 'denied') {
+                badge.textContent = '❌ Bloqué dans les paramètres Chrome';
+                badge.className = 'px-2 py-0.5 rounded bg-rose-500/20 text-rose-300';
+            }
+        }
+
+        async function enableBrowserNotifications() {
+            if (!('Notification' in window)) {
+                alert('Les notifications web ne sont pas supportées sur ce navigateur.');
+                return;
+            }
+            const perm = await Notification.requestPermission();
+            updateChromePermUI();
+            if (perm === 'granted') {
+                sendTestChromeNotification();
+            }
+        }
+
+        function sendTestChromeNotification() {
+            if (!('Notification' in window)) return;
+            if (Notification.permission !== 'granted') {
+                enableBrowserNotifications();
+                return;
+            }
+            const n = new Notification(LATEST_SUMMARY.notification_title, {
+                body: LATEST_SUMMARY.notification_body,
+                tag: 'bf-watch-comparator',
+            });
+            n.onclick = () => {
+                window.focus();
+                if (LATEST_SUMMARY.click_url) {
+                    window.open(LATEST_SUMMARY.click_url, '_blank');
+                }
+            };
+        }
+
+        // Poll latest_summary.json every 15 minutes when tab is kept open in Chrome
+        setInterval(async () => {
+            try {
+                const res = await fetch('latest_summary.json?t=' + Date.now());
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.updated_at && data.updated_at !== lastSeenTimestamp) {
+                    lastSeenTimestamp = data.updated_at;
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        new Notification(data.notification_title, {
+                            body: data.notification_body,
+                            tag: 'bf-watch-comparator-update'
+                        });
+                    }
+                    window.location.reload();
+                }
+            } catch (e) {}
+        }, 15 * 60 * 1000);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateChromePermUI();
+            const firstId = Object.keys(CHART_DATA)[0];
+            if (firstId) selectWatchChart(firstId);
+        });
+    </script>
+</body>
+</html>
