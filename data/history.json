@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-17T23:47:42.794322+00:00",
+  "updated_at": "2026-11-17T23:52:22.878279+00:00",
   "watches": {
     "casio-gwm5610u": {
       "name": "Casio G-Shock GW-M5610U-1ER",
@@ -81,6 +81,18 @@
         },
         {
           "timestamp": "2026-11-17T23:47:42.794221+00:00",
+          "best_price": 89.99,
+          "best_merchant": "Dealabs • Amazon DE",
+          "best_url": "https://www.dealabs.com/search?q=GW-M5610U-1ER",
+          "merchant_prices": {
+            "Amazon FR": 94.9,
+            "Ocarat": 119.0,
+            "Montres & Co": 124.0
+          },
+          "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-17T23:52:22.878155+00:00",
           "best_price": 89.99,
           "best_merchant": "Dealabs • Amazon DE",
           "best_url": "https://www.dealabs.com/search?q=GW-M5610U-1ER",
@@ -180,6 +192,17 @@
             "Ocarat": 215.0
           },
           "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-17T23:52:22.878171+00:00",
+          "best_price": 179.9,
+          "best_merchant": "Idealo Comparateur",
+          "best_url": "https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER",
+          "merchant_prices": {
+            "Amazon FR": 184.5,
+            "Ocarat": 215.0
+          },
+          "bf_score": 100
         }
       ]
     },
@@ -262,6 +285,17 @@
         },
         {
           "timestamp": "2026-11-17T23:47:42.794246+00:00",
+          "best_price": 264.0,
+          "best_merchant": "Ocarat",
+          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
+          "merchant_prices": {
+            "Ocarat": 264.0,
+            "Amazon FR": 279.0
+          },
+          "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-17T23:52:22.878180+00:00",
           "best_price": 264.0,
           "best_merchant": "Ocarat",
           "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
@@ -360,6 +394,17 @@
             "Ocarat": 369.0
           },
           "bf_score": 50
+        },
+        {
+          "timestamp": "2026-11-17T23:52:22.878193+00:00",
+          "best_price": 349.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
+          "merchant_prices": {
+            "Amazon FR": 349.0,
+            "Ocarat": 369.0
+          },
+          "bf_score": 50
         }
       ]
     },
@@ -442,6 +487,17 @@
         },
         {
           "timestamp": "2026-11-17T23:47:42.794266+00:00",
+          "best_price": 272.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323",
+          "merchant_prices": {
+            "Sakura Watches": 272.0,
+            "Chrono24": 298.0
+          },
+          "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-17T23:52:22.878203+00:00",
           "best_price": 272.0,
           "best_merchant": "Sakura Watches",
           "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323",

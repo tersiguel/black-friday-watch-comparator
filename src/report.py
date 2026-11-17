@@ -1,4 +1,4 @@
-"""Interactive HTML report generator for GitHub Pages with Dark/Light Mode toggle, Chrome Notifications, and Chart.js."""
+"""Interactive HTML report generator for GitHub Pages with Dark/Light Mode toggle, URL deletion, and multi-channel Chrome Notifications."""
 
 import html
 import json
@@ -16,7 +16,7 @@ def generate_html_report(
     summary: Dict[str, Any],
     output_dir: str = "docs",
 ) -> str:
-    """Generate docs/index.html and docs/latest_summary.json for GitHub Pages and Chrome notifications."""
+    """Generate docs/index.html, docs/sw.js, and docs/latest_summary.json."""
     os.makedirs(output_dir, exist_ok=True)
     now_str = datetime.now(timezone.utc).strftime("%d/%m/%Y à %H:%M UTC")
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -35,6 +35,7 @@ def generate_html_report(
         "notification_body": summary["body"],
         "click_url": summary.get("click_url", ""),
         "ntfy_topic": ntfy_topic,
+        "ntfy_server": ntfy_server,
         "watches": [
             {
                 "id": a.watch.id,
@@ -54,6 +55,30 @@ def generate_html_report(
     summary_path = os.path.join(output_dir, "latest_summary.json")
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(latest_payload, f, indent=2, ensure_ascii=False)
+
+    # Write Service Worker (docs/sw.js) for Chrome registration.showNotification support
+    sw_code = """self.addEventListener('install', (event) => {
+    self.skipWaiting();
+});
+self.addEventListener('activate', (event) => {
+    event.waitUntil(self.clients.claim());
+});
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const targetUrl = (event.notification.data && event.notification.data.url) || '/';
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+            for (const client of clientList) {
+                if ('focus' in client) return client.focus();
+            }
+            if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
+        })
+    );
+});
+"""
+    sw_path = os.path.join(output_dir, "sw.js")
+    with open(sw_path, "w", encoding="utf-8") as f:
+        f.write(sw_code)
 
     chart_data_by_watch: Dict[str, Any] = {}
     for a in sorted_analyses:
@@ -97,6 +122,9 @@ def generate_html_report(
         price_str = f"{best.price:.2f} €" if (best and best.price is not None) else "Indisponible"
         merchant_str = html.escape(best.merchant) if best else "—"
         url_str = html.escape(best.url) if best else "#"
+        url_js = html.escape(json.dumps(best.url if best else ""))
+        watch_id_js = html.escape(json.dumps(w.id))
+        merchant_js = html.escape(json.dumps(best.merchant if best else ""))
         badge_cls = badge_colors.get(a.bf_verdict_level, badge_colors["wait"])
 
         diff_target = a.discount_vs_target_diff
@@ -121,7 +149,7 @@ def generate_html_report(
             """
 
         comparison_rows_html.append(f"""
-        <tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition">
+        <tr data-offer-url="{url_str}" class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition">
             <td class="py-3.5 px-4 font-bold text-amber-600 dark:text-amber-400">#{rank}</td>
             <td class="py-3.5 px-4">
                 <div class="font-semibold text-slate-900 dark:text-white">{html.escape(w.name)}</div>
@@ -145,10 +173,17 @@ def generate_html_report(
                 </div>
             </td>
             <td class="py-3.5 px-4 text-right">
-                <a href="{url_str}" target="_blank" rel="noopener"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
-                   Voir chez {merchant_str} ↗
-                </a>
+                <div class="inline-flex items-center justify-end gap-1.5">
+                    <a href="{url_str}" target="_blank" rel="noopener"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
+                       Voir chez {merchant_str} ↗
+                    </a>
+                    <button onclick="removeInvalidLink({watch_id_js}, {url_js}, {merchant_js})"
+                       class="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs transition"
+                       title="Signaler et supprimer ce lien s'il est invalide ou expiré">
+                       🗑️
+                    </button>
+                </div>
             </td>
         </tr>
         """)
@@ -159,33 +194,48 @@ def generate_html_report(
             key=lambda o: (o.price is None, o.price if o.price is not None else 999999),
         )
         for o in all_watch_offers:
+            o_url_escaped = html.escape(o.url)
+            o_url_js = html.escape(json.dumps(o.url))
+            o_merch_js = html.escape(json.dumps(o.merchant))
             if o.price is not None:
                 old_p = f'<span class="line-through text-xs text-slate-400 dark:text-slate-500 ml-1">{o.original_price:.2f} €</span>' if o.original_price else ""
                 promo_b = f'<span class="ml-2 px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 text-[10px] font-mono">Code: {html.escape(o.promo_code)}</span>' if o.promo_code else ""
                 stock_b = '<span class="text-emerald-600 dark:text-emerald-400 text-xs">● En stock</span>' if o.in_stock else '<span class="text-rose-600 dark:text-rose-400 text-xs">● Rupture</span>'
                 offer_items_html.append(f"""
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80">
+                <div data-offer-url="{o_url_escaped}" class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 transition">
                     <div>
                         <span class="font-medium text-slate-800 dark:text-slate-200 text-sm">{html.escape(o.merchant)}</span>
                         <span class="ml-2">{stock_b}</span>
                         {promo_b}
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
+                    <div class="flex items-center gap-2">
+                        <div class="text-right mr-1">
                             <span class="font-bold text-slate-900 dark:text-white">{o.price:.2f} €</span>
                             {old_p}
                         </div>
-                        <a href="{html.escape(o.url)}" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 font-semibold transition">Lien ↗</a>
+                        <a href="{o_url_escaped}" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 font-semibold transition">Lien ↗</a>
+                        <button onclick="removeInvalidLink({watch_id_js}, {o_url_js}, {o_merch_js})"
+                            class="px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs transition"
+                            title="Supprimer ce lien invalide">
+                            🗑️
+                        </button>
                     </div>
                 </div>
                 """)
             else:
                 offer_items_html.append(f"""
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-100/60 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800/40 opacity-70">
-                    <span class="text-sm text-slate-500 dark:text-slate-400">{html.escape(o.merchant)}</span>
+                <div data-offer-url="{o_url_escaped}" class="flex items-center justify-between py-2 px-3 rounded-lg bg-rose-50/70 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-800/60 transition">
+                    <div>
+                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{html.escape(o.merchant)}</span>
+                        <span class="ml-2 text-xs text-rose-600 dark:text-rose-400">⚠️ {html.escape(o.error or 'Lien invalide / Prix non détecté')}</span>
+                    </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-xs text-slate-400 dark:text-slate-500">{html.escape(o.error or 'Non relevé')}</span>
-                        <a href="{html.escape(o.url)}" target="_blank" rel="noopener" class="text-xs px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Vérifier ↗</a>
+                        <a href="{o_url_escaped}" target="_blank" rel="noopener" class="text-xs px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Vérifier ↗</a>
+                        <button onclick="removeInvalidLink({watch_id_js}, {o_url_js}, {o_merch_js})"
+                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs shadow transition"
+                            title="Supprimer ce lien invalide">
+                            🗑️ Supprimer ce lien
+                        </button>
                     </div>
                 </div>
                 """)
@@ -230,9 +280,12 @@ def generate_html_report(
 
         for d in a.discovered_offers:
             if d.price is not None:
+                d_url_escaped = html.escape(d.url)
+                d_url_js = html.escape(json.dumps(d.url))
+                d_merch_js = html.escape(json.dumps(d.merchant))
                 temp_badge = f'<span class="px-2 py-0.5 rounded bg-orange-500/15 text-orange-600 dark:text-orange-300 text-xs font-bold">🔥 {html.escape(d.temperature)}</span>' if d.temperature else ""
                 discovered_cards_html.append(f"""
-                <div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between gap-4 shadow-sm transition-colors">
+                <div data-offer-url="{d_url_escaped}" class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between gap-4 shadow-sm transition-colors">
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="text-xs font-bold text-amber-600 dark:text-amber-400">{html.escape(w.reference)}</span>
@@ -241,12 +294,17 @@ def generate_html_report(
                         </div>
                         <div class="text-sm font-semibold text-slate-900 dark:text-white mt-1">{html.escape(d.title or w.name)}</div>
                     </div>
-                    <div class="flex items-center gap-3 shrink-0">
+                    <div class="flex items-center gap-2.5 shrink-0">
                         <div class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{d.price:.2f} €</div>
-                        <a href="{html.escape(d.url)}" target="_blank" rel="noopener"
+                        <a href="{d_url_escaped}" target="_blank" rel="noopener"
                            class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition">
                            Voir l'offre ↗
                         </a>
+                        <button onclick="removeInvalidLink({watch_id_js}, {d_url_js}, {d_merch_js})"
+                           class="px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs transition"
+                           title="Supprimer cette offre si le lien est invalide">
+                           🗑️
+                        </button>
                     </div>
                 </div>
                 """)
@@ -266,7 +324,7 @@ def generate_html_report(
         c_w = champion.watch
         c_o = champion.best_offer
         champion_banner = f"""
-        <div class="rounded-2xl bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-white dark:from-amber-500/20 dark:via-emerald-500/10 dark:to-slate-900 border border-amber-500/40 p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-md transition-colors">
+        <div data-offer-url="{html.escape(c_o.url)}" class="rounded-2xl bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-white dark:from-amber-500/20 dark:via-emerald-500/10 dark:to-slate-900 border border-amber-500/40 p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-md transition-colors">
             <div>
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500 text-slate-950 font-extrabold text-xs uppercase tracking-wider mb-2">
                     🏆 Meilleure Opportunité Black Friday du Jour (Score {champion.bf_score}/100)
@@ -295,16 +353,19 @@ def generate_html_report(
         tailwind.config = {{
             darkMode: 'class'
         }};
-        // Initialisation immédiate du thème (Dark Mode par défaut ou préférence sauvegardée/système)
         (function() {{
-            const savedTheme = localStorage.getItem('bf_watch_theme');
-            if (savedTheme === 'light') {{
-                document.documentElement.classList.remove('dark');
-            }} else if (savedTheme === 'dark') {{
-                document.documentElement.classList.add('dark');
-            }} else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {{
-                document.documentElement.classList.remove('dark');
-            }} else {{
+            try {{
+                const savedTheme = localStorage.getItem('bf_watch_theme');
+                if (savedTheme === 'light') {{
+                    document.documentElement.classList.remove('dark');
+                }} else if (savedTheme === 'dark') {{
+                    document.documentElement.classList.add('dark');
+                }} else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {{
+                    document.documentElement.classList.remove('dark');
+                }} else {{
+                    document.documentElement.classList.add('dark');
+                }}
+            }} catch (e) {{
                 document.documentElement.classList.add('dark');
             }}
         }})();
@@ -312,6 +373,56 @@ def generate_html_report(
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen font-sans selection:bg-amber-400 selection:text-slate-950 transition-colors duration-200">
+    <!-- Toast Container for visual Chrome-style notifications & link removal actions -->
+    <div id="chromeToastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-3 max-w-md w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- Modal for permanent removal of invalid URLs from watches.yaml -->
+    <div id="removeLinkModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/75 backdrop-blur-sm p-4">
+        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-w-lg w-full p-6 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-bold text-lg">
+                    <span>🗑️</span>
+                    <span>Lien invalide masqué du tableau de bord</span>
+                </div>
+                <button onclick="closeRemoveModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg font-bold">✕</button>
+            </div>
+            <p class="text-xs text-slate-600 dark:text-slate-300 mb-3">
+                Le lien <strong id="removedMerchantLabel" class="text-slate-900 dark:text-white"></strong> a été immédiatement retiré de ton affichage.
+                Pour le supprimer définitivement de <code class="font-mono text-amber-600 dark:text-amber-400">watches.yaml</code> afin qu'il ne soit plus scanné aux prochains cycles :
+            </p>
+            <div class="space-y-3 text-xs">
+                <div class="rounded-xl bg-slate-100 dark:bg-slate-950 p-3 border border-slate-200 dark:border-slate-800">
+                    <div class="font-semibold text-slate-700 dark:text-slate-300 mb-1">Option 1 — En 1 commande dans le terminal :</div>
+                    <div class="flex items-center gap-2">
+                        <code id="cliRemoveCmd" class="flex-1 overflow-x-auto font-mono text-[11px] text-emerald-700 dark:text-emerald-400 bg-white dark:bg-slate-900 px-2.5 py-1.5 rounded border border-slate-200 dark:border-slate-800"></code>
+                        <button onclick="copyCliCommand()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold shrink-0">Copier</button>
+                    </div>
+                </div>
+                <div class="rounded-xl bg-slate-100 dark:bg-slate-950 p-3 border border-slate-200 dark:border-slate-800">
+                    <div class="font-semibold text-slate-700 dark:text-slate-300 mb-1">Option 2 — Directement sur GitHub :</div>
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
+                        <a href="https://github.com/tersiguel/black-friday-watch-comparator/edit/feat/black-friday-watch-comparator/watches.yaml" target="_blank" rel="noopener"
+                           class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold">
+                           ✏️ Éditer watches.yaml sur GitHub ↗
+                        </a>
+                        <a href="https://github.com/tersiguel/black-friday-watch-comparator/actions/workflows/price-tracker.yml" target="_blank" rel="noopener"
+                           class="px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-700 dark:text-sky-300 border border-sky-500/30 font-semibold">
+                           ⚡ Lancer l'action remove_url sur GitHub ↗
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5 flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800">
+                <button onclick="restoreRemovedLinks()" class="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline">
+                    Annuler et réafficher tous les liens masqués
+                </button>
+                <button onclick="closeRemoveModal()" class="px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 text-white text-xs font-bold">
+                    Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Header -->
         <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-6 mb-8 border-b border-slate-200 dark:border-slate-800">
@@ -337,16 +448,16 @@ def generate_html_report(
                 </button>
                 <button id="btnChromeNotif" onclick="enableBrowserNotifications()"
                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs shadow transition">
-                    🔔 Activer les notifications Chrome (Onglet)
+                    🔔 Activer les notifications Chrome
                 </button>
                 <button onclick="sendTestChromeNotification()"
-                    class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs border border-slate-300 dark:border-slate-700 shadow-sm transition">
+                    class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition">
                     🧪 Tester la notif Chrome
                 </button>
                 <a href="{html.escape(ntfy_web_url)}" target="_blank" rel="noopener"
                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 font-semibold text-xs transition"
                     title="Recevoir les notifications Chrome même quand cet onglet est fermé">
-                    📲 Web Push Chrome (Canal: {html.escape(ntfy_topic)}) ↗
+                    📲 Web Push Chrome ({html.escape(ntfy_topic)}) ↗
                 </a>
             </div>
         </header>
@@ -354,13 +465,16 @@ def generate_html_report(
         <!-- Chrome Notification Setup Helper Box -->
         <div class="rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 p-4 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-slate-600 dark:text-slate-300 shadow-sm transition-colors">
             <div class="space-y-1">
-                <div class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <span>💡 Deux modes de notifications Google Chrome sont prêts :</span>
-                    <span id="chromePermStatus" class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-amber-600 dark:text-amber-300">Statut : Non activé</span>
+                <div class="font-bold text-slate-900 dark:text-white flex flex-wrap items-center gap-2">
+                    <span>💡 État des notifications Google Chrome :</span>
+                    <span id="chromePermStatus" class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-amber-600 dark:text-amber-300">Vérification...</span>
+                    <button id="btnRestoreLinksBadge" onclick="restoreRemovedLinks()" class="hidden px-2 py-0.5 rounded bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/30 hover:bg-rose-500/25 transition">
+                        🔄 Réafficher les liens supprimés
+                    </button>
                 </div>
                 <p>
-                    1. <strong>Directement depuis cette page :</strong> clique sur <em>« Activer les notifications Chrome »</em> ci-dessus. La page vérifie automatiquement les nouveaux relevés et affiche une notification Chrome.<br/>
-                    2. <strong>Même onglet fermé (Web Push via ntfy.sh) :</strong> ouvre <a href="{html.escape(ntfy_web_url)}" target="_blank" class="text-sky-600 dark:text-sky-400 underline font-medium">ntfy.sh/app</a> dans Chrome, clique sur <em>« Subscribe to topic »</em> et entre <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-950 text-amber-700 dark:text-amber-300 font-mono">{html.escape(ntfy_topic)}</code>.
+                    • Clique sur <strong>« 🧪 Tester la notif Chrome »</strong> : déclenche à la fois la notification native Chrome (si tu es sur la page <a href="https://tersiguel.github.io/black-friday-watch-comparator/" target="_blank" class="text-sky-600 dark:text-sky-400 underline font-semibold">GitHub Pages</a> hors iframe), un aperçu visuel immédiat + un envoi réel sur ton canal Web Push <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-950 text-amber-700 dark:text-amber-300 font-mono">{html.escape(ntfy_topic)}</code>.<br/>
+                    • Si un lien marchand est mort ou invalide, clique sur le bouton <strong>🗑️</strong> en face de l'offre pour le supprimer.
                 </p>
             </div>
         </div>
@@ -384,7 +498,7 @@ def generate_html_report(
                             <th class="py-3 px-4">Plus Bas Hist.</th>
                             <th class="py-3 px-4">Verdict Black Friday</th>
                             <th class="py-3 px-4 text-center">Score BF</th>
-                            <th class="py-3 px-4 text-right">Meilleure Offre</th>
+                            <th class="py-3 px-4 text-right">Meilleure Offre / Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -413,7 +527,7 @@ def generate_html_report(
 
         <!-- Detailed Cards per Watch -->
         <section class="mb-10">
-            <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-4">🔍 Détail des Offres par Montre</h2>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-4">🔍 Détail des Offres par Montre (avec suppression des liens invalides)</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {''.join(watch_cards_html)}
             </div>
@@ -438,9 +552,301 @@ def generate_html_report(
     <script>
         const CHART_DATA = {json.dumps(chart_data_by_watch, ensure_ascii=False)};
         const LATEST_SUMMARY = {json.dumps(latest_payload, ensure_ascii=False)};
+        const REMOVED_URLS_KEY = 'bf_watch_removed_urls';
         let priceChart = null;
         let currentWatchId = null;
         let lastSeenTimestamp = LATEST_SUMMARY.updated_at;
+        let swRegistration = null;
+
+        // Register Service Worker if hosted over HTTP/HTTPS (GitHub Pages)
+        if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.protocol === 'http:')) {{
+            navigator.serviceWorker.register('sw.js').then((reg) => {{
+                swRegistration = reg;
+            }}).catch(() => {{}});
+        }}
+
+        function isInCrossOriginIframe() {{
+            try {{
+                return window.self !== window.top;
+            }} catch (e) {{
+                return true;
+            }}
+        }}
+
+        // Visual Chrome-style notification banner + optional Web Audio chime
+        function showVisualChromeNotification(title, body, clickUrl, statusNote) {{
+            const container = document.getElementById('chromeToastContainer');
+            if (!container) return;
+
+            // Play subtle notification chime
+            try {{
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) {{
+                    const ctx = new AudioCtx();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12); // A5
+                    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.45);
+                }}
+            }} catch (e) {{}}
+
+            const toast = document.createElement('div');
+            toast.className = 'pointer-events-auto rounded-2xl bg-slate-900/95 dark:bg-slate-900 border-2 border-amber-400/80 text-white p-4 shadow-2xl transition-all duration-300 transform translate-y-0';
+            const firstLines = (body || '').split('\\n').slice(0, 3).join('<br/>');
+            const noteHtml = statusNote ? `<div class="mt-2 pt-2 border-t border-slate-800 text-[11px] text-sky-300">${{statusNote}}</div>` : '';
+
+            toast.innerHTML = `
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
+                        <span>🔔 Notification Google Chrome</span>
+                    </div>
+                    <button class="text-slate-400 hover:text-white text-sm font-bold" onclick="this.closest('.pointer-events-auto').remove()">✕</button>
+                </div>
+                <div class="font-bold text-sm text-white mt-1">${{title}}</div>
+                <div class="text-xs text-slate-300 mt-1.5 leading-relaxed">${{firstLines}}</div>
+                ${{noteHtml}}
+            `;
+            if (clickUrl) {{
+                toast.style.cursor = 'pointer';
+                toast.addEventListener('click', (ev) => {{
+                    if (ev.target.tagName.toLowerCase() === 'button') return;
+                    window.open(clickUrl, '_blank');
+                }});
+            }}
+            container.prepend(toast);
+            setTimeout(() => {{
+                if (toast.parentNode) toast.remove();
+            }}, 10000);
+        }}
+
+        function updateChromePermUI() {{
+            const badge = document.getElementById('chromePermStatus');
+            const btn = document.getElementById('btnChromeNotif');
+            if (!badge || !btn) return;
+
+            if (isInCrossOriginIframe()) {{
+                badge.textContent = 'Aperçu intégré (Notif visuelle + Web Push ntfy.sh actifs)';
+                badge.className = 'px-2 py-0.5 rounded bg-sky-500/20 text-sky-700 dark:text-sky-300';
+                return;
+            }}
+            if (!('Notification' in window)) {{
+                badge.textContent = 'Mode Notification Visuelle + Web Push ntfy.sh';
+                return;
+            }}
+            if (Notification.permission === 'granted') {{
+                badge.textContent = '✅ Notifications Chrome natives actives';
+                badge.className = 'px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300';
+                btn.textContent = '🔔 Notifications Chrome Activées';
+            }} else if (Notification.permission === 'denied') {{
+                badge.textContent = '⚠️ Permission native bloquée (Toast visuel + ntfy.sh actifs)';
+                badge.className = 'px-2 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300';
+            }} else {{
+                badge.textContent = 'Prêt à activer (Clique sur Activer ou Tester)';
+            }}
+        }}
+
+        async function enableBrowserNotifications() {{
+            if (isInCrossOriginIframe()) {{
+                showVisualChromeNotification(
+                    LATEST_SUMMARY.notification_title,
+                    LATEST_SUMMARY.notification_body,
+                    LATEST_SUMMARY.click_url,
+                    '💡 Tu es dans l\\'aperçu intégré : les iframes bloquent la popup système OS. Ouvre la page GitHub Pages dans un onglet Chrome ou abonne-toi à ntfy.sh pour la popup système !'
+                );
+                return;
+            }}
+            if (!('Notification' in window)) {{
+                showVisualChromeNotification(
+                    LATEST_SUMMARY.notification_title,
+                    LATEST_SUMMARY.notification_body,
+                    LATEST_SUMMARY.click_url,
+                    'ℹ️ Ton navigateur utilise le mode d\\'alerte visuel intégré.'
+                );
+                return;
+            }}
+            try {{
+                const perm = await Notification.requestPermission();
+                updateChromePermUI();
+                await sendTestChromeNotification();
+            }} catch (e) {{
+                await sendTestChromeNotification();
+            }}
+        }}
+
+        async function triggerNativeOrSwNotification(title, body, clickUrl) {{
+            if (!('Notification' in window) || Notification.permission !== 'granted' || isInCrossOriginIframe()) {{
+                return false;
+            }}
+            try {{
+                if (swRegistration && swRegistration.showNotification) {{
+                    await swRegistration.showNotification(title, {{
+                        body: body,
+                        tag: 'bf-watch-comparator-' + Date.now(),
+                        data: {{ url: clickUrl }}
+                    }});
+                    return true;
+                }}
+            }} catch (e) {{}}
+            try {{
+                const n = new Notification(title, {{
+                    body: body,
+                    tag: 'bf-watch-comparator-' + Date.now()
+                }});
+                n.onclick = () => {{
+                    window.focus();
+                    if (clickUrl) window.open(clickUrl, '_blank');
+                }};
+                return true;
+            }} catch (e) {{
+                return false;
+            }}
+        }}
+
+        async function sendTestChromeNotification() {{
+            // 1. If permission is 'default' and not in iframe, request it first
+            if ('Notification' in window && Notification.permission === 'default' && !isInCrossOriginIframe()) {{
+                try {{
+                    await Notification.requestPermission();
+                    updateChromePermUI();
+                }} catch (e) {{}}
+            }}
+
+            // 2. Try native OS Chrome notification (works on GitHub Pages / localhost)
+            const nativeShown = await triggerNativeOrSwNotification(
+                LATEST_SUMMARY.notification_title,
+                LATEST_SUMMARY.notification_body,
+                LATEST_SUMMARY.click_url
+            );
+
+            // 3. Also send real Web Push to ntfy.sh topic from browser so subscribed Chrome gets it even in background
+            let ntfySent = false;
+            if (LATEST_SUMMARY.ntfy_topic && LATEST_SUMMARY.ntfy_server) {{
+                try {{
+                    const res = await fetch(LATEST_SUMMARY.ntfy_server + '/' + LATEST_SUMMARY.ntfy_topic, {{
+                        method: 'POST',
+                        body: LATEST_SUMMARY.notification_body,
+                        headers: {{
+                            'Title': 'Test Radar Black Friday Montres',
+                            'Priority': 'high',
+                            'Tags': 'watch,fire'
+                        }}
+                    }});
+                    ntfySent = res.ok;
+                }} catch (e) {{}}
+            }}
+
+            // 4. Always show visual Chrome notification toast so user gets immediate feedback in all contexts
+            let statusNote = '';
+            if (nativeShown && ntfySent) {{
+                statusNote = '✅ Notification système Chrome + Web Push ntfy.sh (' + LATEST_SUMMARY.ntfy_topic + ') envoyés !';
+            }} else if (nativeShown) {{
+                statusNote = '✅ Notification système Chrome affichée !';
+            }} else if (ntfySent) {{
+                statusNote = '📲 Web Push envoyé sur ntfy.sh/' + LATEST_SUMMARY.ntfy_topic + ' ! (Ouvre le lien GitHub Pages hors aperçu pour la popup native de l\\'onglet)';
+            }} else if (isInCrossOriginIframe()) {{
+                statusNote = '💡 Aperçu intégré : clique sur la carte "Radar Black Friday — Tableau de Bord GitHub Pages" pour autoriser les notifications natives Chrome.';
+            }} else {{
+                statusNote = '🔔 Aperçu de ta notification Chrome (Vérifie que les notifications sont autorisées à gauche de l\\'URL dans Chrome).';
+            }}
+
+            showVisualChromeNotification(
+                LATEST_SUMMARY.notification_title,
+                LATEST_SUMMARY.notification_body,
+                LATEST_SUMMARY.click_url,
+                statusNote
+            );
+        }}
+
+        // Invalid link removal management
+        function getRemovedUrls() {{
+            try {{
+                const raw = localStorage.getItem(REMOVED_URLS_KEY);
+                return raw ? JSON.parse(raw) : [];
+            }} catch (e) {{
+                return [];
+            }}
+        }}
+
+        function saveRemovedUrls(list) {{
+            try {{
+                localStorage.setItem(REMOVED_URLS_KEY, JSON.stringify(list));
+            }} catch (e) {{}}
+        }}
+
+        function applyRemovedUrlsFilter() {{
+            const removed = new Set(getRemovedUrls());
+            const elements = document.querySelectorAll('[data-offer-url]');
+            elements.forEach((el) => {{
+                const url = el.getAttribute('data-offer-url');
+                if (url && removed.has(url)) {{
+                    el.classList.add('hidden');
+                }} else {{
+                    el.classList.remove('hidden');
+                }}
+            }});
+            const restoreBtn = document.getElementById('btnRestoreLinksBadge');
+            if (restoreBtn) {{
+                if (removed.size > 0) {{
+                    restoreBtn.classList.remove('hidden');
+                    restoreBtn.textContent = `🔄 Réafficher ${{removed.size}} lien(s) supprimé(s)`;
+                }} else {{
+                    restoreBtn.classList.add('hidden');
+                }}
+            }}
+        }}
+
+        function removeInvalidLink(watchId, url, merchant) {{
+            const list = getRemovedUrls();
+            if (!list.includes(url)) {{
+                list.push(url);
+                saveRemovedUrls(list);
+            }}
+            applyRemovedUrlsFilter();
+
+            const modal = document.getElementById('removeLinkModal');
+            const label = document.getElementById('removedMerchantLabel');
+            const cmd = document.getElementById('cliRemoveCmd');
+            if (label) label.textContent = `${{merchant}} (${{url}})`;
+            if (cmd) cmd.textContent = `python3 tracker.py remove-url --watch ${{watchId}} --url "${{url}}"`;
+            if (modal) {{
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }}
+        }}
+
+        function closeRemoveModal() {{
+            const modal = document.getElementById('removeLinkModal');
+            if (modal) {{
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }}
+        }}
+
+        function copyCliCommand() {{
+            const cmd = document.getElementById('cliRemoveCmd');
+            if (!cmd) return;
+            navigator.clipboard.writeText(cmd.textContent).then(() => {{
+                showVisualChromeNotification(
+                    '📋 Commande copiée !',
+                    cmd.textContent,
+                    '',
+                    'Colle cette commande dans ton terminal pour retirer définitivement l\\'URL de watches.yaml.'
+                );
+            }}).catch(() => {{}});
+        }}
+
+        function restoreRemovedLinks() {{
+            saveRemovedUrls([]);
+            applyRemovedUrlsFilter();
+            closeRemoveModal();
+        }}
 
         function isDarkMode() {{
             return document.documentElement.classList.contains('dark');
@@ -463,10 +869,10 @@ def generate_html_report(
             const root = document.documentElement;
             if (root.classList.contains('dark')) {{
                 root.classList.remove('dark');
-                localStorage.setItem('bf_watch_theme', 'light');
+                try {{ localStorage.setItem('bf_watch_theme', 'light'); }} catch (e) {{}}
             }} else {{
                 root.classList.add('dark');
-                localStorage.setItem('bf_watch_theme', 'dark');
+                try {{ localStorage.setItem('bf_watch_theme', 'dark'); }} catch (e) {{}}
             }}
             updateThemeToggleButton();
             if (currentWatchId) {{
@@ -552,53 +958,6 @@ def generate_html_report(
             }});
         }}
 
-        function updateChromePermUI() {{
-            const badge = document.getElementById('chromePermStatus');
-            const btn = document.getElementById('btnChromeNotif');
-            if (!('Notification' in window)) {{
-                badge.textContent = 'Non supporté par ce navigateur';
-                return;
-            }}
-            if (Notification.permission === 'granted') {{
-                badge.textContent = '✅ Notifications Chrome actives';
-                badge.className = 'px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300';
-                btn.textContent = '🔔 Notifications Chrome Activées';
-            }} else if (Notification.permission === 'denied') {{
-                badge.textContent = '❌ Bloqué dans les paramètres Chrome';
-                badge.className = 'px-2 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300';
-            }}
-        }}
-
-        async function enableBrowserNotifications() {{
-            if (!('Notification' in window)) {{
-                alert('Les notifications web ne sont pas supportées sur ce navigateur.');
-                return;
-            }}
-            const perm = await Notification.requestPermission();
-            updateChromePermUI();
-            if (perm === 'granted') {{
-                sendTestChromeNotification();
-            }}
-        }}
-
-        function sendTestChromeNotification() {{
-            if (!('Notification' in window)) return;
-            if (Notification.permission !== 'granted') {{
-                enableBrowserNotifications();
-                return;
-            }}
-            const n = new Notification(LATEST_SUMMARY.notification_title, {{
-                body: LATEST_SUMMARY.notification_body,
-                tag: 'bf-watch-comparator',
-            }});
-            n.onclick = () => {{
-                window.focus();
-                if (LATEST_SUMMARY.click_url) {{
-                    window.open(LATEST_SUMMARY.click_url, '_blank');
-                }}
-            }};
-        }}
-
         setInterval(async () => {{
             try {{
                 const res = await fetch('latest_summary.json?t=' + Date.now());
@@ -606,12 +965,11 @@ def generate_html_report(
                 const data = await res.json();
                 if (data.updated_at && data.updated_at !== lastSeenTimestamp) {{
                     lastSeenTimestamp = data.updated_at;
-                    if ('Notification' in window && Notification.permission === 'granted') {{
-                        new Notification(data.notification_title, {{
-                            body: data.notification_body,
-                            tag: 'bf-watch-comparator-update'
-                        }});
-                    }}
+                    await triggerNativeOrSwNotification(
+                        data.notification_title,
+                        data.notification_body,
+                        data.click_url
+                    );
                     window.location.reload();
                 }}
             }} catch (e) {{}}
@@ -620,6 +978,7 @@ def generate_html_report(
         window.addEventListener('DOMContentLoaded', () => {{
             updateThemeToggleButton();
             updateChromePermUI();
+            applyRemovedUrlsFilter();
             const firstId = Object.keys(CHART_DATA)[0];
             if (firstId) selectWatchChart(firstId);
         }});

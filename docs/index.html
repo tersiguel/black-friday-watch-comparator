@@ -9,16 +9,19 @@
         tailwind.config = {
             darkMode: 'class'
         };
-        // Initialisation immédiate du thème (Dark Mode par défaut ou préférence sauvegardée/système)
         (function() {
-            const savedTheme = localStorage.getItem('bf_watch_theme');
-            if (savedTheme === 'light') {
-                document.documentElement.classList.remove('dark');
-            } else if (savedTheme === 'dark') {
-                document.documentElement.classList.add('dark');
-            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-                document.documentElement.classList.remove('dark');
-            } else {
+            try {
+                const savedTheme = localStorage.getItem('bf_watch_theme');
+                if (savedTheme === 'light') {
+                    document.documentElement.classList.remove('dark');
+                } else if (savedTheme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                    document.documentElement.classList.remove('dark');
+                } else {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) {
                 document.documentElement.classList.add('dark');
             }
         })();
@@ -26,6 +29,56 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen font-sans selection:bg-amber-400 selection:text-slate-950 transition-colors duration-200">
+    <!-- Toast Container for visual Chrome-style notifications & link removal actions -->
+    <div id="chromeToastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-3 max-w-md w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- Modal for permanent removal of invalid URLs from watches.yaml -->
+    <div id="removeLinkModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/75 backdrop-blur-sm p-4">
+        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-w-lg w-full p-6 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-bold text-lg">
+                    <span>🗑️</span>
+                    <span>Lien invalide masqué du tableau de bord</span>
+                </div>
+                <button onclick="closeRemoveModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg font-bold">✕</button>
+            </div>
+            <p class="text-xs text-slate-600 dark:text-slate-300 mb-3">
+                Le lien <strong id="removedMerchantLabel" class="text-slate-900 dark:text-white"></strong> a été immédiatement retiré de ton affichage.
+                Pour le supprimer définitivement de <code class="font-mono text-amber-600 dark:text-amber-400">watches.yaml</code> afin qu'il ne soit plus scanné aux prochains cycles :
+            </p>
+            <div class="space-y-3 text-xs">
+                <div class="rounded-xl bg-slate-100 dark:bg-slate-950 p-3 border border-slate-200 dark:border-slate-800">
+                    <div class="font-semibold text-slate-700 dark:text-slate-300 mb-1">Option 1 — En 1 commande dans le terminal :</div>
+                    <div class="flex items-center gap-2">
+                        <code id="cliRemoveCmd" class="flex-1 overflow-x-auto font-mono text-[11px] text-emerald-700 dark:text-emerald-400 bg-white dark:bg-slate-900 px-2.5 py-1.5 rounded border border-slate-200 dark:border-slate-800"></code>
+                        <button onclick="copyCliCommand()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold shrink-0">Copier</button>
+                    </div>
+                </div>
+                <div class="rounded-xl bg-slate-100 dark:bg-slate-950 p-3 border border-slate-200 dark:border-slate-800">
+                    <div class="font-semibold text-slate-700 dark:text-slate-300 mb-1">Option 2 — Directement sur GitHub :</div>
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
+                        <a href="https://github.com/tersiguel/black-friday-watch-comparator/edit/feat/black-friday-watch-comparator/watches.yaml" target="_blank" rel="noopener"
+                           class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold">
+                           ✏️ Éditer watches.yaml sur GitHub ↗
+                        </a>
+                        <a href="https://github.com/tersiguel/black-friday-watch-comparator/actions/workflows/price-tracker.yml" target="_blank" rel="noopener"
+                           class="px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-700 dark:text-sky-300 border border-sky-500/30 font-semibold">
+                           ⚡ Lancer l'action remove_url sur GitHub ↗
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5 flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800">
+                <button onclick="restoreRemovedLinks()" class="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline">
+                    Annuler et réafficher tous les liens masqués
+                </button>
+                <button onclick="closeRemoveModal()" class="px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 text-white text-xs font-bold">
+                    Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Header -->
         <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-6 mb-8 border-b border-slate-200 dark:border-slate-800">
@@ -37,7 +90,7 @@
                     Comparateur Black Friday — Montres Solaires Radio-Pilotées
                 </h1>
                 <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                    Dernier relevé automatique : <strong class="text-slate-900 dark:text-slate-200">17/11/2026 à 23:47 UTC</strong> • Anti-fausse promo & récapitulatif quotidien actif
+                    Dernier relevé automatique : <strong class="text-slate-900 dark:text-slate-200">17/11/2026 à 23:52 UTC</strong> • Anti-fausse promo & récapitulatif quotidien actif
                 </p>
             </div>
 
@@ -51,16 +104,16 @@
                 </button>
                 <button id="btnChromeNotif" onclick="enableBrowserNotifications()"
                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs shadow transition">
-                    🔔 Activer les notifications Chrome (Onglet)
+                    🔔 Activer les notifications Chrome
                 </button>
                 <button onclick="sendTestChromeNotification()"
-                    class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs border border-slate-300 dark:border-slate-700 shadow-sm transition">
+                    class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition">
                     🧪 Tester la notif Chrome
                 </button>
                 <a href="https://ntfy.sh/app" target="_blank" rel="noopener"
                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 font-semibold text-xs transition"
                     title="Recevoir les notifications Chrome même quand cet onglet est fermé">
-                    📲 Web Push Chrome (Canal: bf-montres-solaires-2026) ↗
+                    📲 Web Push Chrome (bf-montres-solaires-2026) ↗
                 </a>
             </div>
         </header>
@@ -68,19 +121,22 @@
         <!-- Chrome Notification Setup Helper Box -->
         <div class="rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 p-4 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-slate-600 dark:text-slate-300 shadow-sm transition-colors">
             <div class="space-y-1">
-                <div class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <span>💡 Deux modes de notifications Google Chrome sont prêts :</span>
-                    <span id="chromePermStatus" class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-amber-600 dark:text-amber-300">Statut : Non activé</span>
+                <div class="font-bold text-slate-900 dark:text-white flex flex-wrap items-center gap-2">
+                    <span>💡 État des notifications Google Chrome :</span>
+                    <span id="chromePermStatus" class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-amber-600 dark:text-amber-300">Vérification...</span>
+                    <button id="btnRestoreLinksBadge" onclick="restoreRemovedLinks()" class="hidden px-2 py-0.5 rounded bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/30 hover:bg-rose-500/25 transition">
+                        🔄 Réafficher les liens supprimés
+                    </button>
                 </div>
                 <p>
-                    1. <strong>Directement depuis cette page :</strong> clique sur <em>« Activer les notifications Chrome »</em> ci-dessus. La page vérifie automatiquement les nouveaux relevés et affiche une notification Chrome.<br/>
-                    2. <strong>Même onglet fermé (Web Push via ntfy.sh) :</strong> ouvre <a href="https://ntfy.sh/app" target="_blank" class="text-sky-600 dark:text-sky-400 underline font-medium">ntfy.sh/app</a> dans Chrome, clique sur <em>« Subscribe to topic »</em> et entre <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-950 text-amber-700 dark:text-amber-300 font-mono">bf-montres-solaires-2026</code>.
+                    • Clique sur <strong>« 🧪 Tester la notif Chrome »</strong> : déclenche à la fois la notification native Chrome (si tu es sur la page <a href="https://tersiguel.github.io/black-friday-watch-comparator/" target="_blank" class="text-sky-600 dark:text-sky-400 underline font-semibold">GitHub Pages</a> hors iframe), un aperçu visuel immédiat + un envoi réel sur ton canal Web Push <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-950 text-amber-700 dark:text-amber-300 font-mono">bf-montres-solaires-2026</code>.<br/>
+                    • Si un lien marchand est mort ou invalide, clique sur le bouton <strong>🗑️</strong> en face de l'offre pour le supprimer.
                 </p>
             </div>
         </div>
 
         
-        <div class="rounded-2xl bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-white dark:from-amber-500/20 dark:via-emerald-500/10 dark:to-slate-900 border border-amber-500/40 p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-md transition-colors">
+        <div data-offer-url="https://www.dealabs.com/search?q=GW-M5610U-1ER" class="rounded-2xl bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-white dark:from-amber-500/20 dark:via-emerald-500/10 dark:to-slate-900 border border-amber-500/40 p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-md transition-colors">
             <div>
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500 text-slate-950 font-extrabold text-xs uppercase tracking-wider mb-2">
                     🏆 Meilleure Opportunité Black Friday du Jour (Score 100/100)
@@ -115,12 +171,12 @@
                             <th class="py-3 px-4">Plus Bas Hist.</th>
                             <th class="py-3 px-4">Verdict Black Friday</th>
                             <th class="py-3 px-4 text-center">Score BF</th>
-                            <th class="py-3 px-4 text-right">Meilleure Offre</th>
+                            <th class="py-3 px-4 text-right">Meilleure Offre / Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         
-        <tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition">
+        <tr data-offer-url="https://www.dealabs.com/search?q=GW-M5610U-1ER" class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition">
             <td class="py-3.5 px-4 font-bold text-amber-600 dark:text-amber-400">#1</td>
             <td class="py-3.5 px-4">
                 <div class="font-semibold text-slate-900 dark:text-white">Casio G-Shock GW-M5610U-1ER</div>
@@ -144,14 +200,21 @@
                 </div>
             </td>
             <td class="py-3.5 px-4 text-right">
-                <a href="https://www.dealabs.com/search?q=GW-M5610U-1ER" target="_blank" rel="noopener"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
-                   Voir chez Dealabs • Amazon DE ↗
-                </a>
+                <div class="inline-flex items-center justify-end gap-1.5">
+                    <a href="https://www.dealabs.com/search?q=GW-M5610U-1ER" target="_blank" rel="noopener"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
+                       Voir chez Dealabs • Amazon DE ↗
+                    </a>
+                    <button onclick="removeInvalidLink(&quot;casio-gwm5610u&quot;, &quot;https://www.dealabs.com/search?q=GW-M5610U-1ER&quot;, &quot;Dealabs \u2022 Amazon DE&quot;)"
+                       class="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs transition"
+                       title="Signaler et supprimer ce lien s'il est invalide ou expiré">
+                       🗑️
+                    </button>
+                </div>
             </td>
         </tr>
         
-        <tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition">
+        <tr data-offer-url="https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER" class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition">
             <td class="py-3.5 px-4 font-bold text-amber-600 dark:text-amber-400">#2</td>
             <td class="py-3.5 px-4">
                 <div class="font-semibold text-slate-900 dark:text-white">Casio Lineage LCW-M100TSE-1AER (Titane &amp; Saphir)</div>
@@ -175,14 +238,21 @@
                 </div>
             </td>
             <td class="py-3.5 px-4 text-right">
-                <a href="https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER" target="_blank" rel="noopener"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
-                   Voir chez Idealo Comparateur ↗
-                </a>
+                <div class="inline-flex items-center justify-end gap-1.5">
+                    <a href="https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER" target="_blank" rel="noopener"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
+                       Voir chez Idealo Comparateur ↗
+                    </a>
+                    <button onclick="removeInvalidLink(&quot;casio-lineage-titanium&quot;, &quot;https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER&quot;, &quot;Idealo Comparateur&quot;)"
+                       class="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs transition"
+                       title="Signaler et supprimer ce lien s'il est invalide ou expiré">
+                       🗑️
+                    </button>
+                </div>
             </td>
         </tr>
         
-        <tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition">
+        <tr data-offer-url="https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html" class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition">
             <td class="py-3.5 px-4 font-bold text-amber-600 dark:text-amber-400">#3</td>
             <td class="py-3.5 px-4">
                 <div class="font-semibold text-slate-900 dark:text-white">Citizen Eco-Drive Radio-Controlled CB0250-84E</div>
@@ -206,14 +276,21 @@
                 </div>
             </td>
             <td class="py-3.5 px-4 text-right">
-                <a href="https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html" target="_blank" rel="noopener"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
-                   Voir chez Ocarat ↗
-                </a>
+                <div class="inline-flex items-center justify-end gap-1.5">
+                    <a href="https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html" target="_blank" rel="noopener"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
+                       Voir chez Ocarat ↗
+                    </a>
+                    <button onclick="removeInvalidLink(&quot;citizen-ecodrive-cb0250&quot;, &quot;https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html&quot;, &quot;Ocarat&quot;)"
+                       class="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs transition"
+                       title="Signaler et supprimer ce lien s'il est invalide ou expiré">
+                       🗑️
+                    </button>
+                </div>
             </td>
         </tr>
         
-        <tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition">
+        <tr data-offer-url="https://www.sakurawatches.com/seiko-selection-sbtm323" class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition">
             <td class="py-3.5 px-4 font-bold text-amber-600 dark:text-amber-400">#4</td>
             <td class="py-3.5 px-4">
                 <div class="font-semibold text-slate-900 dark:text-white">Seiko Selection Solar Radio-Controlled SBTM323</div>
@@ -237,14 +314,21 @@
                 </div>
             </td>
             <td class="py-3.5 px-4 text-right">
-                <a href="https://www.sakurawatches.com/seiko-selection-sbtm323" target="_blank" rel="noopener"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
-                   Voir chez Sakura Watches ↗
-                </a>
+                <div class="inline-flex items-center justify-end gap-1.5">
+                    <a href="https://www.sakurawatches.com/seiko-selection-sbtm323" target="_blank" rel="noopener"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
+                       Voir chez Sakura Watches ↗
+                    </a>
+                    <button onclick="removeInvalidLink(&quot;seiko-solar-radio-sbtm323&quot;, &quot;https://www.sakurawatches.com/seiko-selection-sbtm323&quot;, &quot;Sakura Watches&quot;)"
+                       class="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs transition"
+                       title="Signaler et supprimer ce lien s'il est invalide ou expiré">
+                       🗑️
+                    </button>
+                </div>
             </td>
         </tr>
         
-        <tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition">
+        <tr data-offer-url="https://www.amazon.fr/dp/B00WG04A1M" class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition">
             <td class="py-3.5 px-4 font-bold text-amber-600 dark:text-amber-400">#5</td>
             <td class="py-3.5 px-4">
                 <div class="font-semibold text-slate-900 dark:text-white">Citizen Promaster Sky Eco-Drive AT8110-61E</div>
@@ -273,10 +357,17 @@
                 </div>
             </td>
             <td class="py-3.5 px-4 text-right">
-                <a href="https://www.amazon.fr/dp/B00WG04A1M" target="_blank" rel="noopener"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
-                   Voir chez Amazon FR ↗
-                </a>
+                <div class="inline-flex items-center justify-end gap-1.5">
+                    <a href="https://www.amazon.fr/dp/B00WG04A1M" target="_blank" rel="noopener"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
+                       Voir chez Amazon FR ↗
+                    </a>
+                    <button onclick="removeInvalidLink(&quot;citizen-promaster-as4020&quot;, &quot;https://www.amazon.fr/dp/B00WG04A1M&quot;, &quot;Amazon FR&quot;)"
+                       class="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs transition"
+                       title="Signaler et supprimer ce lien s'il est invalide ou expiré">
+                       🗑️
+                    </button>
+                </div>
             </td>
         </tr>
         
@@ -304,7 +395,7 @@
 
         <!-- Detailed Cards per Watch -->
         <section class="mb-10">
-            <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-4">🔍 Détail des Offres par Montre</h2>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-4">🔍 Détail des Offres par Montre (avec suppression des liens invalides)</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
         <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between shadow-lg transition-colors">
@@ -334,48 +425,63 @@
                 <div class="space-y-2 mb-4">
                     <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Offres Marchands Surveillées</div>
                     
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80">
+                <div data-offer-url="https://www.amazon.fr/dp/B09CGR4FFM" class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 transition">
                     <div>
                         <span class="font-medium text-slate-800 dark:text-slate-200 text-sm">Amazon FR</span>
                         <span class="ml-2"><span class="text-emerald-600 dark:text-emerald-400 text-xs">● En stock</span></span>
                         
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
+                    <div class="flex items-center gap-2">
+                        <div class="text-right mr-1">
                             <span class="font-bold text-slate-900 dark:text-white">94.90 €</span>
                             <span class="line-through text-xs text-slate-400 dark:text-slate-500 ml-1">149.00 €</span>
                         </div>
                         <a href="https://www.amazon.fr/dp/B09CGR4FFM" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 font-semibold transition">Lien ↗</a>
+                        <button onclick="removeInvalidLink(&quot;casio-gwm5610u&quot;, &quot;https://www.amazon.fr/dp/B09CGR4FFM&quot;, &quot;Amazon FR&quot;)"
+                            class="px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs transition"
+                            title="Supprimer ce lien invalide">
+                            🗑️
+                        </button>
                     </div>
                 </div>
                 
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80">
+                <div data-offer-url="https://ocarat.com/montre-g-shock-origin-gw-m5610u-1er-casio-79831.html" class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 transition">
                     <div>
                         <span class="font-medium text-slate-800 dark:text-slate-200 text-sm">Ocarat</span>
                         <span class="ml-2"><span class="text-emerald-600 dark:text-emerald-400 text-xs">● En stock</span></span>
                         <span class="ml-2 px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 text-[10px] font-mono">Code: BFWATCH10</span>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
+                    <div class="flex items-center gap-2">
+                        <div class="text-right mr-1">
                             <span class="font-bold text-slate-900 dark:text-white">119.00 €</span>
                             <span class="line-through text-xs text-slate-400 dark:text-slate-500 ml-1">149.00 €</span>
                         </div>
                         <a href="https://ocarat.com/montre-g-shock-origin-gw-m5610u-1er-casio-79831.html" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 font-semibold transition">Lien ↗</a>
+                        <button onclick="removeInvalidLink(&quot;casio-gwm5610u&quot;, &quot;https://ocarat.com/montre-g-shock-origin-gw-m5610u-1er-casio-79831.html&quot;, &quot;Ocarat&quot;)"
+                            class="px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs transition"
+                            title="Supprimer ce lien invalide">
+                            🗑️
+                        </button>
                     </div>
                 </div>
                 
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80">
+                <div data-offer-url="https://www.montresandco.com/montre-casio-g-shock-gw-m5610u-1er-p-74248.html" class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 transition">
                     <div>
                         <span class="font-medium text-slate-800 dark:text-slate-200 text-sm">Montres &amp; Co</span>
                         <span class="ml-2"><span class="text-emerald-600 dark:text-emerald-400 text-xs">● En stock</span></span>
                         
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
+                    <div class="flex items-center gap-2">
+                        <div class="text-right mr-1">
                             <span class="font-bold text-slate-900 dark:text-white">124.00 €</span>
                             <span class="line-through text-xs text-slate-400 dark:text-slate-500 ml-1">149.00 €</span>
                         </div>
                         <a href="https://www.montresandco.com/montre-casio-g-shock-gw-m5610u-1er-p-74248.html" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 font-semibold transition">Lien ↗</a>
+                        <button onclick="removeInvalidLink(&quot;casio-gwm5610u&quot;, &quot;https://www.montresandco.com/montre-casio-g-shock-gw-m5610u-1er-p-74248.html&quot;, &quot;Montres &amp; Co&quot;)"
+                            class="px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs transition"
+                            title="Supprimer ce lien invalide">
+                            🗑️
+                        </button>
                     </div>
                 </div>
                 
@@ -415,33 +521,43 @@
                 <div class="space-y-2 mb-4">
                     <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Offres Marchands Surveillées</div>
                     
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80">
+                <div data-offer-url="https://www.amazon.fr/dp/B07571V4V5" class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 transition">
                     <div>
                         <span class="font-medium text-slate-800 dark:text-slate-200 text-sm">Amazon FR</span>
                         <span class="ml-2"><span class="text-emerald-600 dark:text-emerald-400 text-xs">● En stock</span></span>
                         
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
+                    <div class="flex items-center gap-2">
+                        <div class="text-right mr-1">
                             <span class="font-bold text-slate-900 dark:text-white">184.50 €</span>
                             <span class="line-through text-xs text-slate-400 dark:text-slate-500 ml-1">279.00 €</span>
                         </div>
                         <a href="https://www.amazon.fr/dp/B07571V4V5" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 font-semibold transition">Lien ↗</a>
+                        <button onclick="removeInvalidLink(&quot;casio-lineage-titanium&quot;, &quot;https://www.amazon.fr/dp/B07571V4V5&quot;, &quot;Amazon FR&quot;)"
+                            class="px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs transition"
+                            title="Supprimer ce lien invalide">
+                            🗑️
+                        </button>
                     </div>
                 </div>
                 
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80">
+                <div data-offer-url="https://ocarat.com/montre-lineage-lcw-m100tse-1aer-casio-48155.html" class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 transition">
                     <div>
                         <span class="font-medium text-slate-800 dark:text-slate-200 text-sm">Ocarat</span>
                         <span class="ml-2"><span class="text-emerald-600 dark:text-emerald-400 text-xs">● En stock</span></span>
                         
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
+                    <div class="flex items-center gap-2">
+                        <div class="text-right mr-1">
                             <span class="font-bold text-slate-900 dark:text-white">215.00 €</span>
                             <span class="line-through text-xs text-slate-400 dark:text-slate-500 ml-1">279.00 €</span>
                         </div>
                         <a href="https://ocarat.com/montre-lineage-lcw-m100tse-1aer-casio-48155.html" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 font-semibold transition">Lien ↗</a>
+                        <button onclick="removeInvalidLink(&quot;casio-lineage-titanium&quot;, &quot;https://ocarat.com/montre-lineage-lcw-m100tse-1aer-casio-48155.html&quot;, &quot;Ocarat&quot;)"
+                            class="px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs transition"
+                            title="Supprimer ce lien invalide">
+                            🗑️
+                        </button>
                     </div>
                 </div>
                 
@@ -481,33 +597,43 @@
                 <div class="space-y-2 mb-4">
                     <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Offres Marchands Surveillées</div>
                     
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80">
+                <div data-offer-url="https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html" class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 transition">
                     <div>
                         <span class="font-medium text-slate-800 dark:text-slate-200 text-sm">Ocarat</span>
                         <span class="ml-2"><span class="text-emerald-600 dark:text-emerald-400 text-xs">● En stock</span></span>
                         <span class="ml-2 px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 text-[10px] font-mono">Code: BLACKCITIZEN</span>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
+                    <div class="flex items-center gap-2">
+                        <div class="text-right mr-1">
                             <span class="font-bold text-slate-900 dark:text-white">264.00 €</span>
                             <span class="line-through text-xs text-slate-400 dark:text-slate-500 ml-1">399.00 €</span>
                         </div>
                         <a href="https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 font-semibold transition">Lien ↗</a>
+                        <button onclick="removeInvalidLink(&quot;citizen-ecodrive-cb0250&quot;, &quot;https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html&quot;, &quot;Ocarat&quot;)"
+                            class="px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs transition"
+                            title="Supprimer ce lien invalide">
+                            🗑️
+                        </button>
                     </div>
                 </div>
                 
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80">
+                <div data-offer-url="https://www.amazon.fr/dp/B09WVH883J" class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 transition">
                     <div>
                         <span class="font-medium text-slate-800 dark:text-slate-200 text-sm">Amazon FR</span>
                         <span class="ml-2"><span class="text-emerald-600 dark:text-emerald-400 text-xs">● En stock</span></span>
                         
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
+                    <div class="flex items-center gap-2">
+                        <div class="text-right mr-1">
                             <span class="font-bold text-slate-900 dark:text-white">279.00 €</span>
                             <span class="line-through text-xs text-slate-400 dark:text-slate-500 ml-1">399.00 €</span>
                         </div>
                         <a href="https://www.amazon.fr/dp/B09WVH883J" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 font-semibold transition">Lien ↗</a>
+                        <button onclick="removeInvalidLink(&quot;citizen-ecodrive-cb0250&quot;, &quot;https://www.amazon.fr/dp/B09WVH883J&quot;, &quot;Amazon FR&quot;)"
+                            class="px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs transition"
+                            title="Supprimer ce lien invalide">
+                            🗑️
+                        </button>
                     </div>
                 </div>
                 
@@ -547,33 +673,43 @@
                 <div class="space-y-2 mb-4">
                     <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Offres Marchands Surveillées</div>
                     
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80">
+                <div data-offer-url="https://www.sakurawatches.com/seiko-selection-sbtm323" class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 transition">
                     <div>
                         <span class="font-medium text-slate-800 dark:text-slate-200 text-sm">Sakura Watches</span>
                         <span class="ml-2"><span class="text-emerald-600 dark:text-emerald-400 text-xs">● En stock</span></span>
                         
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
+                    <div class="flex items-center gap-2">
+                        <div class="text-right mr-1">
                             <span class="font-bold text-slate-900 dark:text-white">272.00 €</span>
                             <span class="line-through text-xs text-slate-400 dark:text-slate-500 ml-1">395.00 €</span>
                         </div>
                         <a href="https://www.sakurawatches.com/seiko-selection-sbtm323" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 font-semibold transition">Lien ↗</a>
+                        <button onclick="removeInvalidLink(&quot;seiko-solar-radio-sbtm323&quot;, &quot;https://www.sakurawatches.com/seiko-selection-sbtm323&quot;, &quot;Sakura Watches&quot;)"
+                            class="px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs transition"
+                            title="Supprimer ce lien invalide">
+                            🗑️
+                        </button>
                     </div>
                 </div>
                 
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80">
+                <div data-offer-url="https://www.chrono24.fr/search/index.htm?query=SBTM323" class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 transition">
                     <div>
                         <span class="font-medium text-slate-800 dark:text-slate-200 text-sm">Chrono24</span>
                         <span class="ml-2"><span class="text-emerald-600 dark:text-emerald-400 text-xs">● En stock</span></span>
                         
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
+                    <div class="flex items-center gap-2">
+                        <div class="text-right mr-1">
                             <span class="font-bold text-slate-900 dark:text-white">298.00 €</span>
                             <span class="line-through text-xs text-slate-400 dark:text-slate-500 ml-1">395.00 €</span>
                         </div>
                         <a href="https://www.chrono24.fr/search/index.htm?query=SBTM323" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 font-semibold transition">Lien ↗</a>
+                        <button onclick="removeInvalidLink(&quot;seiko-solar-radio-sbtm323&quot;, &quot;https://www.chrono24.fr/search/index.htm?query=SBTM323&quot;, &quot;Chrono24&quot;)"
+                            class="px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs transition"
+                            title="Supprimer ce lien invalide">
+                            🗑️
+                        </button>
                     </div>
                 </div>
                 
@@ -613,33 +749,43 @@
                 <div class="space-y-2 mb-4">
                     <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Offres Marchands Surveillées</div>
                     
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80">
+                <div data-offer-url="https://www.amazon.fr/dp/B00WG04A1M" class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 transition">
                     <div>
                         <span class="font-medium text-slate-800 dark:text-slate-200 text-sm">Amazon FR</span>
                         <span class="ml-2"><span class="text-emerald-600 dark:text-emerald-400 text-xs">● En stock</span></span>
                         
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
+                    <div class="flex items-center gap-2">
+                        <div class="text-right mr-1">
                             <span class="font-bold text-slate-900 dark:text-white">349.00 €</span>
                             <span class="line-through text-xs text-slate-400 dark:text-slate-500 ml-1">529.00 €</span>
                         </div>
                         <a href="https://www.amazon.fr/dp/B00WG04A1M" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 font-semibold transition">Lien ↗</a>
+                        <button onclick="removeInvalidLink(&quot;citizen-promaster-as4020&quot;, &quot;https://www.amazon.fr/dp/B00WG04A1M&quot;, &quot;Amazon FR&quot;)"
+                            class="px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs transition"
+                            title="Supprimer ce lien invalide">
+                            🗑️
+                        </button>
                     </div>
                 </div>
                 
-                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80">
+                <div data-offer-url="https://ocarat.com/montre-chrono-radio-controlled-at8110-61e-citizen-42191.html" class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 transition">
                     <div>
                         <span class="font-medium text-slate-800 dark:text-slate-200 text-sm">Ocarat</span>
                         <span class="ml-2"><span class="text-emerald-600 dark:text-emerald-400 text-xs">● En stock</span></span>
                         
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
+                    <div class="flex items-center gap-2">
+                        <div class="text-right mr-1">
                             <span class="font-bold text-slate-900 dark:text-white">369.00 €</span>
                             <span class="line-through text-xs text-slate-400 dark:text-slate-500 ml-1">459.00 €</span>
                         </div>
                         <a href="https://ocarat.com/montre-chrono-radio-controlled-at8110-61e-citizen-42191.html" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 font-semibold transition">Lien ↗</a>
+                        <button onclick="removeInvalidLink(&quot;citizen-promaster-as4020&quot;, &quot;https://ocarat.com/montre-chrono-radio-controlled-at8110-61e-citizen-42191.html&quot;, &quot;Ocarat&quot;)"
+                            class="px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs transition"
+                            title="Supprimer ce lien invalide">
+                            🗑️
+                        </button>
                     </div>
                 </div>
                 
@@ -663,7 +809,7 @@
             </div>
             <div class="space-y-3">
                 
-                <div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between gap-4 shadow-sm transition-colors">
+                <div data-offer-url="https://www.dealabs.com/search?q=GW-M5610U-1ER" class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between gap-4 shadow-sm transition-colors">
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="text-xs font-bold text-amber-600 dark:text-amber-400">GW-M5610U-1ER</span>
@@ -672,16 +818,21 @@
                         </div>
                         <div class="text-sm font-semibold text-slate-900 dark:text-white mt-1">Casio G-Shock GW-M5610U-1ER Tough Solar Multi-Band 6</div>
                     </div>
-                    <div class="flex items-center gap-3 shrink-0">
+                    <div class="flex items-center gap-2.5 shrink-0">
                         <div class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">89.99 €</div>
                         <a href="https://www.dealabs.com/search?q=GW-M5610U-1ER" target="_blank" rel="noopener"
                            class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition">
                            Voir l'offre ↗
                         </a>
+                        <button onclick="removeInvalidLink(&quot;casio-gwm5610u&quot;, &quot;https://www.dealabs.com/search?q=GW-M5610U-1ER&quot;, &quot;Dealabs \u2022 Amazon DE&quot;)"
+                           class="px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs transition"
+                           title="Supprimer cette offre si le lien est invalide">
+                           🗑️
+                        </button>
                     </div>
                 </div>
                 
-                <div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between gap-4 shadow-sm transition-colors">
+                <div data-offer-url="https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER" class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between gap-4 shadow-sm transition-colors">
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="text-xs font-bold text-amber-600 dark:text-amber-400">LCW-M100TSE-1AER</span>
@@ -690,12 +841,17 @@
                         </div>
                         <div class="text-sm font-semibold text-slate-900 dark:text-white mt-1">Casio Lineage LCW-M100TSE-1AER Titane Saphir</div>
                     </div>
-                    <div class="flex items-center gap-3 shrink-0">
+                    <div class="flex items-center gap-2.5 shrink-0">
                         <div class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">179.90 €</div>
                         <a href="https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER" target="_blank" rel="noopener"
                            class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition">
                            Voir l'offre ↗
                         </a>
+                        <button onclick="removeInvalidLink(&quot;casio-lineage-titanium&quot;, &quot;https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER&quot;, &quot;Idealo Comparateur&quot;)"
+                           class="px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs transition"
+                           title="Supprimer cette offre si le lien est invalide">
+                           🗑️
+                        </button>
                     </div>
                 </div>
                 
@@ -708,11 +864,303 @@
     </div>
 
     <script>
-        const CHART_DATA = {"casio-gwm5610u": {"name": "Casio G-Shock GW-M5610U-1ER", "reference": "GW-M5610U-1ER", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30", "11-17 23:47"], "best_prices": [129.0, 125.0, 119.0, 115.0, 109.0, 104.9, 89.99, 89.99], "target_line": [99.0, 99.0, 99.0, 99.0, 99.0, 99.0, 99.0, 99.0], "msrp_line": [149.0, 149.0, 149.0, 149.0, 149.0, 149.0, 149.0, 149.0]}, "casio-lineage-titanium": {"name": "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)", "reference": "LCW-M100TSE-1AER", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30", "11-17 23:47"], "best_prices": [249.0, 239.0, 229.0, 219.0, 209.0, 199.0, 179.9, 179.9], "target_line": [189.0, 189.0, 189.0, 189.0, 189.0, 189.0, 189.0, 189.0], "msrp_line": [279.0, 279.0, 279.0, 279.0, 279.0, 279.0, 279.0, 279.0]}, "citizen-ecodrive-cb0250": {"name": "Citizen Eco-Drive Radio-Controlled CB0250-84E", "reference": "CB0250-84E", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30", "11-17 23:47"], "best_prices": [339.0, 329.0, 315.0, 299.0, 289.0, 279.0, 264.0, 264.0], "target_line": [269.0, 269.0, 269.0, 269.0, 269.0, 269.0, 269.0, 269.0], "msrp_line": [399.0, 399.0, 399.0, 399.0, 399.0, 399.0, 399.0, 399.0]}, "seiko-solar-radio-sbtm323": {"name": "Seiko Selection Solar Radio-Controlled SBTM323", "reference": "SBTM323", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30", "11-17 23:47"], "best_prices": [325.0, 319.0, 310.0, 299.0, 295.0, 289.0, 272.0, 272.0], "target_line": [279.0, 279.0, 279.0, 279.0, 279.0, 279.0, 279.0, 279.0], "msrp_line": [395.0, 395.0, 395.0, 395.0, 395.0, 395.0, 395.0, 395.0]}, "citizen-promaster-as4020": {"name": "Citizen Promaster Sky Eco-Drive AT8110-61E", "reference": "AT8110-61E", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30", "11-17 23:47"], "best_prices": [329.0, 335.0, 349.0, 359.0, 355.0, 349.0, 349.0, 349.0], "target_line": [319.0, 319.0, 319.0, 319.0, 319.0, 319.0, 319.0, 319.0], "msrp_line": [459.0, 459.0, 459.0, 459.0, 459.0, 459.0, 459.0, 459.0]}};
-        const LATEST_SUMMARY = {"updated_at": "2026-11-17T23:47:42.795021+00:00", "updated_at_human": "17/11/2026 à 23:47 UTC", "notification_title": "🔥 OBJECTIF ATTEINT : Casio G-Shock GW-M5610U-1ER à 89.99 € !", "notification_body": "• GW-M5610U-1ER : 89.99 € chez Dealabs • Amazon DE (-40% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100)\n• LCW-M100TSE-1AER : 179.90 € chez Idealo Comparateur (-36% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100)\n• CB0250-84E : 264.00 € chez Ocarat (-34% vs neuf, ✅ 5€ sous ta cible, Score BF 100/100)\n• SBTM323 : 272.00 € chez Sakura Watches (-31% vs neuf, ✅ 7€ sous ta cible, Score BF 100/100)\n• AT8110-61E : 349.00 € chez Amazon FR (-24% vs neuf, cible 319€ (+30€), Score BF 50/100)", "click_url": "https://www.dealabs.com/search?q=GW-M5610U-1ER", "ntfy_topic": "bf-montres-solaires-2026", "watches": [{"id": "casio-gwm5610u", "name": "Casio G-Shock GW-M5610U-1ER", "reference": "GW-M5610U-1ER", "best_price": 89.99, "best_merchant": "Dealabs • Amazon DE", "best_url": "https://www.dealabs.com/search?q=GW-M5610U-1ER", "target_price": 99.0, "bf_score": 100, "verdict": "🔥 Deal Black Friday Exceptionnel"}, {"id": "casio-lineage-titanium", "name": "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)", "reference": "LCW-M100TSE-1AER", "best_price": 179.9, "best_merchant": "Idealo Comparateur", "best_url": "https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER", "target_price": 189.0, "bf_score": 100, "verdict": "🔥 Deal Black Friday Exceptionnel"}, {"id": "citizen-ecodrive-cb0250", "name": "Citizen Eco-Drive Radio-Controlled CB0250-84E", "reference": "CB0250-84E", "best_price": 264.0, "best_merchant": "Ocarat", "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html", "target_price": 269.0, "bf_score": 100, "verdict": "🔥 Deal Black Friday Exceptionnel"}, {"id": "seiko-solar-radio-sbtm323", "name": "Seiko Selection Solar Radio-Controlled SBTM323", "reference": "SBTM323", "best_price": 272.0, "best_merchant": "Sakura Watches", "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323", "target_price": 279.0, "bf_score": 100, "verdict": "🔥 Deal Black Friday Exceptionnel"}, {"id": "citizen-promaster-as4020", "name": "Citizen Promaster Sky Eco-Drive AT8110-61E", "reference": "AT8110-61E", "best_price": 349.0, "best_merchant": "Amazon FR", "best_url": "https://www.amazon.fr/dp/B00WG04A1M", "target_price": 319.0, "bf_score": 50, "verdict": "⚠️ Fausse Promo détectée"}]};
+        const CHART_DATA = {"casio-gwm5610u": {"name": "Casio G-Shock GW-M5610U-1ER", "reference": "GW-M5610U-1ER", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30", "11-17 23:47", "11-17 23:52"], "best_prices": [129.0, 125.0, 119.0, 115.0, 109.0, 104.9, 89.99, 89.99, 89.99], "target_line": [99.0, 99.0, 99.0, 99.0, 99.0, 99.0, 99.0, 99.0, 99.0], "msrp_line": [149.0, 149.0, 149.0, 149.0, 149.0, 149.0, 149.0, 149.0, 149.0]}, "casio-lineage-titanium": {"name": "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)", "reference": "LCW-M100TSE-1AER", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30", "11-17 23:47", "11-17 23:52"], "best_prices": [249.0, 239.0, 229.0, 219.0, 209.0, 199.0, 179.9, 179.9, 179.9], "target_line": [189.0, 189.0, 189.0, 189.0, 189.0, 189.0, 189.0, 189.0, 189.0], "msrp_line": [279.0, 279.0, 279.0, 279.0, 279.0, 279.0, 279.0, 279.0, 279.0]}, "citizen-ecodrive-cb0250": {"name": "Citizen Eco-Drive Radio-Controlled CB0250-84E", "reference": "CB0250-84E", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30", "11-17 23:47", "11-17 23:52"], "best_prices": [339.0, 329.0, 315.0, 299.0, 289.0, 279.0, 264.0, 264.0, 264.0], "target_line": [269.0, 269.0, 269.0, 269.0, 269.0, 269.0, 269.0, 269.0, 269.0], "msrp_line": [399.0, 399.0, 399.0, 399.0, 399.0, 399.0, 399.0, 399.0, 399.0]}, "seiko-solar-radio-sbtm323": {"name": "Seiko Selection Solar Radio-Controlled SBTM323", "reference": "SBTM323", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30", "11-17 23:47", "11-17 23:52"], "best_prices": [325.0, 319.0, 310.0, 299.0, 295.0, 289.0, 272.0, 272.0, 272.0], "target_line": [279.0, 279.0, 279.0, 279.0, 279.0, 279.0, 279.0, 279.0, 279.0], "msrp_line": [395.0, 395.0, 395.0, 395.0, 395.0, 395.0, 395.0, 395.0, 395.0]}, "citizen-promaster-as4020": {"name": "Citizen Promaster Sky Eco-Drive AT8110-61E", "reference": "AT8110-61E", "labels": ["11-11 23:30", "11-12 23:30", "11-13 23:30", "11-14 23:30", "11-15 23:30", "11-16 23:30", "11-17 23:30", "11-17 23:47", "11-17 23:52"], "best_prices": [329.0, 335.0, 349.0, 359.0, 355.0, 349.0, 349.0, 349.0, 349.0], "target_line": [319.0, 319.0, 319.0, 319.0, 319.0, 319.0, 319.0, 319.0, 319.0], "msrp_line": [459.0, 459.0, 459.0, 459.0, 459.0, 459.0, 459.0, 459.0, 459.0]}};
+        const LATEST_SUMMARY = {"updated_at": "2026-11-17T23:52:22.879083+00:00", "updated_at_human": "17/11/2026 à 23:52 UTC", "notification_title": "🔥 OBJECTIF ATTEINT : Casio G-Shock GW-M5610U-1ER à 89.99 € !", "notification_body": "• GW-M5610U-1ER : 89.99 € chez Dealabs • Amazon DE (-40% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100)\n• LCW-M100TSE-1AER : 179.90 € chez Idealo Comparateur (-36% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100)\n• CB0250-84E : 264.00 € chez Ocarat (-34% vs neuf, ✅ 5€ sous ta cible, Score BF 100/100)\n• SBTM323 : 272.00 € chez Sakura Watches (-31% vs neuf, ✅ 7€ sous ta cible, Score BF 100/100)\n• AT8110-61E : 349.00 € chez Amazon FR (-24% vs neuf, cible 319€ (+30€), Score BF 50/100)", "click_url": "https://www.dealabs.com/search?q=GW-M5610U-1ER", "ntfy_topic": "bf-montres-solaires-2026", "ntfy_server": "https://ntfy.sh", "watches": [{"id": "casio-gwm5610u", "name": "Casio G-Shock GW-M5610U-1ER", "reference": "GW-M5610U-1ER", "best_price": 89.99, "best_merchant": "Dealabs • Amazon DE", "best_url": "https://www.dealabs.com/search?q=GW-M5610U-1ER", "target_price": 99.0, "bf_score": 100, "verdict": "🔥 Deal Black Friday Exceptionnel"}, {"id": "casio-lineage-titanium", "name": "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)", "reference": "LCW-M100TSE-1AER", "best_price": 179.9, "best_merchant": "Idealo Comparateur", "best_url": "https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER", "target_price": 189.0, "bf_score": 100, "verdict": "🔥 Deal Black Friday Exceptionnel"}, {"id": "citizen-ecodrive-cb0250", "name": "Citizen Eco-Drive Radio-Controlled CB0250-84E", "reference": "CB0250-84E", "best_price": 264.0, "best_merchant": "Ocarat", "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html", "target_price": 269.0, "bf_score": 100, "verdict": "🔥 Deal Black Friday Exceptionnel"}, {"id": "seiko-solar-radio-sbtm323", "name": "Seiko Selection Solar Radio-Controlled SBTM323", "reference": "SBTM323", "best_price": 272.0, "best_merchant": "Sakura Watches", "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323", "target_price": 279.0, "bf_score": 100, "verdict": "🔥 Deal Black Friday Exceptionnel"}, {"id": "citizen-promaster-as4020", "name": "Citizen Promaster Sky Eco-Drive AT8110-61E", "reference": "AT8110-61E", "best_price": 349.0, "best_merchant": "Amazon FR", "best_url": "https://www.amazon.fr/dp/B00WG04A1M", "target_price": 319.0, "bf_score": 50, "verdict": "⚠️ Fausse Promo détectée"}]};
+        const REMOVED_URLS_KEY = 'bf_watch_removed_urls';
         let priceChart = null;
         let currentWatchId = null;
         let lastSeenTimestamp = LATEST_SUMMARY.updated_at;
+        let swRegistration = null;
+
+        // Register Service Worker if hosted over HTTP/HTTPS (GitHub Pages)
+        if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.protocol === 'http:')) {
+            navigator.serviceWorker.register('sw.js').then((reg) => {
+                swRegistration = reg;
+            }).catch(() => {});
+        }
+
+        function isInCrossOriginIframe() {
+            try {
+                return window.self !== window.top;
+            } catch (e) {
+                return true;
+            }
+        }
+
+        // Visual Chrome-style notification banner + optional Web Audio chime
+        function showVisualChromeNotification(title, body, clickUrl, statusNote) {
+            const container = document.getElementById('chromeToastContainer');
+            if (!container) return;
+
+            // Play subtle notification chime
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) {
+                    const ctx = new AudioCtx();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12); // A5
+                    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.45);
+                }
+            } catch (e) {}
+
+            const toast = document.createElement('div');
+            toast.className = 'pointer-events-auto rounded-2xl bg-slate-900/95 dark:bg-slate-900 border-2 border-amber-400/80 text-white p-4 shadow-2xl transition-all duration-300 transform translate-y-0';
+            const firstLines = (body || '').split('\n').slice(0, 3).join('<br/>');
+            const noteHtml = statusNote ? `<div class="mt-2 pt-2 border-t border-slate-800 text-[11px] text-sky-300">${statusNote}</div>` : '';
+
+            toast.innerHTML = `
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
+                        <span>🔔 Notification Google Chrome</span>
+                    </div>
+                    <button class="text-slate-400 hover:text-white text-sm font-bold" onclick="this.closest('.pointer-events-auto').remove()">✕</button>
+                </div>
+                <div class="font-bold text-sm text-white mt-1">${title}</div>
+                <div class="text-xs text-slate-300 mt-1.5 leading-relaxed">${firstLines}</div>
+                ${noteHtml}
+            `;
+            if (clickUrl) {
+                toast.style.cursor = 'pointer';
+                toast.addEventListener('click', (ev) => {
+                    if (ev.target.tagName.toLowerCase() === 'button') return;
+                    window.open(clickUrl, '_blank');
+                });
+            }
+            container.prepend(toast);
+            setTimeout(() => {
+                if (toast.parentNode) toast.remove();
+            }, 10000);
+        }
+
+        function updateChromePermUI() {
+            const badge = document.getElementById('chromePermStatus');
+            const btn = document.getElementById('btnChromeNotif');
+            if (!badge || !btn) return;
+
+            if (isInCrossOriginIframe()) {
+                badge.textContent = 'Aperçu intégré (Notif visuelle + Web Push ntfy.sh actifs)';
+                badge.className = 'px-2 py-0.5 rounded bg-sky-500/20 text-sky-700 dark:text-sky-300';
+                return;
+            }
+            if (!('Notification' in window)) {
+                badge.textContent = 'Mode Notification Visuelle + Web Push ntfy.sh';
+                return;
+            }
+            if (Notification.permission === 'granted') {
+                badge.textContent = '✅ Notifications Chrome natives actives';
+                badge.className = 'px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300';
+                btn.textContent = '🔔 Notifications Chrome Activées';
+            } else if (Notification.permission === 'denied') {
+                badge.textContent = '⚠️ Permission native bloquée (Toast visuel + ntfy.sh actifs)';
+                badge.className = 'px-2 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300';
+            } else {
+                badge.textContent = 'Prêt à activer (Clique sur Activer ou Tester)';
+            }
+        }
+
+        async function enableBrowserNotifications() {
+            if (isInCrossOriginIframe()) {
+                showVisualChromeNotification(
+                    LATEST_SUMMARY.notification_title,
+                    LATEST_SUMMARY.notification_body,
+                    LATEST_SUMMARY.click_url,
+                    '💡 Tu es dans l\'aperçu intégré : les iframes bloquent la popup système OS. Ouvre la page GitHub Pages dans un onglet Chrome ou abonne-toi à ntfy.sh pour la popup système !'
+                );
+                return;
+            }
+            if (!('Notification' in window)) {
+                showVisualChromeNotification(
+                    LATEST_SUMMARY.notification_title,
+                    LATEST_SUMMARY.notification_body,
+                    LATEST_SUMMARY.click_url,
+                    'ℹ️ Ton navigateur utilise le mode d\'alerte visuel intégré.'
+                );
+                return;
+            }
+            try {
+                const perm = await Notification.requestPermission();
+                updateChromePermUI();
+                await sendTestChromeNotification();
+            } catch (e) {
+                await sendTestChromeNotification();
+            }
+        }
+
+        async function triggerNativeOrSwNotification(title, body, clickUrl) {
+            if (!('Notification' in window) || Notification.permission !== 'granted' || isInCrossOriginIframe()) {
+                return false;
+            }
+            try {
+                if (swRegistration && swRegistration.showNotification) {
+                    await swRegistration.showNotification(title, {
+                        body: body,
+                        tag: 'bf-watch-comparator-' + Date.now(),
+                        data: { url: clickUrl }
+                    });
+                    return true;
+                }
+            } catch (e) {}
+            try {
+                const n = new Notification(title, {
+                    body: body,
+                    tag: 'bf-watch-comparator-' + Date.now()
+                });
+                n.onclick = () => {
+                    window.focus();
+                    if (clickUrl) window.open(clickUrl, '_blank');
+                };
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        async function sendTestChromeNotification() {
+            // 1. If permission is 'default' and not in iframe, request it first
+            if ('Notification' in window && Notification.permission === 'default' && !isInCrossOriginIframe()) {
+                try {
+                    await Notification.requestPermission();
+                    updateChromePermUI();
+                } catch (e) {}
+            }
+
+            // 2. Try native OS Chrome notification (works on GitHub Pages / localhost)
+            const nativeShown = await triggerNativeOrSwNotification(
+                LATEST_SUMMARY.notification_title,
+                LATEST_SUMMARY.notification_body,
+                LATEST_SUMMARY.click_url
+            );
+
+            // 3. Also send real Web Push to ntfy.sh topic from browser so subscribed Chrome gets it even in background
+            let ntfySent = false;
+            if (LATEST_SUMMARY.ntfy_topic && LATEST_SUMMARY.ntfy_server) {
+                try {
+                    const res = await fetch(LATEST_SUMMARY.ntfy_server + '/' + LATEST_SUMMARY.ntfy_topic, {
+                        method: 'POST',
+                        body: LATEST_SUMMARY.notification_body,
+                        headers: {
+                            'Title': 'Test Radar Black Friday Montres',
+                            'Priority': 'high',
+                            'Tags': 'watch,fire'
+                        }
+                    });
+                    ntfySent = res.ok;
+                } catch (e) {}
+            }
+
+            // 4. Always show visual Chrome notification toast so user gets immediate feedback in all contexts
+            let statusNote = '';
+            if (nativeShown && ntfySent) {
+                statusNote = '✅ Notification système Chrome + Web Push ntfy.sh (' + LATEST_SUMMARY.ntfy_topic + ') envoyés !';
+            } else if (nativeShown) {
+                statusNote = '✅ Notification système Chrome affichée !';
+            } else if (ntfySent) {
+                statusNote = '📲 Web Push envoyé sur ntfy.sh/' + LATEST_SUMMARY.ntfy_topic + ' ! (Ouvre le lien GitHub Pages hors aperçu pour la popup native de l\'onglet)';
+            } else if (isInCrossOriginIframe()) {
+                statusNote = '💡 Aperçu intégré : clique sur la carte "Radar Black Friday — Tableau de Bord GitHub Pages" pour autoriser les notifications natives Chrome.';
+            } else {
+                statusNote = '🔔 Aperçu de ta notification Chrome (Vérifie que les notifications sont autorisées à gauche de l\'URL dans Chrome).';
+            }
+
+            showVisualChromeNotification(
+                LATEST_SUMMARY.notification_title,
+                LATEST_SUMMARY.notification_body,
+                LATEST_SUMMARY.click_url,
+                statusNote
+            );
+        }
+
+        // Invalid link removal management
+        function getRemovedUrls() {
+            try {
+                const raw = localStorage.getItem(REMOVED_URLS_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveRemovedUrls(list) {
+            try {
+                localStorage.setItem(REMOVED_URLS_KEY, JSON.stringify(list));
+            } catch (e) {}
+        }
+
+        function applyRemovedUrlsFilter() {
+            const removed = new Set(getRemovedUrls());
+            const elements = document.querySelectorAll('[data-offer-url]');
+            elements.forEach((el) => {
+                const url = el.getAttribute('data-offer-url');
+                if (url && removed.has(url)) {
+                    el.classList.add('hidden');
+                } else {
+                    el.classList.remove('hidden');
+                }
+            });
+            const restoreBtn = document.getElementById('btnRestoreLinksBadge');
+            if (restoreBtn) {
+                if (removed.size > 0) {
+                    restoreBtn.classList.remove('hidden');
+                    restoreBtn.textContent = `🔄 Réafficher ${removed.size} lien(s) supprimé(s)`;
+                } else {
+                    restoreBtn.classList.add('hidden');
+                }
+            }
+        }
+
+        function removeInvalidLink(watchId, url, merchant) {
+            const list = getRemovedUrls();
+            if (!list.includes(url)) {
+                list.push(url);
+                saveRemovedUrls(list);
+            }
+            applyRemovedUrlsFilter();
+
+            const modal = document.getElementById('removeLinkModal');
+            const label = document.getElementById('removedMerchantLabel');
+            const cmd = document.getElementById('cliRemoveCmd');
+            if (label) label.textContent = `${merchant} (${url})`;
+            if (cmd) cmd.textContent = `python3 tracker.py remove-url --watch ${watchId} --url "${url}"`;
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closeRemoveModal() {
+            const modal = document.getElementById('removeLinkModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function copyCliCommand() {
+            const cmd = document.getElementById('cliRemoveCmd');
+            if (!cmd) return;
+            navigator.clipboard.writeText(cmd.textContent).then(() => {
+                showVisualChromeNotification(
+                    '📋 Commande copiée !',
+                    cmd.textContent,
+                    '',
+                    'Colle cette commande dans ton terminal pour retirer définitivement l\'URL de watches.yaml.'
+                );
+            }).catch(() => {});
+        }
+
+        function restoreRemovedLinks() {
+            saveRemovedUrls([]);
+            applyRemovedUrlsFilter();
+            closeRemoveModal();
+        }
 
         function isDarkMode() {
             return document.documentElement.classList.contains('dark');
@@ -735,10 +1183,10 @@
             const root = document.documentElement;
             if (root.classList.contains('dark')) {
                 root.classList.remove('dark');
-                localStorage.setItem('bf_watch_theme', 'light');
+                try { localStorage.setItem('bf_watch_theme', 'light'); } catch (e) {}
             } else {
                 root.classList.add('dark');
-                localStorage.setItem('bf_watch_theme', 'dark');
+                try { localStorage.setItem('bf_watch_theme', 'dark'); } catch (e) {}
             }
             updateThemeToggleButton();
             if (currentWatchId) {
@@ -824,53 +1272,6 @@
             });
         }
 
-        function updateChromePermUI() {
-            const badge = document.getElementById('chromePermStatus');
-            const btn = document.getElementById('btnChromeNotif');
-            if (!('Notification' in window)) {
-                badge.textContent = 'Non supporté par ce navigateur';
-                return;
-            }
-            if (Notification.permission === 'granted') {
-                badge.textContent = '✅ Notifications Chrome actives';
-                badge.className = 'px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300';
-                btn.textContent = '🔔 Notifications Chrome Activées';
-            } else if (Notification.permission === 'denied') {
-                badge.textContent = '❌ Bloqué dans les paramètres Chrome';
-                badge.className = 'px-2 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300';
-            }
-        }
-
-        async function enableBrowserNotifications() {
-            if (!('Notification' in window)) {
-                alert('Les notifications web ne sont pas supportées sur ce navigateur.');
-                return;
-            }
-            const perm = await Notification.requestPermission();
-            updateChromePermUI();
-            if (perm === 'granted') {
-                sendTestChromeNotification();
-            }
-        }
-
-        function sendTestChromeNotification() {
-            if (!('Notification' in window)) return;
-            if (Notification.permission !== 'granted') {
-                enableBrowserNotifications();
-                return;
-            }
-            const n = new Notification(LATEST_SUMMARY.notification_title, {
-                body: LATEST_SUMMARY.notification_body,
-                tag: 'bf-watch-comparator',
-            });
-            n.onclick = () => {
-                window.focus();
-                if (LATEST_SUMMARY.click_url) {
-                    window.open(LATEST_SUMMARY.click_url, '_blank');
-                }
-            };
-        }
-
         setInterval(async () => {
             try {
                 const res = await fetch('latest_summary.json?t=' + Date.now());
@@ -878,12 +1279,11 @@
                 const data = await res.json();
                 if (data.updated_at && data.updated_at !== lastSeenTimestamp) {
                     lastSeenTimestamp = data.updated_at;
-                    if ('Notification' in window && Notification.permission === 'granted') {
-                        new Notification(data.notification_title, {
-                            body: data.notification_body,
-                            tag: 'bf-watch-comparator-update'
-                        });
-                    }
+                    await triggerNativeOrSwNotification(
+                        data.notification_title,
+                        data.notification_body,
+                        data.click_url
+                    );
                     window.location.reload();
                 }
             } catch (e) {}
@@ -892,6 +1292,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             updateThemeToggleButton();
             updateChromePermUI();
+            applyRemovedUrlsFilter();
             const firstId = Object.keys(CHART_DATA)[0];
             if (firstId) selectWatchChart(firstId);
         });

@@ -5,6 +5,7 @@ Black Friday Solar Radio-Controlled Watch Price Comparator CLI & Orchestrator.
 Commands:
   python3 tracker.py run [--demo] [--no-notify]
   python3 tracker.py add-url --watch <watch_id> --url <url> [--merchant <name>]
+  python3 tracker.py remove-url --url <url> [--watch <watch_id>]
   python3 tracker.py test-notify
 """
 
@@ -200,7 +201,6 @@ def generate_demo_offers_and_seed_history(
             "discovered": [],
         },
         "citizen-promaster-as4020": {
-            # Include a fake promo example where original_price is inflated above MSRP (459 €)
             "past_prices": [329.0, 335.0, 349.0, 359.0, 355.0, 349.0],
             "offers": [
                 OfferResult(
@@ -208,7 +208,7 @@ def generate_demo_offers_and_seed_history(
                     merchant="Amazon FR",
                     url="https://www.amazon.fr/dp/B00WG04A1M",
                     price=349.00,
-                    original_price=529.00,  # Inflated above 459€ MSRP -> triggers anti-fake-promo alert!
+                    original_price=529.00,
                     in_stock=True,
                     title="Citizen Promaster Sky AT8110-61E Eco-Drive Radio-Controlled",
                     extraction_method="css-selector",
@@ -263,6 +263,7 @@ def generate_demo_offers_and_seed_history(
 
     for w in watches:
         prof = demo_profiles.get(w.id)
+        configured_urls = {u.url for u in w.urls}
         if not prof:
             direct_by_watch[w.id] = [
                 OfferResult(
@@ -281,10 +282,11 @@ def generate_demo_offers_and_seed_history(
             disc_by_watch[w.id] = []
             continue
 
-        direct_by_watch[w.id] = prof["offers"]
+        # Only include demo offers whose URL is still in watches.yaml (respects removed URLs!)
+        filtered_offers = [o for o in prof["offers"] if o.url in configured_urls]
+        direct_by_watch[w.id] = filtered_offers
         disc_by_watch[w.id] = prof["discovered"]
 
-        # Seed 6 days of history if empty
         w_hist = history.setdefault("watches", {}).setdefault(
             w.id,
             {
@@ -295,16 +297,16 @@ def generate_demo_offers_and_seed_history(
                 "entries": [],
             },
         )
-        if not w_hist["entries"]:
+        if not w_hist["entries"] and filtered_offers:
             for idx, past_p in enumerate(prof["past_prices"]):
                 day_ts = (now - timedelta(days=len(prof["past_prices"]) - idx)).isoformat()
                 w_hist["entries"].append(
                     {
                         "timestamp": day_ts,
                         "best_price": past_p,
-                        "best_merchant": prof["offers"][0].merchant,
-                        "best_url": prof["offers"][0].url,
-                        "merchant_prices": {prof["offers"][0].merchant: past_p},
+                        "best_merchant": filtered_offers[0].merchant,
+                        "best_url": filtered_offers[0].url,
+                        "merchant_prices": {filtered_offers[0].merchant: past_p},
                         "bf_score": 70,
                     }
                 )
@@ -360,8 +362,6 @@ def run_comparator(
             else:
                 disc_by_watch[w.id] = []
 
-        # If running in an isolated sandbox without outbound access to e-commerce hosts,
-        # transparently seed demo data so the report is rich and complete
         if not any_live_price:
             print("ℹ️ Accès réseau marchand restreint dans cet environnement : chargement des données de démonstration Black Friday.")
             direct_by_watch, disc_by_watch = generate_demo_offers_and_seed_history(watches, history)
@@ -432,6 +432,44 @@ def add_url_to_config(
     return False
 
 
+def remove_url_from_config(
+    url: str,
+    watch_id: str = "",
+    config_path: str = DEFAULT_CONFIG_PATH,
+) -> bool:
+    """Remove an invalid or unwanted product URL from watches.yaml."""
+    target_url = url.strip()
+    if not target_url:
+        print("❌ URL vide.")
+        return False
+
+    with open(config_path, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+
+    removed_count = 0
+    for item in data.get("watches", []):
+        if watch_id and item.get("id") != watch_id:
+            continue
+        urls = item.get("urls", [])
+        new_urls = []
+        for u in urls:
+            u_str = u.get("url", "") if isinstance(u, dict) else str(u)
+            if u_str.strip() == target_url:
+                removed_count += 1
+                print(f"🗑️ Lien supprimé de {item.get('name')} : {u_str}")
+            else:
+                new_urls.append(u)
+        item["urls"] = new_urls
+
+    if removed_count > 0:
+        with open(config_path, "w", encoding="utf-8") as out:
+            yaml.safe_dump(data, out, allow_unicode=True, sort_keys=False)
+        return True
+
+    print(f"⚠️ Aucun lien correspondant à '{target_url}' trouvé dans {config_path}.")
+    return False
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Comparateur de Prix Black Friday — Montres Solaires Radio-Pilotées"
@@ -448,12 +486,19 @@ def main() -> None:
     add_p.add_argument("--url", required=True, help="URL complète de la fiche produit")
     add_p.add_argument("--merchant", default="", help="Nom du marchand (optionnel, détecté auto)")
 
-    test_p = sub.add_parser("test-notify", help="Envoyer une notification de test vers Chrome (ntfy.sh & local)")
+    rem_p = sub.add_parser("remove-url", help="Supprimer un lien invalide ou obsolète de watches.yaml")
+    rem_p.add_argument("--url", required=True, help="URL complète à supprimer")
+    rem_p.add_argument("--watch", default="", help="Identifiant de la montre (optionnel)")
+    rem_p.add_argument("--config", default=DEFAULT_CONFIG_PATH, help="Chemin vers watches.yaml")
+
+    sub.add_parser("test-notify", help="Envoyer une notification de test vers Chrome (ntfy.sh & local)")
 
     args = parser.parse_args()
 
     if args.command == "add-url":
         add_url_to_config(args.watch, args.url, args.merchant)
+    elif args.command == "remove-url":
+        remove_url_from_config(args.url, args.watch, config_path=args.config)
     elif args.command == "test-notify":
         settings, _ = load_config()
         dummy_summary = {
