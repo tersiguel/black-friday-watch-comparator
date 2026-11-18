@@ -256,6 +256,215 @@ def generate_demo_offers_and_seed_history(
             ],
             "discovered": [],
         },
+        "seiko-solar-radio-sbtm317": {
+            "past_prices": [329.0, 319.0, 309.0, 298.0, 289.0, 282.0],
+            "offers": [
+                OfferResult(
+                    watch_id="seiko-solar-radio-sbtm317",
+                    merchant="Sakura Watches",
+                    url="https://www.sakurawatches.com/seiko-selection-sbtm317",
+                    price=268.00,
+                    original_price=395.00,
+                    in_stock=True,
+                    title="Seiko Selection SBTM317 Solar Radio-Controlled (Cadran Vert)",
+                    extraction_method="json-ld",
+                    timestamp=now_iso,
+                ),
+                OfferResult(
+                    watch_id="seiko-solar-radio-sbtm317",
+                    merchant="Chrono24",
+                    url="https://www.chrono24.fr/search/index.htm?query=SBTM317",
+                    price=294.00,
+                    original_price=395.00,
+                    in_stock=True,
+                    title="Seiko Selection SBTM317",
+                    extraction_method="opengraph-meta",
+                    timestamp=now_iso,
+                ),
+            ],
+            "discovered": [],
+        },
+        "citizen-cb1160-55e": {
+            "past_prices": [449.0, 439.0, 425.0, 415.0, 399.0, 389.0],
+            "offers": [
+                OfferResult(
+                    watch_id="citizen-cb1160-55e",
+                    merchant="Sakura Watches",
+                    url="https://www.sakurawatches.com/search/?search=CB1160-55E",
+                    price=369.00,
+                    original_price=549.00,
+                    in_stock=True,
+                    title="Citizen Super Titanium CB1160-55E Radio-Controlled (Noir)",
+                    extraction_method="json-ld",
+                    timestamp=now_iso,
+                ),
+                OfferResult(
+                    watch_id="citizen-cb1160-55e",
+                    merchant="Chrono24",
+                    url="https://www.chrono24.fr/search/index.htm?query=CB1160-55E",
+                    price=395.00,
+                    original_price=549.00,
+                    in_stock=True,
+                    title="Citizen CB1160-55E Eco-Drive",
+                    extraction_method="opengraph-meta",
+                    timestamp=now_iso,
+                ),
+                OfferResult(
+                    watch_id="citizen-cb1160-55e",
+                    merchant="Amazon FR",
+                    url="https://www.amazon.fr/s?k=Citizen+CB1160-55E",
+                    price=419.00,
+                    original_price=549.00,
+                    in_stock=True,
+                    title="Citizen CB1160-55E",
+                    extraction_method="css-selector",
+                    timestamp=now_iso,
+                ),
+            ],
+            "discovered": [],
+        },
+        "citizen-cb1160-55a": {
+            "past_prices": [455.0, 445.0, 429.0, 419.0, 405.0, 392.0],
+            "offers": [
+                OfferResult(
+                    watch_id="citizen-cb1160-55a",
+                    merchant="Sakura Watches",
+                    url="https://www.sakurawatches.com/search/?search=CB1160-55A",
+                    price=374.00,
+                    original_price=549.00,
+                    in_stock=True,
+                    title="Citizen Super Titanium CB1160-55A Radio-Controlled (Blanc)",
+                    extraction_method="json-ld",
+                    timestamp=now_iso,
+                ),
+                OfferResult(
+                    watch_id="citizen-cb1160-55a",
+                    merchant="Chrono24",
+                    url="https://www.chrono24.fr/search/index.htm?query=CB1160-55A",
+                    price=399.00,
+                    original_price=549.00,
+                    in_stock=True,
+                    title="Citizen CB1160-55A",
+                    extraction_method="opengraph-meta",
+                    timestamp=now_iso,
+                ),
+                OfferResult(
+                    watch_id="citizen-cb1160-55a",
+                    merchant="Amazon FR",
+                    url="https://www.amazon.fr/s?k=Citizen+CB1160-55A",
+                    price=425.00,
+                    original_price=549.00,
+                    in_stock=True,
+                    title="Citizen CB1160-55A",
+                    extraction_method="css-selector",
+                    timestamp=now_iso,
+                ),
+            ],
+            "discovered": [],
+        },
+        "citizen-cb1160-55l": {
+            "past_prices": [459.0, 449.0, 435.0, 419.0, 405.0, 395.0],
+            "offers": [
+                OfferResult(
+                    watch_id="citizen-cb1160-55l",
+                    merchant="Sakura Watches",
+                    url="https://www.sakurawatches.com/search/?search=CB1160-55L",
+                    price=372.00,
+                    original_price=549.00,
+                    in_stock=True,
+                    title="Citizen Super Titanium CB1160-55L Radio-Controlled (Bleu)",
+                    extraction_method="json-ld",
+                    timestamp=now_iso,
+                ),
+                OfferResult(
+                    watch_id="citizen-cb1160-55l",
+                    merchant="Chrono24",
+                    url="https://www.chrono24.fr/search/index.htm?query=CB1160-55L",
+                    price=398.00,
+                    original_price=549.00,
+                    in_stock=True,
+                    title="Citizen CB1160-55L",
+                    extraction_method="opengraph-meta",
+                    timestamp=now_iso,
+                ),
+                OfferResult(
+                    watch_id="citizen-cb1160-55l",
+                    merchant="Amazon FR",
+                    url="https://www.amazon.fr/s?k=Citizen+CB1160-55L",
+                    price=422.00,
+                    original_price=549.00,
+                    in_stock=True,
+                    title="Citizen CB1160-55L",
+                    extraction_method="css-selector",
+                    timestamp=now_iso,
+                ),
+            ],
+            "discovered": [
+                OfferResult(
+                    watch_id="citizen-cb1160-55l",
+                    merchant="Dealabs • Import Japon",
+                    url="https://www.dealabs.com/search?q=CB1160",
+                    price=359.00,
+                    original_price=549.00,
+                    title="Citizen Super Titanium CB1160-55L Solaire Radio-Pilotée",
+                    extraction_method="dealabs-search",
+                    timestamp=now_iso,
+                    is_discovered=True,
+                    temperature="287°",
+                )
+            ],
+        },
+        "junghans-max-bill-mega-solar": {
+            "past_prices": [989.0, 965.0, 939.0, 910.0, 889.0, 859.0],
+            "offers": [
+                OfferResult(
+                    watch_id="junghans-max-bill-mega-solar",
+                    merchant="Amazon DE",
+                    url="https://www.amazon.de/s?k=Junghans+Max+Bill+Mega+Solar",
+                    price=789.00,
+                    original_price=1090.00,
+                    in_stock=True,
+                    title="Junghans Max Bill MEGA Solar Titane 059/2020.04",
+                    extraction_method="json-ld",
+                    timestamp=now_iso,
+                ),
+                OfferResult(
+                    watch_id="junghans-max-bill-mega-solar",
+                    merchant="Ocarat",
+                    url="https://ocarat.com/recherche?controller=search&s=Junghans+Max+Bill+Mega+Solar",
+                    price=869.00,
+                    original_price=1090.00,
+                    in_stock=True,
+                    title="Montre Junghans Max Bill MEGA Solar Titane",
+                    extraction_method="json-ld",
+                    promo_code="BFJUNGHANS",
+                    timestamp=now_iso,
+                ),
+                OfferResult(
+                    watch_id="junghans-max-bill-mega-solar",
+                    merchant="Chrono24",
+                    url="https://www.chrono24.fr/search/index.htm?query=Junghans+Max+Bill+Mega+Solar",
+                    price=835.00,
+                    original_price=1090.00,
+                    in_stock=True,
+                    title="Junghans Max Bill MEGA Solar 059/2020.04",
+                    extraction_method="opengraph-meta",
+                    timestamp=now_iso,
+                ),
+            ],
+            "discovered": [
+                OfferResult(
+                    watch_id="junghans-max-bill-mega-solar",
+                    merchant="Idealo Comparateur",
+                    url="https://www.idealo.fr/prechcat.html?q=Junghans+Max+Bill+Mega+Solar",
+                    price=779.00,
+                    title="Junghans Max Bill MEGA Solar Titane & Saphir",
+                    extraction_method="idealo-discovery",
+                    timestamp=now_iso,
+                    is_discovered=True,
+                )
+            ],
+        },
     }
 
     direct_by_watch: Dict[str, List[OfferResult]] = {}
@@ -265,7 +474,7 @@ def generate_demo_offers_and_seed_history(
         prof = demo_profiles.get(w.id)
         configured_urls = {u.url for u in w.urls}
         if not prof:
-            direct_by_watch[w.id] = [
+            fallback_offers = [
                 OfferResult(
                     watch_id=w.id,
                     merchant=u.merchant or infer_merchant_name(u.url),
@@ -279,13 +488,18 @@ def generate_demo_offers_and_seed_history(
                 )
                 for u in w.urls
             ]
+            direct_by_watch[w.id] = fallback_offers
             disc_by_watch[w.id] = []
-            continue
-
-        # Only include demo offers whose URL is still in watches.yaml (respects removed URLs!)
-        filtered_offers = [o for o in prof["offers"] if o.url in configured_urls]
-        direct_by_watch[w.id] = filtered_offers
-        disc_by_watch[w.id] = prof["discovered"]
+            past_series = [
+                round(w.target_price * mult, 2)
+                for mult in (1.14, 1.11, 1.08, 1.05, 1.03, 1.01)
+            ]
+            filtered_offers = fallback_offers
+        else:
+            filtered_offers = [o for o in prof["offers"] if o.url in configured_urls]
+            direct_by_watch[w.id] = filtered_offers
+            disc_by_watch[w.id] = prof["discovered"]
+            past_series = prof["past_prices"]
 
         w_hist = history.setdefault("watches", {}).setdefault(
             w.id,
@@ -298,8 +512,8 @@ def generate_demo_offers_and_seed_history(
             },
         )
         if not w_hist["entries"] and filtered_offers:
-            for idx, past_p in enumerate(prof["past_prices"]):
-                day_ts = (now - timedelta(days=len(prof["past_prices"]) - idx)).isoformat()
+            for idx, past_p in enumerate(past_series):
+                day_ts = (now - timedelta(days=len(past_series) - idx)).isoformat()
                 w_hist["entries"].append(
                     {
                         "timestamp": day_ts,

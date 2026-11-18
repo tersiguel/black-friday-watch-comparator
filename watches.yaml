@@ -1,3 +1,7 @@
+# ==============================================================================
+# Configuration du Comparateur de Prix Black Friday — Montres Solaires Radio-Pilotées
+# ==============================================================================
+
 settings:
   currency: EUR
   ntfy_topic: bf-montres-solaires-2026
@@ -6,68 +10,157 @@ settings:
   auto_discovery: true
   request_timeout: 15
   use_playwright_fallback: true
+
 watches:
-- id: casio-lineage-titanium
-  name: Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)
-  brand: Casio
-  reference: LCW-M100TSE-1AER
-  features: Boîtier & Bracelet Titane • Verre Saphir • Tough Solar • Radio-pilotée
-    Multi-Band 6
-  target_price: 189.0
-  reference_price: 279.0
-  search_queries:
-  - LCW-M100TSE-1AER
-  - Casio Lineage LCW-M100TSE
-  urls:
-  - url: https://www.amazon.fr/dp/B07571V4V5
-    merchant: Amazon FR
-  - url: https://ocarat.com/montre-lineage-lcw-m100tse-1aer-casio-48155.html
-    merchant: Ocarat
-- id: citizen-ecodrive-cb0250
-  name: Citizen Eco-Drive Radio-Controlled CB0250-84E
-  brand: Citizen
-  reference: CB0250-84E
-  features: Eco-Drive Solaire • Radio-pilotée 4 zones • Verre Saphir • Calendrier
-    Perpétuel • 10 bar
-  target_price: 269.0
-  reference_price: 399.0
-  search_queries:
-  - CB0250-84E
-  - Citizen CB0250
-  urls:
-  - url: https://www.amazon.fr/dp/B09WVH883J
-    merchant: Amazon FR
-  - url: https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html
-    merchant: Ocarat
-- id: citizen-promaster-as4020
-  name: Citizen Promaster Sky Eco-Drive AT8110-61E
-  brand: Citizen
-  reference: AT8110-61E
-  features: Chronographe Eco-Drive Solaire • Radio-pilotée • Verre Saphir •Heure Mondiale
-    26 villes
-  target_price: 319.0
-  reference_price: 459.0
-  search_queries:
-  - AT8110-61E
-  - Citizen AT8110
-  urls:
-  - url: https://www.amazon.fr/dp/B00WG04A1M
-    merchant: Amazon FR
-  - url: https://ocarat.com/montre-chrono-radio-controlled-at8110-61e-citizen-42191.html
-    merchant: Ocarat
-- id: seiko-solar-radio-sbtm323
-  name: Seiko Selection Solar Radio-Controlled SBTM323
-  brand: Seiko
-  reference: SBTM323
-  features: Calibre 7B72 Solaire Radio-piloté • Verre Saphir Super-Clear • Finition
-    Zaratsu-style
-  target_price: 279.0
-  reference_price: 395.0
-  search_queries:
-  - Seiko SBTM323
-  - SBTM323
-  urls:
-  - url: https://www.chrono24.fr/search/index.htm?query=SBTM323
-    merchant: Chrono24
-  - url: https://www.sakurawatches.com/seiko-selection-sbtm323
-    merchant: Sakura Watches
+  - id: citizen-cb1160-55e
+    name: Citizen Radio-Controlled CB1160-55E (Cadran Noir)
+    brand: Citizen
+    reference: CB1160-55E
+    features: Super Titanium™ • Calibre H149 Eco-Drive Solaire Radio-piloté • Verre Saphir • Calendrier Perpétuel • 38 mm
+    target_price: 379.0
+    reference_price: 549.0
+    search_queries:
+      - CB1160-55E
+      - Citizen CB1160-55E
+    urls:
+      - url: https://www.chrono24.fr/search/index.htm?query=CB1160-55E
+        merchant: Chrono24
+      - url: https://www.sakurawatches.com/search/?search=CB1160-55E
+        merchant: Sakura Watches
+      - url: https://www.amazon.fr/s?k=Citizen+CB1160-55E
+        merchant: Amazon FR
+
+  - id: citizen-cb1160-55a
+    name: Citizen Radio-Controlled CB1160-55A (Cadran Blanc)
+    brand: Citizen
+    reference: CB1160-55A
+    features: Super Titanium™ • Calibre H149 Eco-Drive Solaire Radio-piloté • Verre Saphir • Calendrier Perpétuel • 38 mm
+    target_price: 379.0
+    reference_price: 549.0
+    search_queries:
+      - CB1160-55A
+      - Citizen CB1160-55A
+    urls:
+      - url: https://www.chrono24.fr/search/index.htm?query=CB1160-55A
+        merchant: Chrono24
+      - url: https://www.sakurawatches.com/search/?search=CB1160-55A
+        merchant: Sakura Watches
+      - url: https://www.amazon.fr/s?k=Citizen+CB1160-55A
+        merchant: Amazon FR
+
+  - id: citizen-cb1160-55l
+    name: Citizen Radio-Controlled CB1160-55L (Cadran Bleu)
+    brand: Citizen
+    reference: CB1160-55L
+    features: Super Titanium™ • Calibre H149 Eco-Drive Solaire Radio-piloté • Verre Saphir • Calendrier Perpétuel • 38 mm
+    target_price: 379.0
+    reference_price: 549.0
+    search_queries:
+      - CB1160-55L
+      - Citizen CB1160-55L
+    urls:
+      - url: https://www.chrono24.fr/search/index.htm?query=CB1160-55L
+        merchant: Chrono24
+      - url: https://www.sakurawatches.com/search/?search=CB1160-55L
+        merchant: Sakura Watches
+      - url: https://www.amazon.fr/s?k=Citizen+CB1160-55L
+        merchant: Amazon FR
+
+  - id: seiko-solar-radio-sbtm323
+    name: Seiko Selection Solar Radio-Controlled SBTM323 (Cadran Noir)
+    brand: Seiko
+    reference: SBTM323
+    features: Calibre 7B72 Solaire Radio-piloté • Verre Saphir Super-Clear • Finition Zaratsu-style • 39.5 mm
+    target_price: 279.0
+    reference_price: 395.0
+    search_queries:
+      - Seiko SBTM323
+      - SBTM323
+    urls:
+      - url: https://www.sakurawatches.com/seiko-selection-sbtm323
+        merchant: Sakura Watches
+      - url: https://www.chrono24.fr/search/index.htm?query=SBTM323
+        merchant: Chrono24
+
+  - id: seiko-solar-radio-sbtm317
+    name: Seiko Selection Solar Radio-Controlled SBTM317 (Cadran Vert)
+    brand: Seiko
+    reference: SBTM317
+    features: Calibre 7B72 Solaire Radio-piloté • Verre Saphir Super-Clear • Cadran Vert Émeraude • 39.5 mm
+    target_price: 279.0
+    reference_price: 395.0
+    search_queries:
+      - Seiko SBTM317
+      - SBTM317
+    urls:
+      - url: https://www.sakurawatches.com/seiko-selection-sbtm317
+        merchant: Sakura Watches
+      - url: https://www.chrono24.fr/search/index.htm?query=SBTM317
+        merchant: Chrono24
+
+  - id: junghans-max-bill-mega-solar
+    name: Junghans Max Bill MEGA Solar (Titane & Saphir)
+    brand: Junghans
+    reference: 059/2020.04
+    features: Design Bauhaus Max Bill • Boîtier Titane • Verre Saphir Bombé • Calibre J101.85 Solaire Radio-piloté • 38 mm
+    target_price: 799.0
+    reference_price: 1090.0
+    search_queries:
+      - Junghans Max Bill Mega Solar
+      - 059/2020.04
+      - 59/2020.02
+    urls:
+      - url: https://ocarat.com/recherche?controller=search&s=Junghans+Max+Bill+Mega+Solar
+        merchant: Ocarat
+      - url: https://www.chrono24.fr/search/index.htm?query=Junghans+Max+Bill+Mega+Solar
+        merchant: Chrono24
+      - url: https://www.amazon.de/s?k=Junghans+Max+Bill+Mega+Solar
+        merchant: Amazon DE
+
+  - id: casio-lineage-titanium
+    name: Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)
+    brand: Casio
+    reference: LCW-M100TSE-1AER
+    features: Boîtier & Bracelet Titane • Verre Saphir • Tough Solar • Radio-pilotée Multi-Band 6
+    target_price: 189.0
+    reference_price: 279.0
+    search_queries:
+      - LCW-M100TSE-1AER
+      - Casio Lineage LCW-M100TSE
+    urls:
+      - url: https://www.amazon.fr/dp/B07571V4V5
+        merchant: Amazon FR
+      - url: https://ocarat.com/montre-lineage-lcw-m100tse-1aer-casio-48155.html
+        merchant: Ocarat
+
+  - id: citizen-ecodrive-cb0250
+    name: Citizen Eco-Drive Radio-Controlled CB0250-84E
+    brand: Citizen
+    reference: CB0250-84E
+    features: Eco-Drive Solaire • Radio-pilotée 4 zones • Verre Saphir • Calendrier Perpétuel • 10 bar
+    target_price: 269.0
+    reference_price: 399.0
+    search_queries:
+      - CB0250-84E
+      - Citizen CB0250
+    urls:
+      - url: https://www.amazon.fr/dp/B09WVH883J
+        merchant: Amazon FR
+      - url: https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html
+        merchant: Ocarat
+
+  - id: citizen-promaster-as4020
+    name: Citizen Promaster Sky Eco-Drive AT8110-61E
+    brand: Citizen
+    reference: AT8110-61E
+    features: Chronographe Eco-Drive Solaire • Radio-pilotée • Verre Saphir • Heure Mondiale 26 villes
+    target_price: 319.0
+    reference_price: 459.0
+    search_queries:
+      - AT8110-61E
+      - Citizen AT8110
+    urls:
+      - url: https://www.amazon.fr/dp/B00WG04A1M
+        merchant: Amazon FR
+      - url: https://ocarat.com/montre-chrono-radio-controlled-at8110-61e-citizen-42191.html
+        merchant: Ocarat

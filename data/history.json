@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-17T23:55:58.089560+00:00",
+  "updated_at": "2026-11-18T00:00:50.771007+00:00",
   "watches": {
     "casio-lineage-titanium": {
       "name": "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)",
@@ -102,6 +102,17 @@
         },
         {
           "timestamp": "2026-11-17T23:55:58.089477+00:00",
+          "best_price": 179.9,
+          "best_merchant": "Idealo Comparateur",
+          "best_url": "https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER",
+          "merchant_prices": {
+            "Amazon FR": 184.5,
+            "Ocarat": 215.0
+          },
+          "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T00:00:50.770882+00:00",
           "best_price": 179.9,
           "best_merchant": "Idealo Comparateur",
           "best_url": "https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER",
@@ -222,6 +233,17 @@
             "Amazon FR": 279.0
           },
           "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T00:00:50.770904+00:00",
+          "best_price": 264.0,
+          "best_merchant": "Ocarat",
+          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
+          "merchant_prices": {
+            "Ocarat": 264.0,
+            "Amazon FR": 279.0
+          },
+          "bf_score": 100
         }
       ]
     },
@@ -326,6 +348,17 @@
         },
         {
           "timestamp": "2026-11-17T23:55:58.089507+00:00",
+          "best_price": 349.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
+          "merchant_prices": {
+            "Amazon FR": 349.0,
+            "Ocarat": 369.0
+          },
+          "bf_score": 50
+        },
+        {
+          "timestamp": "2026-11-18T00:00:50.770921+00:00",
           "best_price": 349.0,
           "best_merchant": "Amazon FR",
           "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
@@ -444,6 +477,416 @@
           "merchant_prices": {
             "Sakura Watches": 272.0,
             "Chrono24": 298.0
+          },
+          "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T00:00:50.770857+00:00",
+          "best_price": 272.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323",
+          "merchant_prices": {
+            "Sakura Watches": 272.0,
+            "Chrono24": 298.0
+          },
+          "bf_score": 100
+        }
+      ]
+    },
+    "citizen-cb1160-55e": {
+      "name": "Citizen Radio-Controlled CB1160-55E (Cadran Noir)",
+      "reference": "CB1160-55E",
+      "target_price": 379.0,
+      "reference_price": 549.0,
+      "entries": [
+        {
+          "timestamp": "2026-11-12T00:00:50.770653+00:00",
+          "best_price": 449.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55E",
+          "merchant_prices": {
+            "Sakura Watches": 449.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-13T00:00:50.770653+00:00",
+          "best_price": 439.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55E",
+          "merchant_prices": {
+            "Sakura Watches": 439.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-14T00:00:50.770653+00:00",
+          "best_price": 425.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55E",
+          "merchant_prices": {
+            "Sakura Watches": 425.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-15T00:00:50.770653+00:00",
+          "best_price": 415.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55E",
+          "merchant_prices": {
+            "Sakura Watches": 415.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-16T00:00:50.770653+00:00",
+          "best_price": 399.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55E",
+          "merchant_prices": {
+            "Sakura Watches": 399.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-17T00:00:50.770653+00:00",
+          "best_price": 389.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55E",
+          "merchant_prices": {
+            "Sakura Watches": 389.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-18T00:00:50.770818+00:00",
+          "best_price": 369.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55E",
+          "merchant_prices": {
+            "Sakura Watches": 369.0,
+            "Chrono24": 395.0,
+            "Amazon FR": 419.0
+          },
+          "bf_score": 100
+        }
+      ]
+    },
+    "citizen-cb1160-55a": {
+      "name": "Citizen Radio-Controlled CB1160-55A (Cadran Blanc)",
+      "reference": "CB1160-55A",
+      "target_price": 379.0,
+      "reference_price": 549.0,
+      "entries": [
+        {
+          "timestamp": "2026-11-12T00:00:50.770653+00:00",
+          "best_price": 455.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55A",
+          "merchant_prices": {
+            "Sakura Watches": 455.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-13T00:00:50.770653+00:00",
+          "best_price": 445.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55A",
+          "merchant_prices": {
+            "Sakura Watches": 445.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-14T00:00:50.770653+00:00",
+          "best_price": 429.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55A",
+          "merchant_prices": {
+            "Sakura Watches": 429.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-15T00:00:50.770653+00:00",
+          "best_price": 419.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55A",
+          "merchant_prices": {
+            "Sakura Watches": 419.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-16T00:00:50.770653+00:00",
+          "best_price": 405.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55A",
+          "merchant_prices": {
+            "Sakura Watches": 405.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-17T00:00:50.770653+00:00",
+          "best_price": 392.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55A",
+          "merchant_prices": {
+            "Sakura Watches": 392.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-18T00:00:50.770834+00:00",
+          "best_price": 374.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55A",
+          "merchant_prices": {
+            "Sakura Watches": 374.0,
+            "Chrono24": 399.0,
+            "Amazon FR": 425.0
+          },
+          "bf_score": 100
+        }
+      ]
+    },
+    "citizen-cb1160-55l": {
+      "name": "Citizen Radio-Controlled CB1160-55L (Cadran Bleu)",
+      "reference": "CB1160-55L",
+      "target_price": 379.0,
+      "reference_price": 549.0,
+      "entries": [
+        {
+          "timestamp": "2026-11-12T00:00:50.770653+00:00",
+          "best_price": 459.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55L",
+          "merchant_prices": {
+            "Sakura Watches": 459.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-13T00:00:50.770653+00:00",
+          "best_price": 449.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55L",
+          "merchant_prices": {
+            "Sakura Watches": 449.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-14T00:00:50.770653+00:00",
+          "best_price": 435.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55L",
+          "merchant_prices": {
+            "Sakura Watches": 435.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-15T00:00:50.770653+00:00",
+          "best_price": 419.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55L",
+          "merchant_prices": {
+            "Sakura Watches": 419.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-16T00:00:50.770653+00:00",
+          "best_price": 405.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55L",
+          "merchant_prices": {
+            "Sakura Watches": 405.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-17T00:00:50.770653+00:00",
+          "best_price": 395.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55L",
+          "merchant_prices": {
+            "Sakura Watches": 395.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-18T00:00:50.770844+00:00",
+          "best_price": 359.0,
+          "best_merchant": "Dealabs • Import Japon",
+          "best_url": "https://www.dealabs.com/search?q=CB1160",
+          "merchant_prices": {
+            "Sakura Watches": 372.0,
+            "Chrono24": 398.0,
+            "Amazon FR": 422.0
+          },
+          "bf_score": 100
+        }
+      ]
+    },
+    "seiko-solar-radio-sbtm317": {
+      "name": "Seiko Selection Solar Radio-Controlled SBTM317 (Cadran Vert)",
+      "reference": "SBTM317",
+      "target_price": 279.0,
+      "reference_price": 395.0,
+      "entries": [
+        {
+          "timestamp": "2026-11-12T00:00:50.770653+00:00",
+          "best_price": 329.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm317",
+          "merchant_prices": {
+            "Sakura Watches": 329.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-13T00:00:50.770653+00:00",
+          "best_price": 319.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm317",
+          "merchant_prices": {
+            "Sakura Watches": 319.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-14T00:00:50.770653+00:00",
+          "best_price": 309.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm317",
+          "merchant_prices": {
+            "Sakura Watches": 309.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-15T00:00:50.770653+00:00",
+          "best_price": 298.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm317",
+          "merchant_prices": {
+            "Sakura Watches": 298.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-16T00:00:50.770653+00:00",
+          "best_price": 289.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm317",
+          "merchant_prices": {
+            "Sakura Watches": 289.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-17T00:00:50.770653+00:00",
+          "best_price": 282.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm317",
+          "merchant_prices": {
+            "Sakura Watches": 282.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-18T00:00:50.770867+00:00",
+          "best_price": 268.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm317",
+          "merchant_prices": {
+            "Sakura Watches": 268.0,
+            "Chrono24": 294.0
+          },
+          "bf_score": 100
+        }
+      ]
+    },
+    "junghans-max-bill-mega-solar": {
+      "name": "Junghans Max Bill MEGA Solar (Titane & Saphir)",
+      "reference": "059/2020.04",
+      "target_price": 799.0,
+      "reference_price": 1090.0,
+      "entries": [
+        {
+          "timestamp": "2026-11-12T00:00:50.770653+00:00",
+          "best_price": 989.0,
+          "best_merchant": "Amazon DE",
+          "best_url": "https://www.amazon.de/s?k=Junghans+Max+Bill+Mega+Solar",
+          "merchant_prices": {
+            "Amazon DE": 989.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-13T00:00:50.770653+00:00",
+          "best_price": 965.0,
+          "best_merchant": "Amazon DE",
+          "best_url": "https://www.amazon.de/s?k=Junghans+Max+Bill+Mega+Solar",
+          "merchant_prices": {
+            "Amazon DE": 965.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-14T00:00:50.770653+00:00",
+          "best_price": 939.0,
+          "best_merchant": "Amazon DE",
+          "best_url": "https://www.amazon.de/s?k=Junghans+Max+Bill+Mega+Solar",
+          "merchant_prices": {
+            "Amazon DE": 939.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-15T00:00:50.770653+00:00",
+          "best_price": 910.0,
+          "best_merchant": "Amazon DE",
+          "best_url": "https://www.amazon.de/s?k=Junghans+Max+Bill+Mega+Solar",
+          "merchant_prices": {
+            "Amazon DE": 910.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-16T00:00:50.770653+00:00",
+          "best_price": 889.0,
+          "best_merchant": "Amazon DE",
+          "best_url": "https://www.amazon.de/s?k=Junghans+Max+Bill+Mega+Solar",
+          "merchant_prices": {
+            "Amazon DE": 889.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-17T00:00:50.770653+00:00",
+          "best_price": 859.0,
+          "best_merchant": "Amazon DE",
+          "best_url": "https://www.amazon.de/s?k=Junghans+Max+Bill+Mega+Solar",
+          "merchant_prices": {
+            "Amazon DE": 859.0
+          },
+          "bf_score": 70
+        },
+        {
+          "timestamp": "2026-11-18T00:00:50.770875+00:00",
+          "best_price": 779.0,
+          "best_merchant": "Idealo Comparateur",
+          "best_url": "https://www.idealo.fr/prechcat.html?q=Junghans+Max+Bill+Mega+Solar",
+          "merchant_prices": {
+            "Amazon DE": 789.0,
+            "Ocarat": 869.0,
+            "Chrono24": 835.0
           },
           "bf_score": 100
         }

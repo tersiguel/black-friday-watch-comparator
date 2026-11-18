@@ -1,12 +1,78 @@
 {
-  "updated_at": "2026-11-17T23:55:58.090204+00:00",
-  "updated_at_human": "17/11/2026 à 23:55 UTC",
-  "notification_title": "🔥 OBJECTIF ATTEINT : Casio Lineage LCW-M100TSE-1AER (Titane & Saphir) à 179.90 € !",
-  "notification_body": "• LCW-M100TSE-1AER : 179.90 € chez Idealo Comparateur (-36% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100)\n• CB0250-84E : 264.00 € chez Ocarat (-34% vs neuf, ✅ 5€ sous ta cible, Score BF 100/100)\n• SBTM323 : 272.00 € chez Sakura Watches (-31% vs neuf, ✅ 7€ sous ta cible, Score BF 100/100)\n• AT8110-61E : 349.00 € chez Amazon FR (-24% vs neuf, cible 319€ (+30€), Score BF 50/100)",
-  "click_url": "https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER",
+  "updated_at": "2026-11-18T00:00:50.772165+00:00",
+  "updated_at_human": "18/11/2026 à 00:00 UTC",
+  "notification_title": "🔥 OBJECTIF ATTEINT : Citizen Radio-Controlled CB1160-55E (Cadran Noir) à 369.00 € !",
+  "notification_body": "• CB1160-55E : 369.00 € chez Sakura Watches (-33% vs neuf, ✅ 10€ sous ta cible, Score BF 100/100) [📉 -20.00€]\n• CB1160-55A : 374.00 € chez Sakura Watches (-32% vs neuf, ✅ 5€ sous ta cible, Score BF 100/100) [📉 -18.00€]\n• CB1160-55L : 359.00 € chez Dealabs • Import Japon (-35% vs neuf, ✅ 20€ sous ta cible, Score BF 100/100) [📉 -36.00€]\n• SBTM323 : 272.00 € chez Sakura Watches (-31% vs neuf, ✅ 7€ sous ta cible, Score BF 100/100)\n• SBTM317 : 268.00 € chez Sakura Watches (-32% vs neuf, ✅ 11€ sous ta cible, Score BF 100/100) [📉 -14.00€]\n• 059/2020.04 : 779.00 € chez Idealo Comparateur (-28% vs neuf, ✅ 20€ sous ta cible, Score BF 100/100) [📉 -80.00€]\n• LCW-M100TSE-1AER : 179.90 € chez Idealo Comparateur (-36% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100)\n• CB0250-84E : 264.00 € chez Ocarat (-34% vs neuf, ✅ 5€ sous ta cible, Score BF 100/100)\n• AT8110-61E : 349.00 € chez Amazon FR (-24% vs neuf, cible 319€ (+30€), Score BF 50/100)",
+  "click_url": "https://www.sakurawatches.com/search/?search=CB1160-55E",
   "ntfy_topic": "bf-montres-solaires-2026",
   "ntfy_server": "https://ntfy.sh",
   "watches": [
+    {
+      "id": "citizen-cb1160-55e",
+      "name": "Citizen Radio-Controlled CB1160-55E (Cadran Noir)",
+      "reference": "CB1160-55E",
+      "best_price": 369.0,
+      "best_merchant": "Sakura Watches",
+      "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55E",
+      "target_price": 379.0,
+      "bf_score": 100,
+      "verdict": "🔥 Deal Black Friday Exceptionnel"
+    },
+    {
+      "id": "citizen-cb1160-55a",
+      "name": "Citizen Radio-Controlled CB1160-55A (Cadran Blanc)",
+      "reference": "CB1160-55A",
+      "best_price": 374.0,
+      "best_merchant": "Sakura Watches",
+      "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55A",
+      "target_price": 379.0,
+      "bf_score": 100,
+      "verdict": "🔥 Deal Black Friday Exceptionnel"
+    },
+    {
+      "id": "citizen-cb1160-55l",
+      "name": "Citizen Radio-Controlled CB1160-55L (Cadran Bleu)",
+      "reference": "CB1160-55L",
+      "best_price": 359.0,
+      "best_merchant": "Dealabs • Import Japon",
+      "best_url": "https://www.dealabs.com/search?q=CB1160",
+      "target_price": 379.0,
+      "bf_score": 100,
+      "verdict": "🔥 Deal Black Friday Exceptionnel"
+    },
+    {
+      "id": "seiko-solar-radio-sbtm323",
+      "name": "Seiko Selection Solar Radio-Controlled SBTM323 (Cadran Noir)",
+      "reference": "SBTM323",
+      "best_price": 272.0,
+      "best_merchant": "Sakura Watches",
+      "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323",
+      "target_price": 279.0,
+      "bf_score": 100,
+      "verdict": "🔥 Deal Black Friday Exceptionnel"
+    },
+    {
+      "id": "seiko-solar-radio-sbtm317",
+      "name": "Seiko Selection Solar Radio-Controlled SBTM317 (Cadran Vert)",
+      "reference": "SBTM317",
+      "best_price": 268.0,
+      "best_merchant": "Sakura Watches",
+      "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm317",
+      "target_price": 279.0,
+      "bf_score": 100,
+      "verdict": "🔥 Deal Black Friday Exceptionnel"
+    },
+    {
+      "id": "junghans-max-bill-mega-solar",
+      "name": "Junghans Max Bill MEGA Solar (Titane & Saphir)",
+      "reference": "059/2020.04",
+      "best_price": 779.0,
+      "best_merchant": "Idealo Comparateur",
+      "best_url": "https://www.idealo.fr/prechcat.html?q=Junghans+Max+Bill+Mega+Solar",
+      "target_price": 799.0,
+      "bf_score": 100,
+      "verdict": "🔥 Deal Black Friday Exceptionnel"
+    },
     {
       "id": "casio-lineage-titanium",
       "name": "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)",
@@ -26,17 +92,6 @@
       "best_merchant": "Ocarat",
       "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
       "target_price": 269.0,
-      "bf_score": 100,
-      "verdict": "🔥 Deal Black Friday Exceptionnel"
-    },
-    {
-      "id": "seiko-solar-radio-sbtm323",
-      "name": "Seiko Selection Solar Radio-Controlled SBTM323",
-      "reference": "SBTM323",
-      "best_price": 272.0,
-      "best_merchant": "Sakura Watches",
-      "best_url": "https://www.sakurawatches.com/seiko-selection-sbtm323",
-      "target_price": 279.0,
       "bf_score": 100,
       "verdict": "🔥 Deal Black Friday Exceptionnel"
     },
