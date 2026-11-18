@@ -1,4 +1,4 @@
-"""Universal hybrid price & explicit fee scraper for watch product pages."""
+"""Universal hybrid price, metadata & explicit fee scraper for watch product pages."""
 
 import json
 import re
@@ -9,7 +9,7 @@ from urllib.request import Request, urlopen
 
 from lxml import html as lxml_html
 
-from src.models import OfferResult, WatchURL
+from src.models import OfferResult
 
 
 DEFAULT_HEADERS = {
@@ -31,6 +31,27 @@ FX_RATES_TO_EUR = {
     "JPY": 0.0061,
 }
 
+KNOWN_WATCH_BRANDS = (
+    "Citizen",
+    "Seiko",
+    "Casio",
+    "Junghans",
+    "Tissot",
+    "Orient",
+    "Hamilton",
+    "Longines",
+    "Omega",
+    "Certina",
+    "Mido",
+    "Sinn",
+    "Bulova",
+    "Timex",
+    "Garmin",
+    "Lip",
+    "Yema",
+    "Baltic",
+)
+
 NON_EU_IMPORT_DOMAINS = (
     "sakurawatches.com",
     "shoppinginjapan.net",
@@ -39,6 +60,9 @@ NON_EU_IMPORT_DOMAINS = (
     "creationwatches.com",
     "gnomonwatches.com",
     "timeshop4you.co.uk",
+    "amazon.co.jp",
+    "amazon.com",
+    "amazon.co.uk",
 )
 
 EU_RETAIL_DOMAINS = (
@@ -62,6 +86,7 @@ EU_RETAIL_DOMAINS = (
     "mastersintime.com",
     "watchxl.com",
     "rm-time.com",
+    "watchhouse.de",
     "fnac.com",
     "darty.com",
     "boulanger.com",
@@ -97,6 +122,8 @@ def infer_merchant_name(url: str, fallback: str = "") -> str:
             "amazon.es": "Amazon.es",
             "amazon.it": "Amazon.it",
             "amazon.co.jp": "Amazon.co.jp",
+            "amazon.co.uk": "Amazon.co.uk",
+            "amazon.com": "Amazon.com",
             "ocarat.com": "Ocarat",
             "montresandco.com": "Montres & Co",
             "lepage.fr": "Lepage",
@@ -113,6 +140,7 @@ def infer_merchant_name(url: str, fallback: str = "") -> str:
             "seiyajapan.com": "SeiyaJapan",
             "creationwatches.com": "CreationWatches",
             "gnomonwatches.com": "Gnomon Watches",
+            "timeshop4you.co.uk": "Timeshop4you (UK)",
             "citizenwatch.eu": "Citizen Store EU",
             "de.citizenwatch.eu": "Citizen Store DE",
             "casio.com": "Casio Officiel",
@@ -121,11 +149,14 @@ def infer_merchant_name(url: str, fallback: str = "") -> str:
             "irisimo.com": "Irisimo",
             "zeitlounge.com": "Zeitlounge",
             "luna-time.fr": "Luna-Time",
+            "luna-time.nl": "Luna-Time NL",
             "mastersintime.com": "Masters In Time",
             "watchxl.com": "WatchXL",
             "rm-time.com": "RM-Time",
+            "watchhouse.de": "Watchhouse.de",
             "catawiki.com": "Catawiki",
             "ebay.fr": "eBay.fr",
+            "ebay.com": "eBay",
             "vinted.fr": "Vinted",
             "leboncoin.fr": "Leboncoin",
             "idealo.fr": "Idealo.fr",
@@ -140,7 +171,7 @@ def infer_merchant_name(url: str, fallback: str = "") -> str:
 
 
 def is_non_eu_import_url(url: str) -> bool:
-    """Return True if the URL belongs to a non-EU (e.g. Tokyo/UK) boutique subject to French VAT & customs."""
+    """Return True if the URL belongs to a non-EU (e.g. Tokyo/UK/US) boutique subject to French VAT & customs."""
     try:
         hostname = re.sub(r"^www\.", "", (urlparse(url).hostname or "").lower())
         return any(hostname == d or hostname.endswith("." + d) for d in NON_EU_IMPORT_DOMAINS)
@@ -202,12 +233,35 @@ def compute_catawiki_price_with_fees(raw_bid: float) -> float:
     return round(raw_bid + compute_catawiki_fee_only(raw_bid), 2)
 
 
-def parse_amount_string(raw: Any, min_val: float = 0.0, max_val: float = 25000.0) -> Optional[float]:
-    """Parse a numeric price or fee string (allowing 0.00 € for fees when min_val=0.0)."""
+def _detect_currency_code(text: str, hint: str = "") -> str:
+    h = (hint or "").strip().upper()
+    if h in FX_RATES_TO_EUR:
+        return h
+    if "€" in text or re.search(r"\bEUR\b", text, re.I):
+        return "EUR"
+    if re.search(r"US\s*\$|\bUSD\b|\$", text, re.I):
+        return "USD"
+    if "£" in text or re.search(r"\bGBP\b", text, re.I):
+        return "GBP"
+    if re.search(r"\bCHF\b", text, re.I):
+        return "CHF"
+    if "¥" in text or "￥" in text or "円" in text or re.search(r"\bJPY\b", text, re.I):
+        return "JPY"
+    return "EUR"
+
+
+def parse_amount_string(
+    raw: Any,
+    min_val: float = 0.0,
+    max_val: float = 25000.0,
+    currency_hint: str = "",
+) -> Optional[float]:
+    """Parse a numeric price or fee string in EUR/USD/GBP/CHF/JPY and convert to EUR."""
     if raw is None:
         return None
     if isinstance(raw, (int, float)):
-        val = float(raw)
+        curr = (currency_hint or "EUR").upper()
+        val = float(raw) * FX_RATES_TO_EUR.get(curr, 1.0)
         return round(val, 2) if min_val <= val <= max_val else None
 
     text = str(raw).strip()
@@ -215,6 +269,8 @@ def parse_amount_string(raw: Any, min_val: float = 0.0, max_val: float = 25000.0
         return None
 
     text = text.replace("\xa0", " ").replace("\u202f", " ")
+    curr = _detect_currency_code(text, currency_hint)
+
     m_euro_sep = re.search(r"(\d[\d\s.]*)\s*€\s*(\d{2})\b", text)
     if m_euro_sep:
         whole = re.sub(r"[^\d]", "", m_euro_sep.group(1))
@@ -226,22 +282,22 @@ def parse_amount_string(raw: Any, min_val: float = 0.0, max_val: float = 25000.0
             pass
 
     m_curr = re.search(
-        r"(?:(?:€|EUR|US\s*\$|\$|£|CHF)\s*(\d{1,3}(?:[\s.]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)|(\d{1,3}(?:[\s.]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)\s*(?:€|EUR\b|USD\b|\$))",
+        r"(?:(?:€|EUR|US\s*\$|\$|£|GBP|CHF|¥|￥|JPY)\s*(\d{1,3}(?:[\s.,]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)|(\d{1,3}(?:[\s.,]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)\s*(?:€|EUR\b|USD\b|\$|£|GBP\b|CHF\b|¥|￥|JPY\b|円))",
         text,
         re.I,
     )
     if m_curr:
-        candidate = m_curr.group(1) or m_curr.group(2)
-        m = re.search(r".+", candidate)
+        num_str = (m_curr.group(1) or m_curr.group(2) or "").strip()
     else:
         m = re.search(
             r"(?<![A-Za-z0-9-])(\d{1,3}(?:[\s.]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)(?![A-Za-z0-9])",
             text,
         )
-    if not m:
-        return None
+        if not m:
+            return None
+        num_str = m.group(0)
 
-    num_str = m.group(0).replace(" ", "")
+    num_str = num_str.replace(" ", "")
     if "." in num_str and "," in num_str:
         if num_str.rfind(",") > num_str.rfind("."):
             num_str = num_str.replace(".", "").replace(",", ".")
@@ -253,25 +309,59 @@ def parse_amount_string(raw: Any, min_val: float = 0.0, max_val: float = 25000.0
             num_str = "".join(parts[:-1]) + "." + parts[-1]
         else:
             num_str = "".join(parts)
+    elif "." in num_str:
+        parts = num_str.split(".")
+        # Handle German/European thousands dot e.g. "1.315" when > 1 and 3 digits at end
+        if len(parts[-1]) == 3 and curr in ("EUR", "JPY"):
+            num_str = "".join(parts)
 
     try:
-        val = float(num_str)
-        if re.search(r"US\s*\$|\bUSD\b", text, re.I) and "€" not in text:
-            val = val * FX_RATES_TO_EUR["USD"]
-        elif "£" in text or re.search(r"\bGBP\b", text, re.I):
-            val = val * FX_RATES_TO_EUR["GBP"]
-        return round(val, 2) if min_val <= val <= max_val else None
+        raw_val = float(num_str)
+        eur_val = raw_val * FX_RATES_TO_EUR.get(curr, 1.0)
+        return round(eur_val, 2) if min_val <= eur_val <= max_val else None
     except ValueError:
         return None
 
 
-def parse_price_string(raw: Any) -> Optional[float]:
+def parse_price_string(raw: Any, currency_hint: str = "") -> Optional[float]:
     """Parse a watch product price (>= 5 €)."""
-    return parse_amount_string(raw, min_val=5.0, max_val=25000.0)
+    return parse_amount_string(raw, min_val=5.0, max_val=25000.0, currency_hint=currency_hint)
+
+
+def infer_watch_metadata_from_text(title: str, url: str = "", description: str = "") -> Dict[str, str]:
+    """Infer brand, watch reference, and ASIN from title/URL when not explicitly in JSON-LD."""
+    combined = f"{title} {description} {url}"
+    brand = ""
+    for b in KNOWN_WATCH_BRANDS:
+        if re.search(rf"\b{re.escape(b)}\b", combined, re.I):
+            brand = b
+            break
+
+    # Typical watch reference patterns: CB1160-55E, SBTM323, LCW-M100TSE-1AER, 059/2020.04, 59/2020.02, SSC813P1
+    ref = ""
+    ref_patterns = [
+        r"\b([A-Z]{2,5}-?[A-Z0-9]{2,6}-[A-Z0-9]{2,5})\b",
+        r"\b(0?\d{2}/\d{4}\.\d{2})\b",
+        r"\b([A-Z]{3,4}\d{3,4}[A-Z0-9]{0,3})\b",
+    ]
+    for pat in ref_patterns:
+        m = re.search(pat, f"{title} {url.upper()}")
+        if m:
+            candidate = m.group(1).strip()
+            if not candidate.startswith("HTTP") and candidate not in ("HTML", "UTF-8"):
+                ref = candidate
+                break
+
+    asin = ""
+    m_asin = re.search(r"/(?:dp|gp/product)/([A-Z0-9]{10})\b", url, re.I)
+    if m_asin:
+        asin = m_asin.group(1).upper()
+
+    return {"brand": brand, "reference": ref, "asin": asin}
 
 
 def extract_from_json_ld(doc: lxml_html.HtmlElement) -> Optional[Dict[str, Any]]:
-    """Layer 1: Extract price, condition, shippingDetails, image, and title from JSON-LD Schema.org."""
+    """Layer 1: Extract price, condition, shippingDetails, brand, SKU/EAN, image, and title from JSON-LD."""
     scripts = doc.xpath(
         "//script[contains(translate(@type, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'ld+json')]"
     )
@@ -285,9 +375,7 @@ def extract_from_json_ld(doc: lxml_html.HtmlElement) -> Optional[Dict[str, Any]]
             if isinstance(rate, dict):
                 raw_val = rate.get("value")
                 curr = str(rate.get("currency", "EUR")).upper()
-                parsed = parse_amount_string(raw_val, min_val=0.0, max_val=500.0)
-                if parsed is not None:
-                    return round(parsed * FX_RATES_TO_EUR.get(curr, 1.0), 2)
+                return parse_amount_string(raw_val, min_val=0.0, max_val=500.0, currency_hint=curr)
         return None
 
     def _walk_node(node: Any) -> Optional[Dict[str, Any]]:
@@ -305,24 +393,40 @@ def extract_from_json_ld(doc: lxml_html.HtmlElement) -> Optional[Dict[str, Any]]
         types_lower = [str(t).lower() for t in types]
 
         if any("product" in t for t in types_lower):
-            title = node.get("name", "")
+            title = str(node.get("name", "") or "").strip()
+            desc = str(node.get("description", "") or "").strip()
+            brand_obj = node.get("brand", "")
+            brand = (
+                str(brand_obj.get("name", ""))
+                if isinstance(brand_obj, dict)
+                else str(brand_obj or "")
+            ).strip()
+            sku = str(node.get("mpn") or node.get("model") or node.get("sku") or "").strip()
+            ean = str(node.get("gtin13") or node.get("ean") or node.get("gtin") or "").strip()
+
             img = node.get("image", "")
             if isinstance(img, list) and img:
                 img = img[0]
             if isinstance(img, dict):
                 img = img.get("url", "")
+
             offers = node.get("offers")
             res = _extract_offers(offers)
             if res and res.get("price"):
                 res["title"] = title
+                res["description"] = re.sub(r"\s+", " ", desc)[:280]
+                res["brand"] = brand
+                res["reference"] = sku
+                res["ean"] = ean
                 if isinstance(img, str) and img.startswith("http"):
                     res["image_url"] = img
                 return res
 
-        if "@graph" in node:
-            res = _walk_node(node["@graph"])
-            if res:
-                return res
+        for sub_key in ("@graph", "mainEntity"):
+            if sub_key in node:
+                res = _walk_node(node[sub_key])
+                if res:
+                    return res
         return None
 
     def _extract_offers(offers: Any) -> Optional[Dict[str, Any]]:
@@ -340,19 +444,15 @@ def extract_from_json_ld(doc: lxml_html.HtmlElement) -> Optional[Dict[str, Any]]
             return valid[0]
 
         if isinstance(offers, dict):
-            raw_price = (
-                offers.get("price")
-                or offers.get("lowPrice")
-                or (
-                    offers.get("priceSpecification", {})
-                    if isinstance(offers.get("priceSpecification"), dict)
-                    else {}
-                ).get("price")
-            )
-            currency = str(offers.get("priceCurrency", "EUR")).upper()
-            price = parse_price_string(raw_price)
-            if price and currency in FX_RATES_TO_EUR and currency != "EUR":
-                price = round(price * FX_RATES_TO_EUR[currency], 2)
+            spec = offers.get("priceSpecification")
+            if isinstance(spec, list) and spec:
+                spec = spec[0]
+            spec_dict = spec if isinstance(spec, dict) else {}
+            currency = str(
+                offers.get("priceCurrency") or spec_dict.get("priceCurrency") or "EUR"
+            ).upper()
+            raw_price = offers.get("price") or offers.get("lowPrice") or spec_dict.get("price")
+            price = parse_price_string(raw_price, currency_hint=currency)
 
             if not price and isinstance(offers.get("offers"), (list, dict)):
                 return _extract_offers(offers["offers"])
@@ -367,9 +467,10 @@ def extract_from_json_ld(doc: lxml_html.HtmlElement) -> Optional[Dict[str, Any]]
                     condition = "new"
 
                 ship_fee = _extract_shipping_from_offer(offers)
-                high_price = parse_price_string(offers.get("highPrice"))
+                high_price = parse_price_string(offers.get("highPrice"), currency_hint=currency)
                 return {
                     "price": price,
+                    "original_currency": currency,
                     "original_price": high_price if (high_price and high_price > price) else None,
                     "currency": "EUR",
                     "in_stock": in_stock,
@@ -395,6 +496,11 @@ def extract_from_json_ld(doc: lxml_html.HtmlElement) -> Optional[Dict[str, Any]]
 
 def extract_from_meta(doc: lxml_html.HtmlElement) -> Optional[Dict[str, Any]]:
     """Layer 2: Extract from OpenGraph, Twitter, or Schema Microdata meta tags."""
+    curr_nodes = doc.xpath(
+        "//*[@property='product:price:currency']/@content | //*[@property='og:price:currency']/@content | //*[@itemprop='priceCurrency']/@content"
+    )
+    curr = str(curr_nodes[0]).strip().upper() if curr_nodes else ""
+
     xpaths = [
         "//*[@property='product:price:amount']",
         "//*[@property='og:price:amount']",
@@ -407,7 +513,7 @@ def extract_from_meta(doc: lxml_html.HtmlElement) -> Optional[Dict[str, Any]]:
         nodes = doc.xpath(xp)
         for node in nodes:
             candidate = node.get("content") or node.text_content()
-            price = parse_price_string(candidate)
+            price = parse_price_string(candidate, currency_hint=curr)
             if price:
                 break
         if price:
@@ -416,14 +522,11 @@ def extract_from_meta(doc: lxml_html.HtmlElement) -> Optional[Dict[str, Any]]:
     if not price:
         return None
 
-    curr_nodes = doc.xpath("//*[@property='product:price:currency']/@content | //*[@itemprop='priceCurrency']/@content")
-    if curr_nodes:
-        curr = str(curr_nodes[0]).strip().upper()
-        if curr in FX_RATES_TO_EUR and curr != "EUR":
-            price = round(price * FX_RATES_TO_EUR[curr], 2)
-
     title_nodes = doc.xpath("//meta[@property='og:title']/@content | //title/text()")
     title = str(title_nodes[0]).strip() if title_nodes else ""
+
+    desc_nodes = doc.xpath("//meta[@property='og:description']/@content | //meta[@name='description']/@content")
+    desc = str(desc_nodes[0]).strip() if desc_nodes else ""
 
     img_nodes = doc.xpath("//meta[@property='og:image']/@content")
     img_url = str(img_nodes[0]).strip() if img_nodes else ""
@@ -439,10 +542,12 @@ def extract_from_meta(doc: lxml_html.HtmlElement) -> Optional[Dict[str, Any]]:
 
     return {
         "price": price,
+        "original_currency": curr or "EUR",
         "original_price": None,
         "currency": "EUR",
         "in_stock": in_stock,
         "title": title,
+        "description": desc[:280],
         "image_url": img_url,
         "method": "opengraph-meta",
     }
@@ -451,17 +556,28 @@ def extract_from_meta(doc: lxml_html.HtmlElement) -> Optional[Dict[str, Any]]:
 def extract_from_selectors(doc: lxml_html.HtmlElement, url: str = "") -> Optional[Dict[str, Any]]:
     """Layer 3: Domain-specific XPath/CSS selectors."""
     current_xpaths = [
+        # Amazon
         "//*[@id='corePriceDisplay_desktop_feature_div']//*[contains(@class, 'a-price')]//*[contains(@class, 'a-offscreen')]",
         "//*[@id='corePrice_feature_div']//*[contains(@class, 'a-price')]//*[contains(@class, 'a-offscreen')]",
         "//*[@id='priceblock_ourprice']",
         "//*[@id='priceblock_dealprice']",
+        # Sakura Watches / OpenCart
+        "//*[@id='product']//*[contains(@class, 'price-new')]",
+        "//*[@id='content']//ul[contains(@class, 'list-unstyled')]//h2",
+        "//*[contains(@class, 'price-new')]",
+        # Chrono24
+        "//*[contains(@class, 'js-price-shipping-country')]",
+        "//*[contains(@class, 'detail-page-price')]",
+        # PrestaShop / Ocarat / Horlogers
         "//*[contains(@class, 'current-price-value')]",
         "//*[contains(@class, 'product-price')]//*[contains(@class, 'price')]",
         "//*[@id='our_price_display']",
+        # Catawiki
         "//*[@data-testid='lot-bid-status-section']//*[contains(text(), '€')]",
         "//*[@data-testid='bid-amount']",
         "//*[contains(@class, 'be-lot-details-bidding-panel')]//*[contains(text(), '€')]",
         "//*[contains(@class, 'c-lot-card__price')]",
+        # Generic
         "//*[@data-testid='product-price']",
         "//*[contains(@class, 'f-priceBox-price')]",
         "//*[contains(@class, 'fpPrice')]",
@@ -470,18 +586,6 @@ def extract_from_selectors(doc: lxml_html.HtmlElement, url: str = "") -> Optiona
         "//*[contains(@class, 'special-price')]//*[contains(@class, 'price')]",
         "//*[contains(@class, 'final-price')]",
         "//*[contains(@class, 'price--main')]",
-    ]
-
-    old_price_xpaths = [
-        "//*[contains(@class, 'basisPrice')]//*[contains(@class, 'a-offscreen')]",
-        "//*[contains(@class, 'a-text-price')]//*[contains(@class, 'a-offscreen')]",
-        "//*[contains(@class, 'regular-price')]",
-        "//*[@id='old_price_display']",
-        "//*[contains(@class, 'price-standard')]",
-        "//*[contains(@class, 'old-price')]//*[contains(@class, 'price')]",
-        "//*[contains(@class, 'c-price__old')]",
-        "//del//*[contains(@class, 'price')]",
-        "//s//*[contains(@class, 'price')]",
     ]
 
     price = None
@@ -495,32 +599,25 @@ def extract_from_selectors(doc: lxml_html.HtmlElement, url: str = "") -> Optiona
         if price:
             break
 
-    original_price = None
-    for xp in old_price_xpaths:
-        nodes = doc.xpath(xp)
-        for el in nodes:
-            val = parse_price_string(el.get("content") or el.text_content())
-            if val and (not price or val > price):
-                original_price = val
-                break
-        if original_price:
-            break
-
     title_nodes = doc.xpath("//*[@id='productTitle']/text() | //h1/text() | //title/text()")
     title = str(title_nodes[0]).strip() if title_nodes else ""
+
+    desc_nodes = doc.xpath("//meta[@name='description']/@content | //meta[@property='og:description']/@content")
+    desc = str(desc_nodes[0]).strip() if desc_nodes else ""
 
     img_nodes = doc.xpath("//meta[@property='og:image']/@content | //*[@id='landingImage']/@src")
     img_url = str(img_nodes[0]).strip() if img_nodes else ""
 
-    if not price and not original_price:
+    if not price:
         return None
 
     return {
         "price": price,
-        "original_price": original_price,
+        "original_price": None,
         "currency": "EUR",
         "in_stock": True,
         "title": title,
+        "description": desc[:280],
         "image_url": img_url,
         "method": "css-selector",
     }
@@ -551,7 +648,7 @@ def extract_explicit_fees_and_condition(
     # 1. Condition ("new" vs "used")
     condition = json_ld_condition
     if not condition:
-        if any(k in url_lower for k in ("-used", "occasion", "catawiki.", "vinted.", "leboncoin.")):
+        if any(k in url_lower for k in ("-used", "usedornew=used", "occasion", "catawiki.", "vinted.", "leboncoin.")):
             condition = "used"
         elif re.search(
             r"\b(?:état\s*:\s*(?:occasion|très\s+bon|bon\s+état)|pre-owned|gebraucht|d'occasion|seconde\s+main)\b",
@@ -572,7 +669,6 @@ def extract_explicit_fees_and_condition(
         shipping_detected = True
         shipping_reason = "Indiqué dans les métadonnées livraison de la page"
     elif body_text:
-        # Check explicit free shipping statements first
         if re.search(
             r"(?:livraison\s+(?:gratuite|offerte)|frais\s+de\s+port\s+offerts|port\s+gratuit|free\s+(?:shipping|delivery)|versandkostenfrei|kostenloser\s+versand)",
             body_text,
@@ -582,7 +678,6 @@ def extract_explicit_fees_and_condition(
             shipping_detected = True
             shipping_reason = "Marqué « Livraison gratuite » sur la page"
         else:
-            # Explicit numeric shipping fee patterns on page
             ship_patterns = [
                 r"\+\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€\s*(?:de\s+)?(?:frais\s+de\s+port|livraison|port)",
                 r"(?:frais\s+de\s+port|frais\s+d'expédition|livraison\s+à|shipping(?:\s+cost)?|versand(?:kosten)?)\s*[:\-]?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€",
@@ -645,7 +740,6 @@ def extract_explicit_fees_and_condition(
     carrier_eur = float(imp.get("carrier_fee_eur", 18.0))
     default_jp_ship = float(imp.get("shipping_eur", 24.0))
 
-    # Check explicit Import Fees Deposit on page (e.g. Amazon Global)
     if body_text:
         m_imp_dep = re.search(
             r"(?:acompte\s+frais\s+d'importation|import\s+fees\s+deposit|frais\s+de\s+douane)\s*[:\-]?\s*(\d{1,4}(?:[.,]\d{1,2})?)\s*€",
@@ -663,7 +757,7 @@ def extract_explicit_fees_and_condition(
         non_eu_text = bool(
             body_text
             and re.search(
-                r"(?:expédié\s+depuis\s+(?:le\s+)?japon|ships\s+from\s+japan|location\s*:\s*japan|standort\s*:\s*japan|hors\s+taxes)",
+                r"(?:expédié\s+depuis\s+(?:le\s+)?(?:japon|royaume-uni|suisse|états-unis)|ships\s+from\s+(?:japan|united\s+kingdom|switzerland|us)|location\s*:\s*(?:japan|switzerland|uk|united\s+states)|standort\s*:\s*japan|hors\s+taxes)",
                 body_text,
                 re.I,
             )
@@ -707,6 +801,68 @@ def extract_explicit_fees_and_condition(
     }
 
 
+def extract_metadata_only(doc: lxml_html.HtmlElement, url: str = "") -> Dict[str, Any]:
+    """Extract product metadata (title, description, image_url, brand, reference, ean, asin) even if price is absent."""
+    title_nodes = doc.xpath(
+        "//meta[@property='og:title']/@content | //*[@id='productTitle']/text() | //h1/text() | //title/text()"
+    )
+    title = ""
+    for t in title_nodes:
+        ts = re.sub(r"\s+", " ", str(t)).strip()
+        if ts:
+            title = ts
+            break
+
+    desc_nodes = doc.xpath("//meta[@property='og:description']/@content | //meta[@name='description']/@content")
+    desc = re.sub(r"\s+", " ", str(desc_nodes[0])).strip()[:280] if desc_nodes else ""
+
+    img_nodes = doc.xpath(
+        "//meta[@property='og:image']/@content | //*[@id='landingImage']/@src | //meta[@name='twitter:image']/@content"
+    )
+    img_url = str(img_nodes[0]).strip() if img_nodes else ""
+
+    brand = ""
+    sku = ""
+    ean = ""
+    scripts = doc.xpath(
+        "//script[contains(translate(@type, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'ld+json')]"
+    )
+    for script in scripts:
+        raw_text = script.text_content() or ""
+        try:
+            data = json.loads(raw_text.strip())
+            nodes = data if isinstance(data, list) else [data]
+            for n in nodes:
+                if isinstance(n, dict) and "product" in str(n.get("@type", "")).lower():
+                    b_obj = n.get("brand", "")
+                    brand = brand or (
+                        str(b_obj.get("name", "")) if isinstance(b_obj, dict) else str(b_obj or "")
+                    ).strip()
+                    sku = sku or str(n.get("mpn") or n.get("model") or n.get("sku") or "").strip()
+                    ean = ean or str(n.get("gtin13") or n.get("ean") or n.get("gtin") or "").strip()
+                    if not img_url:
+                        im = n.get("image", "")
+                        if isinstance(im, list) and im:
+                            im = im[0]
+                        if isinstance(im, dict):
+                            im = im.get("url", "")
+                        if isinstance(im, str) and im.startswith("http"):
+                            img_url = im
+        except Exception:
+            continue
+
+    inferred = infer_watch_metadata_from_text(title, url, desc)
+    return {
+        "title": title,
+        "description": desc,
+        "image_url": img_url,
+        "brand": brand or inferred["brand"],
+        "reference": sku or inferred["reference"],
+        "ean": ean,
+        "asin": inferred["asin"],
+    }
+
+
 def extract_from_html(html_str: str, url: str = "") -> Optional[Dict[str, Any]]:
     """Run all HTML extraction layers in priority order and enrich missing fields."""
     if not html_str or not html_str.strip():
@@ -725,15 +881,12 @@ def extract_from_html(html_str: str, url: str = "") -> Optional[Dict[str, Any]]:
     if not primary:
         return None
 
-    for extra in (res_meta, res_sel):
+    meta_fallback = extract_metadata_only(doc, url)
+    for extra in (res_meta, res_sel, meta_fallback):
         if extra:
-            if not primary.get("original_price") and extra.get("original_price"):
-                if extra["original_price"] > primary["price"]:
-                    primary["original_price"] = extra["original_price"]
-            if not primary.get("title") and extra.get("title"):
-                primary["title"] = extra["title"]
-            if not primary.get("image_url") and extra.get("image_url"):
-                primary["image_url"] = extra["image_url"]
+            for field_name in ("title", "description", "image_url", "original_price", "brand", "reference", "ean", "asin"):
+                if not primary.get(field_name) and extra.get(field_name):
+                    primary[field_name] = extra[field_name]
 
     return primary
 
@@ -763,13 +916,12 @@ def inspect_product_url(
     url: str,
     html_str: Optional[str] = None,
     timeout: int = 12,
-    use_playwright_fallback: bool = False,
+    use_playwright_fallback: bool = True,
     import_settings: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
-    Inspect a product URL before adding it to a watch card:
-    returns merchant, title, image_url, condition, base_price, and any explicitly
-    detectable shipping_fee, site_fee, and customs_fee (or None when user input is needed).
+    Inspect a product URL: returns merchant, title, brand, reference, ean, asin,
+    description, image_url, condition, base_price, and any explicitly detectable fees.
     """
     merchant = infer_merchant_name(url)
     fetch_error = None
@@ -784,10 +936,19 @@ def inspect_product_url(
         except Exception as exc:
             fetch_error = str(exc)
 
-        if not html_str and use_playwright_fallback:
-            html_str = fetch_html_playwright(url, timeout_ms=timeout * 1000)
+        if (not html_str or not extract_from_html(html_str, url)) and use_playwright_fallback:
+            pw_html = fetch_html_playwright(url, timeout_ms=timeout * 1000)
+            if pw_html:
+                html_str = pw_html
 
     extracted = extract_from_html(html_str, url) if html_str else None
+    meta_only: Dict[str, Any] = {}
+    if html_str and not extracted:
+        try:
+            meta_only = extract_metadata_only(lxml_html.fromstring(html_str), url)
+        except Exception:
+            meta_only = {}
+
     base_price = extracted.get("price") if extracted else None
     fees = extract_explicit_fees_and_condition(
         html_str=html_str or "",
@@ -798,12 +959,22 @@ def inspect_product_url(
         import_settings=import_settings,
     )
 
+    title = (extracted.get("title") if extracted else "") or meta_only.get("title", "")
+    description = (extracted.get("description") if extracted else "") or meta_only.get("description", "")
+    inferred = infer_watch_metadata_from_text(title, url, description)
+
     return {
         "url": url,
         "merchant": merchant,
-        "title": (extracted.get("title") if extracted else "") or "",
-        "image_url": (extracted.get("image_url") if extracted else "") or "",
+        "title": title,
+        "description": description,
+        "brand": (extracted.get("brand") if extracted else "") or meta_only.get("brand", "") or inferred["brand"],
+        "reference": (extracted.get("reference") if extracted else "") or meta_only.get("reference", "") or inferred["reference"],
+        "ean": (extracted.get("ean") if extracted else "") or meta_only.get("ean", ""),
+        "asin": (extracted.get("asin") if extracted else "") or meta_only.get("asin", "") or inferred["asin"],
+        "image_url": (extracted.get("image_url") if extracted else "") or meta_only.get("image_url", ""),
         "base_price": base_price,
+        "original_currency": (extracted.get("original_currency") if extracted else "EUR") or "EUR",
         "condition": fees["condition"],
         "shipping_fee": fees["shipping_fee"],
         "shipping_detected": fees["shipping_detected"],
@@ -831,11 +1002,7 @@ def scrape_offer(
     use_playwright_fallback: bool = True,
     import_settings: Optional[Dict[str, Any]] = None,
 ) -> OfferResult:
-    """
-    Scrape a single user-configured product URL and apply either:
-    - User-specified fees (shipping_fee / site_fee / customs_fee when not None), OR
-    - Explicitly detected fees on the product page (falling back to 0.0).
-    """
+    """Scrape a user-configured product URL and apply explicit or auto-detected fees."""
     merchant_name = infer_merchant_name(url, merchant)
     now_iso = datetime.now(timezone.utc).isoformat()
 

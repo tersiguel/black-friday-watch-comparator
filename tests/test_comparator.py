@@ -30,8 +30,67 @@ class TestKeepaWatchComparator(unittest.TestCase):
     def test_parse_price_string_formats(self):
         self.assertEqual(parse_price_string("129,99 €"), 129.99)
         self.assertEqual(parse_price_string("1 249,90 €"), 1249.90)
+        self.assertEqual(parse_price_string("1.315,00 €"), 1315.00)
         self.assertEqual(parse_price_string("94€90"), 94.90)
         self.assertEqual(parse_price_string("Citizen CB1160-55E à 435,89 €"), 435.89)
+        self.assertAlmostEqual(parse_price_string("US $335.00"), 308.20, places=2)
+        self.assertAlmostEqual(parse_price_string("¥49,280", currency_hint="JPY"), 300.61, places=2)
+
+    def test_inspect_url_extracts_multicurrency_and_watch_metadata(self):
+        html_sakura = """
+        <html>
+          <head>
+            <meta property="og:image" content="https://www.sakurawatches.com/image/cache/cb1160-55e.jpg" />
+            <script type="application/ld+json">
+            {
+              "@context": "https://schema.org/",
+              "@type": "Product",
+              "name": "Citizen Collection Super Titanium CB1160-55E",
+              "description": "Montre radio-pilotée Eco-Drive H149 en Super Titanium.",
+              "brand": {"@type": "Brand", "name": "Citizen"},
+              "mpn": "CB1160-55E",
+              "gtin13": "4974374356307",
+              "offers": {
+                "@type": "Offer",
+                "priceCurrency": "JPY",
+                "price": "51200",
+                "itemCondition": "https://schema.org/NewCondition"
+              }
+            }
+            </script>
+          </head>
+          <body><h1>Citizen CB1160-55E</h1></body>
+        </html>
+        """
+        res = inspect_product_url(
+            "https://www.sakurawatches.com/citizen-collection-cb1160-55e-15415",
+            html_str=html_sakura,
+        )
+        self.assertEqual(res["brand"], "Citizen")
+        self.assertEqual(res["reference"], "CB1160-55E")
+        self.assertEqual(res["ean"], "4974374356307")
+        self.assertEqual(res["image_url"], "https://www.sakurawatches.com/image/cache/cb1160-55e.jpg")
+        self.assertEqual(res["original_currency"], "JPY")
+        self.assertAlmostEqual(res["base_price"], 312.32, places=2)
+        self.assertEqual(res["shipping_fee"], 24.0)
+        self.assertTrue(res["customs_detected"])
+
+        # Metadata fallback when ASIN is in Amazon URL even if price is hidden by anti-bot
+        html_amz_no_price = """
+        <html>
+          <head><meta property="og:title" content="Junghans Max Bill MEGA Solar 059/2020.02" /></head>
+          <body><h1>Junghans Max Bill MEGA Solar 059/2020.02</h1></body>
+        </html>
+        """
+        res_amz = inspect_product_url(
+            "https://www.amazon.fr/dp/B07H4K9L2P",
+            html_str=html_amz_no_price,
+            use_playwright_fallback=False,
+        )
+        self.assertEqual(res_amz["brand"], "Junghans")
+        self.assertEqual(res_amz["reference"], "059/2020.02")
+        self.assertEqual(res_amz["asin"], "B07H4K9L2P")
+        self.assertIsNone(res_amz["base_price"])
 
     def test_inspect_url_prefills_clear_fees_or_leaves_manual(self):
         # 1. Explicit shipping & used condition stated in clear text on page

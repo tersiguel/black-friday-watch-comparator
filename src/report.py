@@ -1049,7 +1049,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     .url-inspect-row {
       display: flex;
       gap: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 8px;
       flex-wrap: wrap;
     }
     .url-inspect-row input {
@@ -1061,6 +1061,67 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       background: var(--bg-card);
       color: var(--text-main);
       font-size: 13.5px;
+    }
+
+    .live-fetch-banner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      padding: 7px 11px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+    .live-fetch-banner.is-loading {
+      background: var(--new-bg);
+      border-color: var(--new-border);
+      color: var(--new-color);
+      font-weight: 500;
+    }
+    .live-fetch-banner.is-ok {
+      background: var(--success-bg);
+      border-color: var(--success-border);
+      color: var(--success);
+      font-weight: 500;
+    }
+    .live-fetch-banner.is-warn {
+      background: var(--used-bg);
+      border-color: var(--used-border);
+      color: var(--used-color);
+      font-weight: 500;
+    }
+
+    .mini-spin {
+      width: 13px;
+      height: 13px;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+      animation: spinAnim 0.65s linear infinite;
+    }
+    @keyframes spinAnim {
+      to { transform: rotate(360deg); }
+    }
+
+    .auto-import-box {
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background: var(--new-bg);
+      border: 1px solid var(--new-border);
+      margin-bottom: 16px;
+    }
+    .auto-import-box label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--new-color);
+      margin-bottom: 6px;
     }
 
     .url-form-grid {
@@ -1304,6 +1365,17 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         <button class="icon-btn" onclick="closeModal('addProductModal')">✕</button>
       </div>
       <form onsubmit="submitNewProduct(event)">
+        <div class="auto-import-box">
+          <label for="npSourceUrl">🔗 Collez une URL produit pour tout remplir automatiquement (optionnel)</label>
+          <div class="url-inspect-row" style="margin-bottom:6px;">
+            <input type="url" id="npSourceUrl" placeholder="https://ocarat.com/... ou Amazon, Chrono24, Sakura, Catawiki..." onpaste="onNewProductUrlPaste()" oninput="onNewProductUrlInput()" />
+            <button type="button" class="btn btn-primary btn-sm" id="npInspectBtn" onclick="inspectNewProductUrl(true)">🔄 Récupérer</button>
+          </div>
+          <div class="live-fetch-banner" id="npLiveBanner" style="margin-bottom:0;">
+            <span>Collez un lien : la marque, la référence, la photo, le prix et les frais seront extraits automatiquement.</span>
+          </div>
+        </div>
+
         <div class="url-form-grid">
           <div class="field-group">
             <label>Marque *</label>
@@ -1635,6 +1707,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             <td class="mono-num">${Number(u.customs_fee || 0) > 0 ? '+ ' + fmtEur(u.customs_fee) : '0,00 €'}</td>
             <td class="total-cell ${totalClass}">${fmtEur(u.total_price)}</td>
             <td style="text-align:right; white-space:nowrap;">
+              <button class="btn btn-outline btn-sm" onclick="refreshSingleTrackedUrl('${escapeHtml(w.id)}', ${idx}, this)" title="Récupérer automatiquement le prix actuel sur la page">🔄</button>
               <button class="btn btn-outline btn-sm" onclick="openEditUrlDrawer('${escapeHtml(w.id)}', ${idx})" title="Modifier le prix ou les frais">✏️ Frais</button>
               <button class="icon-btn" onclick="deleteUrlFromWatch('${escapeHtml(w.id)}', ${idx})" title="Supprimer cette page produit">🗑️</button>
             </td>
@@ -1844,10 +1917,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
               <input type="hidden" id="uf-edit-idx-${escapeHtml(w.id)}" value="-1" />
 
               <div class="url-inspect-row">
-                <input type="url" required id="uf-url-${escapeHtml(w.id)}" placeholder="Collez l'URL de la page produit (Amazon, Ocarat, Chrono24, Catawiki, Sakura...)" onblur="autoInspectUrlOnBlur('${escapeHtml(w.id)}')" />
-                <button type="button" class="btn btn-outline" id="uf-inspect-btn-${escapeHtml(w.id)}" onclick="inspectAndPrefillUrl('${escapeHtml(w.id)}')">
-                  🔎 Analyser le site & Pré-remplir
+                <input type="url" required id="uf-url-${escapeHtml(w.id)}" placeholder="Collez l'URL de la page produit (Amazon, Ocarat, Chrono24, Catawiki, Sakura...)" onpaste="onUrlFieldPaste('${escapeHtml(w.id)}')" oninput="onUrlFieldInput('${escapeHtml(w.id)}')" onblur="onUrlFieldInput('${escapeHtml(w.id)}', true)" />
+                <button type="button" class="btn btn-outline" id="uf-inspect-btn-${escapeHtml(w.id)}" onclick="inspectAndPrefillUrl('${escapeHtml(w.id)}', true)">
+                  🔄 Actualiser depuis l'URL
                 </button>
+              </div>
+              <div class="live-fetch-banner" id="uf-live-banner-${escapeHtml(w.id)}">
+                <span>Collez une URL produit ci-dessus : le prix, le marchand, l'état et les frais sont récupérés automatiquement.</span>
               </div>
 
               <div class="url-form-grid">
@@ -2113,14 +2189,181 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       }
     }
 
-    /* URL Fee Auto-Detection & Management */
-    const urlFeeAutoState = {}; // watchId -> { shipMode: 'auto'|'manual', siteMode: 'auto'|'manual', custMode: 'auto'|'manual', ruleType: '' }
+    /* Live URL Auto-Scraper & Fee Pre-Filler (Browser CORS + Headless Reader + Local Server) */
+    const urlFeeAutoState = {}; // watchId -> { shipMode, siteMode, custMode, ruleType, pendingMeta }
+    const urlInputTimers = {};
+    const lastInspectedByWatch = {};
+    const inspectRequestSeq = {};
+    let npUrlTimer = null;
+    let npLastInspectedUrl = '';
+    let npFetchedInitialOffer = null;
+
+    let fxRatesLoaded = false;
+    const fxRatesToEur = {
+      EUR: 1.0,
+      USD: 0.92,
+      GBP: 1.18,
+      CHF: 1.06,
+      JPY: 0.0061
+    };
+
+    const KNOWN_WATCH_BRANDS = [
+      'Citizen', 'Seiko', 'Casio', 'Junghans', 'Tissot', 'Orient', 'Hamilton',
+      'Longines', 'Omega', 'Certina', 'Mido', 'Sinn', 'Bulova', 'Timex',
+      'Garmin', 'Lip', 'Yema', 'Baltic'
+    ];
+
+    function isValidHttpUrl(str) {
+      if (!str || str.length < 10) return false;
+      try {
+        const u = new URL(str.trim());
+        return (u.protocol === 'http:' || u.protocol === 'https:') && u.hostname.includes('.');
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async function fetchWithTimeout(resource, options = {}, timeoutMs = 6800) {
+      const ctrl = new AbortController();
+      const id = setTimeout(() => ctrl.abort(), timeoutMs);
+      try {
+        return await fetch(resource, { ...options, signal: ctrl.signal });
+      } finally {
+        clearTimeout(id);
+      }
+    }
+
+    async function ensureLiveFxRates() {
+      if (fxRatesLoaded) return;
+      fxRatesLoaded = true;
+      try {
+        const resp = await fetchWithTimeout('https://api.frankfurter.app/latest?from=EUR&to=USD,GBP,CHF,JPY', {}, 2500);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data && data.rates) {
+            for (const [k, v] of Object.entries(data.rates)) {
+              if (Number(v) > 0) fxRatesToEur[k] = 1 / Number(v);
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
+    function detectCurrencyJs(text, hint = '') {
+      const h = String(hint || '').trim().toUpperCase();
+      if (fxRatesToEur[h]) return h;
+      const s = String(text || '');
+      if (s.includes('€') || /\bEUR\b/i.test(s)) return 'EUR';
+      if (/US\s*\$|\bUSD\b|\$/i.test(s)) return 'USD';
+      if (s.includes('£') || /\bGBP\b/i.test(s)) return 'GBP';
+      if (/\bCHF\b/i.test(s)) return 'CHF';
+      if (s.includes('¥') || s.includes('￥') || s.includes('円') || /\bJPY\b/i.test(s)) return 'JPY';
+      return 'EUR';
+    }
+
+    function parseAmountToEur(raw, minVal = 0, maxVal = 25000, currencyHint = '') {
+      if (raw === null || raw === undefined || raw === '') return null;
+      if (typeof raw === 'number') {
+        if (isNaN(raw)) return null;
+        const curr = detectCurrencyJs('', currencyHint);
+        const eur = Math.round(raw * (fxRatesToEur[curr] || 1) * 100) / 100;
+        return (eur >= minVal && eur <= maxVal) ? { eur, rawVal: raw, currency: curr } : null;
+      }
+
+      const text = String(raw).replace(/[\u00A0\u202F]/g, ' ').trim();
+      if (!text) return null;
+      const curr = detectCurrencyJs(text, currencyHint);
+
+      // French split euro format e.g. "429 € 90"
+      const mSplit = text.match(/(\d[\d\s.]*)\s*€\s*(\d{2})\b/);
+      if (mSplit) {
+        const whole = mSplit[1].replace(/[^\d]/g, '');
+        const val = parseFloat(whole + '.' + mSplit[2]);
+        if (!isNaN(val) && val >= minVal && val <= maxVal) {
+          return { eur: Math.round(val * 100) / 100, rawVal: val, currency: 'EUR' };
+        }
+      }
+
+      let numStr = '';
+      const mCurr = text.match(/(?:(?:€|EUR|US\s*\$|\$|£|GBP|CHF|¥|￥|JPY)\s*(\d{1,3}(?:[\s.,]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)|(\d{1,3}(?:[\s.,]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)\s*(?:€|EUR\b|USD\b|\$|£|GBP\b|CHF\b|¥|￥|JPY\b|円))/i);
+      if (mCurr) {
+        numStr = (mCurr[1] || mCurr[2] || '').trim();
+      } else {
+        const mPlain = text.match(/(?:^|[^A-Za-z0-9-])(\d{1,3}(?:[\s.]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)(?![A-Za-z0-9])/);
+        if (!mPlain) return null;
+        numStr = mPlain[1];
+      }
+
+      numStr = numStr.replace(/\s+/g, '');
+      if (numStr.includes('.') && numStr.includes(',')) {
+        if (numStr.lastIndexOf(',') > numStr.lastIndexOf('.')) {
+          numStr = numStr.replace(/\./g, '').replace(',', '.');
+        } else {
+          numStr = numStr.replace(/,/g, '');
+        }
+      } else if (numStr.includes(',')) {
+        const parts = numStr.split(',');
+        if (parts[parts.length - 1].length <= 2) {
+          numStr = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
+        } else {
+          numStr = parts.join('');
+        }
+      } else if (numStr.includes('.')) {
+        const parts = numStr.split('.');
+        if (parts[parts.length - 1].length === 3 && (curr === 'EUR' || curr === 'JPY')) {
+          numStr = parts.join('');
+        }
+      }
+
+      const rawVal = parseFloat(numStr);
+      if (isNaN(rawVal)) return null;
+      const eur = Math.round(rawVal * (fxRatesToEur[curr] || 1) * 100) / 100;
+      if (eur < minVal || eur > maxVal) return null;
+      return { eur, rawVal, currency: curr };
+    }
+
+    function inferWatchMetadataJs(title, url, description = '') {
+      const combined = `${title || ''} ${description || ''} ${url || ''}`;
+      let brand = '';
+      for (const b of KNOWN_WATCH_BRANDS) {
+        const re = new RegExp(`\\b${b}\\b`, 'i');
+        if (re.test(combined)) { brand = b; break; }
+      }
+
+      let reference = '';
+      const upperHay = `${title || ''} ${(url || '').toUpperCase()}`;
+      const refPatterns = [
+        /\b([A-Z]{2,5}-?[A-Z0-9]{2,6}-[A-Z0-9]{2,5})\b/,
+        /\b(0?\d{2}\/\d{4}\.\d{2})\b/,
+        /\b([A-Z]{3,4}\d{3,4}[A-Z0-9]{0,3})\b/
+      ];
+      for (const pat of refPatterns) {
+        const m = upperHay.match(pat);
+        if (m && m[1] && !m[1].startsWith('HTTP') && m[1] !== 'HTML' && m[1] !== 'UTF-8') {
+          reference = m[1];
+          break;
+        }
+      }
+
+      let asin = '';
+      const mAsin = (url || '').match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})\b/i);
+      if (mAsin) asin = mAsin[1].toUpperCase();
+
+      return { brand, reference, asin };
+    }
 
     function setHint(id, text, cls) {
       const el = document.getElementById(id);
       if (!el) return;
       el.textContent = text || '';
       el.className = 'fee-status-hint ' + (cls || '');
+    }
+
+    function setLiveBanner(elId, html, stateCls = '') {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      el.className = 'live-fetch-banner' + (stateCls ? ' ' + stateCls : '');
+      el.innerHTML = html;
     }
 
     function markManualFee(watchId, kind) {
@@ -2141,7 +2384,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       document.getElementById(`uf-site-${watchId}`).value = '';
       document.getElementById(`uf-cust-${watchId}`).value = '';
       ['merch', 'cond', 'base', 'ship', 'site', 'cust'].forEach(k => setHint(`uf-${k}-hint-${watchId}`, '', ''));
-      urlFeeAutoState[watchId] = { shipMode: 'auto', siteMode: 'auto', custMode: 'auto', ruleType: '' };
+      setLiveBanner(`uf-live-banner-${watchId}`, '<span>Collez une URL produit ci-dessus : le prix, le marchand, l\'état et les frais sont récupérés automatiquement.</span>', '');
+      lastInspectedByWatch[watchId] = '';
+      urlFeeAutoState[watchId] = { shipMode: 'auto', siteMode: 'auto', custMode: 'auto', ruleType: '', pendingMeta: null };
       recalcUrlPreview(watchId);
       drawer.classList.add('open');
       document.getElementById(`uf-url-${watchId}`).focus();
@@ -2152,7 +2397,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       if (!w || !w.urls[idx]) return;
       const u = w.urls[idx];
       const drawer = document.getElementById(`url-drawer-${watchId}`);
-      document.getElementById(`url-drawer-title-${watchId}`).textContent = `✏️ Modifier les frais — ${u.merchant}`;
+      document.getElementById(`url-drawer-title-${watchId}`).textContent = `✏️ Modifier le prix ou les frais — ${u.merchant}`;
       document.getElementById(`uf-edit-idx-${watchId}`).value = String(idx);
       document.getElementById(`uf-url-${watchId}`).value = u.url;
       document.getElementById(`uf-merchant-${watchId}`).value = u.merchant || '';
@@ -2162,7 +2407,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       document.getElementById(`uf-site-${watchId}`).value = u.site_fee ?? 0;
       document.getElementById(`uf-cust-${watchId}`).value = u.customs_fee ?? 0;
       ['merch', 'cond', 'base', 'ship', 'site', 'cust'].forEach(k => setHint(`uf-${k}-hint-${watchId}`, '', ''));
-      urlFeeAutoState[watchId] = { shipMode: 'manual', siteMode: 'manual', custMode: 'manual', ruleType: '' };
+      setLiveBanner(`uf-live-banner-${watchId}`, '<span>Cliquez sur <strong>🔄 Actualiser depuis l\'URL</strong> pour relire le prix en direct sur la page, ou ajustez librement les champs.</span>', '');
+      lastInspectedByWatch[watchId] = u.url;
+      urlFeeAutoState[watchId] = { shipMode: 'manual', siteMode: 'manual', custMode: 'manual', ruleType: '', pendingMeta: null };
       recalcUrlPreview(watchId);
       drawer.classList.add('open');
     }
@@ -2193,7 +2440,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       document.getElementById(`uf-cond-${watchId}`).value = s.condition || 'new';
       if (s.estimated_base_price !== null && s.estimated_base_price !== undefined) {
         document.getElementById(`uf-base-${watchId}`).value = s.estimated_base_price;
-        setHint(`uf-base-hint-${watchId}`, 'Prix indicatif pré-rempli (ajustable)', 'auto-ok');
+        setHint(`uf-base-hint-${watchId}`, 'Prix indicatif pré-rempli', 'auto-ok');
       }
       if (s.shipping_fee !== null && s.shipping_fee !== undefined) {
         document.getElementById(`uf-ship-${watchId}`).value = s.shipping_fee;
@@ -2208,6 +2455,12 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         setHint(`uf-cust-hint-${watchId}`, '✓ Douane pré-remplie', 'auto-ok');
       }
       recalcUrlPreview(watchId);
+
+      // Automatically fetch live price if it's a direct product page or has no price yet
+      const isSearchPage = /[?&](?:k|q|s|query)=/i.test(s.url);
+      if (!isSearchPage) {
+        inspectAndPrefillUrl(watchId, true);
+      }
     }
 
     function clientSideSiteRules(url, basePrice) {
@@ -2218,20 +2471,29 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       const merchantMap = {
         'amazon.fr': 'Amazon.fr',
         'amazon.de': 'Amazon.de',
+        'amazon.es': 'Amazon.es',
+        'amazon.it': 'Amazon.it',
+        'amazon.co.jp': 'Amazon.co.jp',
+        'amazon.co.uk': 'Amazon.co.uk',
+        'amazon.com': 'Amazon.com',
         'ocarat.com': 'Ocarat',
         'montresandco.com': 'Montres & Co',
         'lepage.fr': 'Lepage',
+        'histoiredeor.com': 'Histoire d\'Or',
         'chrono24.fr': 'Chrono24',
         'chrono24.com': 'Chrono24',
         'catawiki.com': 'Catawiki',
         'vinted.fr': 'Vinted',
         'leboncoin.fr': 'Leboncoin',
         'ebay.fr': 'eBay.fr',
+        'ebay.com': 'eBay',
         'sakurawatches.com': 'Sakura Watches (Tokyo)',
         'shoppinginjapan.net': 'Shopping In Japan',
         'seiyajapan.com': 'SeiyaJapan',
+        'discovery-japan.me': 'Discovery Japan',
         'creationwatches.com': 'CreationWatches',
         'gnomonwatches.com': 'Gnomon Watches',
+        'timeshop4you.co.uk': 'Timeshop4you (UK)',
         'citizenwatch.eu': 'Citizen Store EU',
         'casio.com': 'Casio Officiel',
         'uhr24.de': 'Uhr24.de',
@@ -2239,8 +2501,15 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         'irisimo.com': 'Irisimo',
         'zeitlounge.com': 'Zeitlounge',
         'luna-time.fr': 'Luna-Time',
+        'luna-time.nl': 'Luna-Time NL',
         'mastersintime.com': 'Masters In Time',
-        'rm-time.com': 'RM-Time'
+        'watchxl.com': 'WatchXL',
+        'rm-time.com': 'RM-Time',
+        'watchhouse.de': 'Watchhouse.de',
+        'fnac.com': 'Fnac',
+        'darty.com': 'Darty',
+        'boulanger.com': 'Boulanger',
+        'cdiscount.com': 'Cdiscount'
       };
 
       let merchant = '';
@@ -2252,8 +2521,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       const isUsedUrl = u.includes('used') || u.includes('occasion') || host.includes('catawiki') || host.includes('vinted') || host.includes('leboncoin');
       const condition = isUsedUrl ? 'used' : 'new';
 
-      const nonEuDomains = ['sakurawatches.com', 'shoppinginjapan.net', 'seiyajapan.com', 'discovery-japan.me', 'creationwatches.com', 'gnomonwatches.com', 'timeshop4you.co.uk'];
-      const euDomains = ['amazon.fr', 'amazon.de', 'ocarat.com', 'montresandco.com', 'lepage.fr', 'citizenwatch.eu', 'casio.com', 'uhr24.de', 'helveti.eu', 'irisimo.com', 'zeitlounge.com', 'luna-time.fr', 'mastersintime.com', 'rm-time.com'];
+      const nonEuDomains = ['sakurawatches.com', 'shoppinginjapan.net', 'seiyajapan.com', 'discovery-japan.me', 'creationwatches.com', 'gnomonwatches.com', 'timeshop4you.co.uk', 'amazon.co.jp', 'amazon.com', 'amazon.co.uk'];
+      const euDomains = ['amazon.fr', 'amazon.de', 'amazon.es', 'amazon.it', 'ocarat.com', 'montresandco.com', 'lepage.fr', 'histoiredeor.com', 'citizenwatch.eu', 'casio.com', 'uhr24.de', 'helveti.eu', 'irisimo.com', 'zeitlounge.com', 'luna-time.fr', 'luna-time.nl', 'mastersintime.com', 'watchxl.com', 'rm-time.com', 'watchhouse.de', 'fnac.com', 'darty.com', 'boulanger.com', 'cdiscount.com'];
 
       const isNonEu = nonEuDomains.some(d => host === d || host.endsWith('.' + d));
       const isEu = euDomains.some(d => host === d || host.endsWith('.' + d));
@@ -2295,7 +2564,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         }
       } else if (isEu) {
         ship = 0.0;
-        shipReason = '✓ Livraison standard UE offerte (vérifier si < seuil)';
+        shipReason = '✓ Livraison standard UE offerte';
         cust = 0.0;
         custReason = '✓ Boutique UE TTC (0 € de douane)';
       }
@@ -2303,56 +2572,591 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       return { merchant, condition, ship, shipReason, site, siteReason, cust, custReason, ruleType };
     }
 
-    function autoInspectUrlOnBlur(watchId) {
-      const editIdx = Number(document.getElementById(`uf-edit-idx-${watchId}`).value);
-      if (editIdx >= 0) return;
-      const urlVal = document.getElementById(`uf-url-${watchId}`).value.trim();
-      if (urlVal && !document.getElementById(`uf-merchant-${watchId}`).value) {
-        inspectAndPrefillUrl(watchId);
+    function extractExplicitTextSignals(bodyText, url, basePrice, jsonLdShip, jsonLdCond) {
+      const text = String(bodyText || '').replace(/\s+/g, ' ');
+      const rules = clientSideSiteRules(url, basePrice || 0);
+
+      let condition = jsonLdCond || null;
+      if (!condition) {
+        if (rules.condition === 'used' || /\b(?:état\s*:\s*(?:occasion|très\s+bon|bon\s+état)|pre-owned|gebraucht|d'occasion|seconde\s+main)\b/i.test(text)) {
+          condition = 'used';
+        } else {
+          condition = 'new';
+        }
       }
+
+      let shipping_fee = null, shipping_detected = false, shipping_reason = '';
+      if (jsonLdShip !== null && jsonLdShip !== undefined) {
+        shipping_fee = jsonLdShip;
+        shipping_detected = true;
+        shipping_reason = 'Indiqué dans les métadonnées livraison de la page';
+      } else if (/(?:livraison\s+(?:gratuite|offerte)|frais\s+de\s+port\s+offerts|port\s+gratuit|free\s+(?:shipping|delivery)|versandkostenfrei|kostenloser\s+versand)/i.test(text)) {
+        shipping_fee = 0;
+        shipping_detected = true;
+        shipping_reason = 'Marqué « Livraison gratuite » sur la page';
+      } else {
+        const shipPats = [
+          /\+\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€\s*(?:de\s+)?(?:frais\s+de\s+port|livraison|port)/i,
+          /(?:frais\s+de\s+port|frais\s+d'expédition|livraison\s+à|shipping(?:\s+cost)?|versand(?:kosten)?)\s*[:\-]?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€/i,
+          /(?:shipping|delivery)\s*[:\-]?\s*€\s*(\d{1,3}(?:[.,]\d{1,2})?)/i,
+          /zzgl\.?\s*(\d{1,3}(?:[.,]\d{1,2})?)\s*€\s*versand/i
+        ];
+        for (const pat of shipPats) {
+          const m = text.match(pat);
+          if (m && m[1]) {
+            const p = parseAmountToEur(m[1], 0, 300, 'EUR');
+            if (p) {
+              shipping_fee = p.eur;
+              shipping_detected = true;
+              shipping_reason = `Marqué en clair sur la page (${fmtEur(p.eur)})`;
+              break;
+            }
+          }
+        }
+      }
+
+      let customs_fee = null, customs_detected = false, customs_reason = '';
+      const nonEuSeller = /(?:expédié\s+depuis\s+(?:le\s+)?(?:japon|royaume-uni|suisse|états-unis)|ships\s+from\s+(?:japan|united\s+kingdom|switzerland|us)|location\s*:\s*(?:japan|switzerland|uk|united\s+states)|standort\s*:\s*japan|hors\s+taxes)/i.test(text);
+      if (nonEuSeller && basePrice > 0) {
+        const effShip = shipping_fee !== null ? shipping_fee : 24.0;
+        if (shipping_fee === null) {
+          shipping_fee = 24.0;
+          shipping_detected = true;
+          shipping_reason = 'Forfait international hors-UE (~24 €)';
+        }
+        customs_fee = Math.round(((basePrice + effShip + 0.80) * 0.20 + 0.80 + 18.0) * 100) / 100;
+        customs_detected = true;
+        customs_reason = 'Vendeur hors-UE : TVA 20 % + douane + dossier';
+      }
+
+      return {
+        condition,
+        shipping_fee: shipping_detected ? shipping_fee : rules.ship,
+        shipping_detected: shipping_detected || (rules.ship !== null),
+        shipping_reason: shipping_detected ? shipping_reason : rules.shipReason.replace(/^✓\s*/, ''),
+        site_fee: rules.site,
+        site_fee_detected: rules.site !== null,
+        site_fee_reason: rules.siteReason.replace(/^✓\s*/, ''),
+        customs_fee: customs_detected ? customs_fee : rules.cust,
+        customs_detected: customs_detected || (rules.cust !== null),
+        customs_reason: customs_detected ? customs_reason : rules.custReason.replace(/^✓\s*/, ''),
+        ruleType: nonEuSeller ? 'japan_import' : rules.ruleType
+      };
     }
 
-    async function inspectAndPrefillUrl(watchId) {
-      const urlInput = document.getElementById(`uf-url-${watchId}`);
-      const url = urlInput.value.trim();
-      if (!url) return;
+    function extractFromHtmlDom(htmlStr, url) {
+      if (!htmlStr || htmlStr.length < 200) return null;
+      const doc = new DOMParser().parseFromString(htmlStr, 'text/html');
 
-      const btn = document.getElementById(`uf-inspect-btn-${watchId}`);
-      const oldLabel = btn.textContent;
-      btn.textContent = '⏳ Analyse de la page...';
-      btn.disabled = true;
+      let base_price = null;
+      let original_currency = 'EUR';
+      let title = '';
+      let description = '';
+      let brand = '';
+      let reference = '';
+      let ean = '';
+      let image_url = '';
+      let jsonLdCond = null;
+      let jsonLdShip = null;
 
-      let inspected = null;
+      // 1. JSON-LD Product / Offer
+      const walkOffer = (offers) => {
+        if (!offers) return null;
+        if (Array.isArray(offers)) {
+          const list = offers.map(walkOffer).filter(x => x && x.eur > 0);
+          list.sort((a, b) => a.eur - b.eur);
+          return list[0] || null;
+        }
+        if (typeof offers === 'object') {
+          let spec = offers.priceSpecification;
+          if (Array.isArray(spec)) spec = spec[0];
+          const curr = String(offers.priceCurrency || (spec && spec.priceCurrency) || 'EUR').toUpperCase();
+          const rawP = offers.price ?? offers.lowPrice ?? (spec && spec.price);
+          const parsed = parseAmountToEur(rawP, 5, 25000, curr);
+          if (!parsed && offers.offers) return walkOffer(offers.offers);
+          if (parsed) {
+            const condRaw = String(offers.itemCondition || '').toLowerCase();
+            let cond = null;
+            if (/used|refurbished|secondhand/.test(condRaw)) cond = 'used';
+            else if (/new/.test(condRaw)) cond = 'new';
 
-      // 1. Try local Python server /api/inspect-url if running
+            let shipVal = null;
+            let sd = offers.shippingDetails;
+            if (Array.isArray(sd)) sd = sd[0];
+            if (sd && sd.shippingRate && sd.shippingRate.value !== undefined) {
+              const sp = parseAmountToEur(sd.shippingRate.value, 0, 500, sd.shippingRate.currency || curr);
+              if (sp) shipVal = sp.eur;
+            }
+            return { eur: parsed.eur, currency: parsed.currency, cond, shipVal };
+          }
+        }
+        return null;
+      };
+
+      const walkLd = (node) => {
+        if (!node) return;
+        if (Array.isArray(node)) { node.forEach(walkLd); return; }
+        if (typeof node !== 'object') return;
+        const t = Array.isArray(node['@type']) ? node['@type'].join(' ') : String(node['@type'] || '');
+        if (/product/i.test(t)) {
+          if (!title && node.name) title = String(node.name).trim();
+          if (!description && node.description) description = String(node.description).replace(/\s+/g, ' ').trim().slice(0, 280);
+          if (!brand && node.brand) {
+            brand = typeof node.brand === 'object' ? String(node.brand.name || '').trim() : String(node.brand).trim();
+          }
+          if (!reference) reference = String(node.mpn || node.model || node.sku || '').trim();
+          if (!ean) ean = String(node.gtin13 || node.ean || node.gtin || '').trim();
+          if (!image_url && node.image) {
+            let im = Array.isArray(node.image) ? node.image[0] : node.image;
+            if (im && typeof im === 'object') im = im.url;
+            if (typeof im === 'string' && im.startsWith('http')) image_url = im;
+          }
+          if (base_price === null && node.offers) {
+            const off = walkOffer(node.offers);
+            if (off) {
+              base_price = off.eur;
+              original_currency = off.currency;
+              jsonLdCond = off.cond;
+              jsonLdShip = off.shipVal;
+            }
+          }
+        }
+        if (node['@graph']) walkLd(node['@graph']);
+        if (node.mainEntity) walkLd(node.mainEntity);
+      };
+
+      doc.querySelectorAll('script[type*="ld+json"]').forEach(sc => {
+        try { walkLd(JSON.parse(sc.textContent.trim())); } catch (e) {}
+      });
+
+      // 2. OpenGraph & Meta tags
+      const metaCurrEl = doc.querySelector('meta[property="product:price:currency"], meta[property="og:price:currency"], [itemprop="priceCurrency"]');
+      const metaCurr = metaCurrEl ? (metaCurrEl.getAttribute('content') || metaCurrEl.textContent || '') : '';
+
+      if (base_price === null) {
+        const metaPriceSelectors = [
+          'meta[property="product:price:amount"]',
+          'meta[property="og:price:amount"]',
+          'meta[name="twitter:data1"]',
+          '[itemprop="price"]',
+          '[itemprop="lowPrice"]'
+        ];
+        for (const sel of metaPriceSelectors) {
+          const els = doc.querySelectorAll(sel);
+          for (const el of els) {
+            const p = parseAmountToEur(el.getAttribute('content') || el.textContent, 5, 25000, metaCurr);
+            if (p) { base_price = p.eur; original_currency = p.currency; break; }
+          }
+          if (base_price !== null) break;
+        }
+      }
+
+      // 3. Domain-specific & universal CSS price selectors
+      if (base_price === null) {
+        const cssSelectors = [
+          '#corePriceDisplay_desktop_feature_div .a-price .a-offscreen',
+          '#corePrice_feature_div .a-price .a-offscreen',
+          '.apexPriceToPay .a-offscreen',
+          '#priceblock_ourprice',
+          '#priceblock_dealprice',
+          '#product .price-new',
+          '#content ul.list-unstyled h2',
+          '.price-new',
+          '.js-price-shipping-country',
+          '.detail-page-price',
+          '[data-testid="price"]',
+          '.current-price-value',
+          '.product-price .price',
+          '#our_price_display',
+          '[data-testid="bid-amount"]',
+          '[data-testid="lot-bid-status-section"]',
+          '.be-lot-details-bidding-panel',
+          '.c-lot-card__price',
+          '[data-testid="product-price"]',
+          '.f-priceBox-price',
+          '.fpPrice',
+          '.c-price__current',
+          '.price-sales',
+          '.special-price .price',
+          '.final-price',
+          '.price--main',
+          '.product__price',
+          '.woocommerce-Price-amount'
+        ];
+        for (const sel of cssSelectors) {
+          const els = doc.querySelectorAll(sel);
+          for (const el of els) {
+            const p = parseAmountToEur(el.getAttribute('content') || el.textContent, 5, 25000, metaCurr);
+            if (p) { base_price = p.eur; original_currency = p.currency; break; }
+          }
+          if (base_price !== null) break;
+        }
+      }
+
+      // Enrich metadata from DOM/OG
+      if (!title) {
+        const tEl = doc.querySelector('meta[property="og:title"], #productTitle, h1, title');
+        if (tEl) title = String(tEl.getAttribute('content') || tEl.textContent || '').replace(/\s+/g, ' ').trim();
+      }
+      if (!description) {
+        const dEl = doc.querySelector('meta[property="og:description"], meta[name="description"]');
+        if (dEl) description = String(dEl.getAttribute('content') || '').replace(/\s+/g, ' ').trim().slice(0, 280);
+      }
+      if (!image_url) {
+        const iEl = doc.querySelector('meta[property="og:image"], #landingImage, meta[name="twitter:image"]');
+        if (iEl) {
+          const src = String(iEl.getAttribute('content') || iEl.getAttribute('src') || '').trim();
+          if (src.startsWith('http')) image_url = src;
+        }
+      }
+
+      const inferred = inferWatchMetadataJs(title, url, description);
+      const bodyText = doc.body ? doc.body.textContent : '';
+      const fees = extractExplicitTextSignals(bodyText, url, base_price, jsonLdShip, jsonLdCond);
+      const rules = clientSideSiteRules(url, base_price || 0);
+
+      return {
+        url,
+        merchant: rules.merchant,
+        title,
+        description,
+        brand: brand || inferred.brand,
+        reference: reference || inferred.reference,
+        ean,
+        asin: inferred.asin,
+        image_url,
+        base_price,
+        original_currency,
+        ...fees
+      };
+    }
+
+    function extractFromJinaMarkdown(mdText, url) {
+      if (!mdText || mdText.length < 80) return null;
+      let title = '';
+      const mTitle = mdText.match(/^Title:\s*(.+)$/m);
+      if (mTitle) title = mTitle[1].trim();
+
+      let image_url = '';
+      const imgRegex = /!\[[^\]]*\]\((https?:\/\/[^\s)]+\.(?:jpg|jpeg|png|webp)[^\s)]*)\)/gi;
+      let mImg;
+      while ((mImg = imgRegex.exec(mdText)) !== null) {
+        const candidate = mImg[1];
+        if (!/logo|icon|sprite|avatar|flag|badge|pixel|banner/i.test(candidate)) {
+          image_url = candidate;
+          break;
+        }
+      }
+
+      // Extract clean prose line for description
+      let description = '';
+      const lines = mdText.split('\n').map(l => l.trim()).filter(Boolean);
+      for (const ln of lines) {
+        if (ln.length > 65 && !ln.startsWith('Title:') && !ln.startsWith('URL Source:') && !ln.startsWith('Markdown') && !ln.startsWith('![') && !ln.startsWith('[') && !ln.startsWith('*') && !ln.startsWith('#')) {
+          description = ln.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').slice(0, 260);
+          break;
+        }
+      }
+
+      // Find candidate watch prices in rendered text (explicit currency symbol/code required)
+      let base_price = null;
+      let original_currency = 'EUR';
+      const priceTokenRe = /(?:(?:€|EUR|US\s*\$|\$|£|GBP|CHF|¥|￥|JPY)\s*\d{1,3}(?:[\s.,]\d{3})*(?:[.,]\d{1,2})?|\d{1,3}(?:[\s.,]\d{3})*(?:[.,]\d{1,2})?\s*(?:€|EUR\b|USD\b|\$|£|GBP\b|CHF\b|¥|￥|JPY\b|円))/gi;
+      const candidates = [];
+      for (const ln of lines.slice(0, 140)) {
+        if (/livraison|shipping|versand|port|douane|frais|protection|retour/i.test(ln) && !/prix|price|enchère|offre/i.test(ln)) continue;
+        const matches = ln.match(priceTokenRe) || [];
+        for (const tok of matches) {
+          const p = parseAmountToEur(tok, 35, 22000);
+          if (p) candidates.push(p);
+        }
+        if (candidates.length >= 6) break;
+      }
+      if (candidates.length > 0) {
+        base_price = candidates[0].eur;
+        original_currency = candidates[0].currency;
+      }
+
+      const inferred = inferWatchMetadataJs(title, url, description);
+      const fees = extractExplicitTextSignals(mdText, url, base_price, null, null);
+      const rules = clientSideSiteRules(url, base_price || 0);
+
+      return {
+        url,
+        merchant: rules.merchant,
+        title,
+        description,
+        brand: inferred.brand,
+        reference: inferred.reference,
+        ean: '',
+        asin: inferred.asin,
+        image_url,
+        base_price,
+        original_currency,
+        ...fees
+      };
+    }
+
+    function lookupKnownUrlInState(url) {
+      const norm = (url || '').trim().replace(/\/$/, '').toLowerCase();
+      const pools = [...(appState.watches || []), ...(DEFAULT_STATE.watches || [])];
+      for (const w of pools) {
+        for (const u of (w.urls || [])) {
+          if ((u.url || '').trim().replace(/\/$/, '').toLowerCase() === norm && u.base_price) {
+            return {
+              url,
+              merchant: u.merchant,
+              title: u.title || w.name,
+              description: w.features || '',
+              brand: w.brand || '',
+              reference: w.reference || '',
+              ean: w.ean || '',
+              asin: w.asin || '',
+              image_url: w.image_url || '',
+              base_price: u.base_price,
+              original_currency: 'EUR',
+              condition: u.condition || 'new',
+              shipping_fee: u.shipping_fee ?? 0,
+              shipping_detected: true,
+              shipping_reason: 'Frais connus de la page produit',
+              site_fee: u.site_fee ?? 0,
+              site_fee_detected: true,
+              site_fee_reason: 'Frais connus de la page produit',
+              customs_fee: u.customs_fee ?? 0,
+              customs_detected: true,
+              customs_reason: 'Douane connue de la page produit',
+              ruleType: 'standard'
+            };
+          }
+        }
+        for (const s of (w.suggested_urls || [])) {
+          if ((s.url || '').trim().replace(/\/$/, '').toLowerCase() === norm && s.estimated_base_price) {
+            return {
+              url,
+              merchant: s.merchant,
+              title: s.title || w.name,
+              description: w.features || '',
+              brand: w.brand || '',
+              reference: w.reference || '',
+              ean: w.ean || '',
+              asin: w.asin || '',
+              image_url: w.image_url || '',
+              base_price: s.estimated_base_price,
+              original_currency: 'EUR',
+              condition: s.condition || 'new',
+              shipping_fee: s.shipping_fee ?? 0,
+              shipping_detected: s.shipping_fee !== null,
+              shipping_reason: 'Barème suggéré',
+              site_fee: s.site_fee ?? 0,
+              site_fee_detected: s.site_fee !== null,
+              site_fee_reason: 'Barème suggéré',
+              customs_fee: s.customs_fee ?? 0,
+              customs_detected: s.customs_fee !== null,
+              customs_reason: 'Barème suggéré',
+              ruleType: 'standard'
+            };
+          }
+        }
+      }
+      return null;
+    }
+
+    async function fetchAndInspectUrlLive(url) {
+      await ensureLiveFxRates();
+
+      let bestPartial = null;
+
+      // 1. Local Python server (/api/inspect-url) if active
       if (localApiAvailable) {
         try {
-          const resp = await fetch('/api/inspect-url', {
+          const resp = await fetchWithTimeout('/api/inspect-url', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url })
-          });
-          if (resp.ok) inspected = await resp.json();
+          }, 10000);
+          if (resp.ok) {
+            const srv = await resp.json();
+            if (srv && srv.base_price !== null && srv.base_price !== undefined) {
+              return srv;
+            }
+            bestPartial = srv;
+          }
         } catch (e) {}
       }
 
-      // 2. Apply server inspection result OR client-side site rules
-      const currentBase = parseFloat(document.getElementById(`uf-base-${watchId}`).value) || 0;
-      const rules = clientSideSiteRules(url, (inspected && inspected.base_price) || currentBase);
-      urlFeeAutoState[watchId] = { shipMode: 'auto', siteMode: 'auto', custMode: 'auto', ruleType: rules.ruleType };
+      // 2. Browser CORS HTML Proxies raced in parallel (fastest valid price wins)
+      const proxyUrls = [
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        `https://corsproxy.io/?url=${encodeURIComponent(url)}`
+      ];
+
+      try {
+        const winner = await Promise.any(proxyUrls.map(async (pUrl) => {
+          const r = await fetchWithTimeout(pUrl, {}, 6500);
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const html = await r.text();
+          if (!html || html.length < 350) throw new Error('Empty');
+          const parsed = extractFromHtmlDom(html, url);
+          if (parsed && (parsed.title || parsed.brand || parsed.image_url) && !bestPartial) {
+            bestPartial = parsed;
+          }
+          if (parsed && parsed.base_price !== null && parsed.base_price !== undefined) {
+            return parsed;
+          }
+          throw new Error('No static price');
+        }));
+        if (winner) return winner;
+      } catch (e) {}
+
+      // 3. Headless Reader fallback (r.jina.ai) for JS-rendered / anti-bot pages (Amazon, Chrono24, Catawiki...)
+      try {
+        const jinaResp = await fetchWithTimeout('https://r.jina.ai/' + url, {
+          headers: { 'Accept': 'text/plain' }
+        }, 8500);
+        if (jinaResp.ok) {
+          const md = await jinaResp.text();
+          const jinaParsed = extractFromJinaMarkdown(md, url);
+          if (jinaParsed) {
+            if (bestPartial) {
+              for (const k of ['title', 'description', 'brand', 'reference', 'ean', 'asin', 'image_url']) {
+                if (!jinaParsed[k] && bestPartial[k]) jinaParsed[k] = bestPartial[k];
+              }
+            }
+            if (jinaParsed.base_price !== null && jinaParsed.base_price !== undefined) {
+              return jinaParsed;
+            }
+            if (!bestPartial) bestPartial = jinaParsed;
+          }
+        }
+      } catch (e) {}
+
+      // 4. Offline / sandboxed fallback against known configured URLs
+      const known = lookupKnownUrlInState(url);
+      if (known) return known;
+
+      if (bestPartial) return bestPartial;
+
+      // 5. Pure domain rules fallback
+      const rules = clientSideSiteRules(url, 0);
+      const inferred = inferWatchMetadataJs('', url, '');
+      return {
+        url,
+        merchant: rules.merchant,
+        title: '',
+        description: '',
+        brand: inferred.brand,
+        reference: inferred.reference,
+        ean: '',
+        asin: inferred.asin,
+        image_url: '',
+        base_price: null,
+        original_currency: 'EUR',
+        condition: rules.condition,
+        shipping_fee: rules.ship,
+        shipping_detected: rules.ship !== null,
+        shipping_reason: rules.shipReason.replace(/^✓\s*/, ''),
+        site_fee: rules.site,
+        site_fee_detected: rules.site !== null,
+        site_fee_reason: rules.siteReason.replace(/^✓\s*/, ''),
+        customs_fee: rules.cust,
+        customs_detected: rules.cust !== null,
+        customs_reason: rules.custReason.replace(/^✓\s*/, ''),
+        ruleType: rules.ruleType
+      };
+    }
+
+    function onUrlFieldPaste(watchId) {
+      setTimeout(() => {
+        const el = document.getElementById(`uf-url-${watchId}`);
+        if (el && isValidHttpUrl(el.value)) {
+          inspectAndPrefillUrl(watchId, true);
+        }
+      }, 45);
+    }
+
+    function onUrlFieldInput(watchId, immediate = false) {
+      clearTimeout(urlInputTimers[watchId]);
+      const el = document.getElementById(`uf-url-${watchId}`);
+      if (!el) return;
+      const val = el.value.trim();
+      if (!isValidHttpUrl(val)) return;
+      if (val === lastInspectedByWatch[watchId]) return;
+
+      if (immediate) {
+        inspectAndPrefillUrl(watchId, false);
+      } else {
+        urlInputTimers[watchId] = setTimeout(() => {
+          inspectAndPrefillUrl(watchId, false);
+        }, 450);
+      }
+    }
+
+    async function inspectAndPrefillUrl(watchId, force = false) {
+      const urlInput = document.getElementById(`uf-url-${watchId}`);
+      if (!urlInput) return;
+      const url = urlInput.value.trim();
+      if (!isValidHttpUrl(url)) return;
+      if (!force && url === lastInspectedByWatch[watchId]) return;
+
+      lastInspectedByWatch[watchId] = url;
+      const reqId = (inspectRequestSeq[watchId] = (inspectRequestSeq[watchId] || 0) + 1);
+
+      const btn = document.getElementById(`uf-inspect-btn-${watchId}`);
+      if (btn) {
+        btn.textContent = '⏳ Récupération...';
+        btn.disabled = true;
+      }
+      setLiveBanner(
+        `uf-live-banner-${watchId}`,
+        `<span class="mini-spin"></span><span>Connexion à <strong>${escapeHtml(getHostnameLabel(url))}</strong> — récupération automatique du prix, de l'état et des frais...</span>`,
+        'is-loading'
+      );
+
+      // Instant optimistic merchant/rules preview while live fetch runs
+      const quickRules = clientSideSiteRules(url, parseFloat(document.getElementById(`uf-base-${watchId}`).value) || 0);
+      if (!document.getElementById(`uf-merchant-${watchId}`).value) {
+        document.getElementById(`uf-merchant-${watchId}`).value = quickRules.merchant;
+      }
+
+      const inspected = await fetchAndInspectUrlLive(url);
+      if (inspectRequestSeq[watchId] !== reqId) return; // Superseded by a newer URL input
+
+      const effectiveBase = (inspected && inspected.base_price !== null && inspected.base_price !== undefined)
+        ? Number(inspected.base_price)
+        : (parseFloat(document.getElementById(`uf-base-${watchId}`).value) || 0);
+      const rules = clientSideSiteRules(url, effectiveBase);
+
+      urlFeeAutoState[watchId] = {
+        shipMode: 'auto',
+        siteMode: 'auto',
+        custMode: 'auto',
+        ruleType: (inspected && inspected.ruleType) || rules.ruleType,
+        pendingMeta: inspected
+      };
 
       document.getElementById(`uf-merchant-${watchId}`).value = (inspected && inspected.merchant) || rules.merchant;
+      setHint(`uf-merch-hint-${watchId}`, '✓ Détecté automatiquement', 'auto-ok');
+
       document.getElementById(`uf-cond-${watchId}`).value = (inspected && inspected.condition) || rules.condition;
+      setHint(`uf-cond-hint-${watchId}`, ((inspected && inspected.condition) === 'used' ? '✓ Détecté : Occasion' : '✓ Détecté : Neuf'), 'auto-ok');
 
       if (inspected && inspected.base_price !== null && inspected.base_price !== undefined) {
         document.getElementById(`uf-base-${watchId}`).value = inspected.base_price;
-        setHint(`uf-base-hint-${watchId}`, '✓ Prix lu en clair sur la page', 'auto-ok');
+        const currNote = (inspected.original_currency && inspected.original_currency !== 'EUR')
+          ? ` (converti depuis ${inspected.original_currency})`
+          : '';
+        setHint(`uf-base-hint-${watchId}`, `✓ Prix récupéré sur la page${currNote}`, 'auto-ok');
       } else if (!document.getElementById(`uf-base-${watchId}`).value) {
-        setHint(`uf-base-hint-${watchId}`, '✍️ Saisissez le prix affiché sur la page', 'manual-needed');
+        setHint(`uf-base-hint-${watchId}`, '✍️ Prix protégé sur ce site — saisissez-le', 'manual-needed');
       }
 
-      const shipVal = (inspected && inspected.shipping_detected) ? inspected.shipping_fee : rules.ship;
-      const shipWhy = (inspected && inspected.shipping_detected) ? ('✓ ' + inspected.shipping_reason) : rules.shipReason;
+      const shipVal = (inspected && inspected.shipping_detected && inspected.shipping_fee !== null && inspected.shipping_fee !== undefined)
+        ? inspected.shipping_fee
+        : rules.ship;
+      const shipWhy = (inspected && inspected.shipping_detected && inspected.shipping_reason)
+        ? ('✓ ' + inspected.shipping_reason)
+        : rules.shipReason;
       if (shipVal !== null && shipVal !== undefined) {
         document.getElementById(`uf-ship-${watchId}`).value = shipVal;
         setHint(`uf-ship-hint-${watchId}`, shipWhy, 'auto-ok');
@@ -2361,8 +3165,12 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         setHint(`uf-ship-hint-${watchId}`, '✍️ Non indiqué en clair — à saisir', 'manual-needed');
       }
 
-      const siteVal = (inspected && inspected.site_fee_detected) ? inspected.site_fee : rules.site;
-      const siteWhy = (inspected && inspected.site_fee_detected) ? ('✓ ' + inspected.site_fee_reason) : rules.siteReason;
+      const siteVal = (rules.ruleType === 'catawiki' || rules.ruleType === 'vinted')
+        ? rules.site
+        : ((inspected && inspected.site_fee_detected && inspected.site_fee !== null && inspected.site_fee !== undefined) ? inspected.site_fee : rules.site);
+      const siteWhy = (rules.ruleType === 'catawiki' || rules.ruleType === 'vinted')
+        ? rules.siteReason
+        : ((inspected && inspected.site_fee_detected && inspected.site_fee_reason) ? ('✓ ' + inspected.site_fee_reason) : rules.siteReason);
       if (siteVal !== null && siteVal !== undefined) {
         document.getElementById(`uf-site-${watchId}`).value = siteVal;
         setHint(`uf-site-hint-${watchId}`, siteWhy, 'auto-ok');
@@ -2371,8 +3179,12 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         setHint(`uf-site-hint-${watchId}`, siteWhy || '✍️ Non indiqué en clair — à saisir', 'manual-needed');
       }
 
-      const custVal = (inspected && inspected.customs_detected) ? inspected.customs_fee : rules.cust;
-      const custWhy = (inspected && inspected.customs_detected) ? ('✓ ' + inspected.customs_reason) : rules.custReason;
+      const custVal = (rules.ruleType === 'japan_import' && effectiveBase > 0)
+        ? rules.cust
+        : ((inspected && inspected.customs_detected && inspected.customs_fee !== null && inspected.customs_fee !== undefined) ? inspected.customs_fee : rules.cust);
+      const custWhy = (rules.ruleType === 'japan_import' && effectiveBase > 0)
+        ? rules.custReason
+        : ((inspected && inspected.customs_detected && inspected.customs_reason) ? ('✓ ' + inspected.customs_reason) : rules.custReason);
       if (custVal !== null && custVal !== undefined) {
         document.getElementById(`uf-cust-${watchId}`).value = custVal;
         setHint(`uf-cust-hint-${watchId}`, custWhy, 'auto-ok');
@@ -2381,9 +3193,53 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         setHint(`uf-cust-hint-${watchId}`, custWhy || '✍️ Vérifiez pays du vendeur (0 € si UE)', 'manual-needed');
       }
 
-      btn.textContent = oldLabel;
-      btn.disabled = false;
+      if (inspected && inspected.base_price !== null && inspected.base_price !== undefined) {
+        const shortTitle = inspected.title ? ` — <em>${escapeHtml(inspected.title.slice(0, 68))}${inspected.title.length > 68 ? '…' : ''}</em>` : '';
+        setLiveBanner(
+          `uf-live-banner-${watchId}`,
+          `<span>✅ <strong>Valeurs récupérées automatiquement</strong> : prix affiché <strong>${fmtEur(inspected.base_price)}</strong> chez <strong>${escapeHtml((inspected && inspected.merchant) || rules.merchant)}</strong>${shortTitle}</span>`,
+          'is-ok'
+        );
+      } else {
+        setLiveBanner(
+          `uf-live-banner-${watchId}`,
+          `<span>⚠️ Marchand (<strong>${escapeHtml(rules.merchant)}</strong>) et barème de frais pré-remplis, mais ce site bloque la lecture directe du prix — saisissez uniquement le prix affiché.</span>`,
+          'is-warn'
+        );
+      }
+
+      if (btn) {
+        btn.textContent = "🔄 Actualiser depuis l'URL";
+        btn.disabled = false;
+      }
       recalcUrlPreview(watchId);
+    }
+
+    async function refreshSingleTrackedUrl(watchId, idx, btnEl) {
+      const w = appState.watches.find(x => x.id === watchId);
+      if (!w || !w.urls[idx]) return;
+      const u = w.urls[idx];
+      const oldTxt = btnEl ? btnEl.textContent : '🔄';
+      if (btnEl) { btnEl.textContent = '⏳'; btnEl.disabled = true; }
+
+      const inspected = await fetchAndInspectUrlLive(u.url);
+      if (btnEl) { btnEl.textContent = oldTxt; btnEl.disabled = false; }
+
+      if (inspected && inspected.base_price !== null && inspected.base_price !== undefined) {
+        u.base_price = inspected.base_price;
+        const rules = clientSideSiteRules(u.url, u.base_price);
+        if (rules.ruleType === 'catawiki' && rules.site !== null) u.site_fee = rules.site;
+        if (rules.ruleType === 'vinted' && rules.site !== null) u.site_fee = rules.site;
+        if (rules.ruleType === 'japan_import') {
+          const taxes = (u.base_price + (u.shipping_fee || 24.0) + 0.80) * 0.20 + 0.80 + 18.0;
+          u.customs_fee = Math.round(taxes * 100) / 100;
+        }
+        u.total_price = Math.round((u.base_price + (u.shipping_fee || 0) + (u.site_fee || 0) + (u.customs_fee || 0)) * 100) / 100;
+        await persistState(`Prix mis à jour chez ${u.merchant} : ${fmtEur(u.total_price)} TTC`);
+        renderAllCards();
+      } else {
+        showToast(`Impossible de lire automatiquement le prix sur ${u.merchant} — cliquez sur ✏️ Frais pour l'ajuster.`);
+      }
     }
 
     function onBasePriceInput(watchId) {
@@ -2440,6 +3296,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       const customs_fee = parseFloat(document.getElementById(`uf-cust-${watchId}`).value) || 0;
       const total_price = Math.round((base_price + shipping_fee + site_fee + customs_fee) * 100) / 100;
 
+      const meta = (urlFeeAutoState[watchId] && urlFeeAutoState[watchId].pendingMeta) || null;
+      if (meta) {
+        if (!w.image_url && meta.image_url) w.image_url = meta.image_url;
+        if (!w.ean && meta.ean) w.ean = meta.ean;
+        if (!w.asin && meta.asin) w.asin = meta.asin;
+      }
+
       const record = {
         url,
         merchant,
@@ -2449,6 +3312,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         site_fee,
         customs_fee,
         total_price,
+        title: (meta && meta.title) || '',
         in_stock: true
       };
 
@@ -2487,9 +3351,100 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       renderAllCards();
     }
 
-    /* Add / Delete Watch Reference Card */
+    /* Add / Delete Watch Reference Card (with Automatic URL Import) */
     function openAddProductModal() {
+      npLastInspectedUrl = '';
+      npFetchedInitialOffer = null;
+      const srcEl = document.getElementById('npSourceUrl');
+      if (srcEl) srcEl.value = '';
+      setLiveBanner('npLiveBanner', '<span>Collez un lien : la marque, la référence, la photo, le prix et les frais seront extraits automatiquement.</span>', '');
       document.getElementById('addProductModal').classList.add('open');
+      if (srcEl) setTimeout(() => srcEl.focus(), 60);
+    }
+
+    function onNewProductUrlPaste() {
+      setTimeout(() => inspectNewProductUrl(true), 45);
+    }
+
+    function onNewProductUrlInput() {
+      clearTimeout(npUrlTimer);
+      const el = document.getElementById('npSourceUrl');
+      if (!el || !isValidHttpUrl(el.value)) return;
+      if (el.value.trim() === npLastInspectedUrl) return;
+      npUrlTimer = setTimeout(() => inspectNewProductUrl(false), 450);
+    }
+
+    async function inspectNewProductUrl(force = false) {
+      const el = document.getElementById('npSourceUrl');
+      if (!el) return;
+      const url = el.value.trim();
+      if (!isValidHttpUrl(url)) return;
+      if (!force && url === npLastInspectedUrl) return;
+
+      npLastInspectedUrl = url;
+      const reqId = (inspectRequestSeq.NEW_PRODUCT = (inspectRequestSeq.NEW_PRODUCT || 0) + 1);
+      const btn = document.getElementById('npInspectBtn');
+      if (btn) { btn.textContent = '⏳...'; btn.disabled = true; }
+      setLiveBanner('npLiveBanner', `<span class="mini-spin"></span><span>Lecture automatique de la fiche produit sur <strong>${escapeHtml(getHostnameLabel(url))}</strong>...</span>`, 'is-loading');
+
+      const inspected = await fetchAndInspectUrlLive(url);
+      if (inspectRequestSeq.NEW_PRODUCT !== reqId) return;
+
+      if (btn) { btn.textContent = '🔄 Récupérer'; btn.disabled = false; }
+      if (!inspected) return;
+
+      if (inspected.brand) document.getElementById('npBrand').value = inspected.brand;
+      if (inspected.reference) document.getElementById('npRef').value = inspected.reference;
+      if (inspected.title) {
+        const cleanTitle = inspected.title.replace(/\s*[|\-–]\s*(?:Amazon|Ocarat|Chrono24|Catawiki|Sakura).*$/i, '').trim();
+        document.getElementById('npName').value = cleanTitle || inspected.title;
+      }
+      if (inspected.ean) document.getElementById('npEan').value = inspected.ean;
+      if (inspected.image_url) document.getElementById('npImage').value = inspected.image_url;
+      if (inspected.description) {
+        document.getElementById('npFeatures').value = inspected.description;
+      } else if (inspected.title && !document.getElementById('npFeatures').value) {
+        document.getElementById('npFeatures').value = inspected.title;
+      }
+
+      if (inspected.base_price !== null && inspected.base_price !== undefined) {
+        const ship = inspected.shipping_fee ?? 0;
+        const site = inspected.site_fee ?? 0;
+        const cust = inspected.customs_fee ?? 0;
+        const total = Math.round((inspected.base_price + ship + site + cust) * 100) / 100;
+
+        npFetchedInitialOffer = {
+          url,
+          merchant: inspected.merchant || getHostnameLabel(url),
+          condition: inspected.condition || 'new',
+          base_price: inspected.base_price,
+          shipping_fee: ship,
+          site_fee: site,
+          customs_fee: cust,
+          total_price: total,
+          asin: inspected.asin || '',
+          title: inspected.title || ''
+        };
+
+        if (npFetchedInitialOffer.condition === 'used' && !document.getElementById('npTargetUsed').value) {
+          document.getElementById('npTargetUsed').value = Math.floor(total * 0.92);
+        } else if (npFetchedInitialOffer.condition !== 'used' && !document.getElementById('npTargetNew').value) {
+          document.getElementById('npTargetNew').value = Math.floor(total * 0.92);
+        }
+
+        setLiveBanner(
+          'npLiveBanner',
+          `<span>✅ <strong>Fiche & prix récupérés !</strong> Cette URL (${escapeHtml(npFetchedInitialOffer.merchant)} à <strong>${fmtEur(total)} TTC</strong>) sera automatiquement ajoutée à la fiche.</span>`,
+          'is-ok'
+        );
+      } else {
+        npFetchedInitialOffer = null;
+        setLiveBanner(
+          'npLiveBanner',
+          `<span>⚠️ Infos disponibles pré-remplies depuis <strong>${escapeHtml(inspected.merchant || getHostnameLabel(url))}</strong> — vérifiez les champs obligatoires ci-dessous.</span>`,
+          'is-warn'
+        );
+      }
     }
 
     function openNotifyModal() {
@@ -2516,9 +3471,28 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       const features = document.getElementById('npFeatures').value.trim();
       const tNew = document.getElementById('npTargetNew').value;
       const tUsed = document.getElementById('npTargetUsed').value;
+      const srcUrl = (document.getElementById('npSourceUrl')?.value || '').trim();
 
       const id = (brand + '-' + reference).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || ('watch-' + Date.now());
       const q = encodeURIComponent(`${brand} ${reference}`);
+
+      const initialUrls = [];
+      let initialAsin = '';
+      if (npFetchedInitialOffer && srcUrl && npFetchedInitialOffer.url === srcUrl) {
+        initialAsin = npFetchedInitialOffer.asin || '';
+        initialUrls.push({
+          url: npFetchedInitialOffer.url,
+          merchant: npFetchedInitialOffer.merchant,
+          condition: npFetchedInitialOffer.condition,
+          base_price: npFetchedInitialOffer.base_price,
+          shipping_fee: npFetchedInitialOffer.shipping_fee,
+          site_fee: npFetchedInitialOffer.site_fee,
+          customs_fee: npFetchedInitialOffer.customs_fee,
+          total_price: npFetchedInitialOffer.total_price,
+          title: npFetchedInitialOffer.title || name,
+          in_stock: true
+        });
+      }
 
       const newWatch = {
         id,
@@ -2526,14 +3500,14 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         brand,
         reference,
         ean,
-        asin: '',
+        asin: initialAsin,
         image_url,
         features,
         specs: { Référence: reference },
         target_price_new: tNew !== '' ? Number(tNew) : null,
         target_price_used: tUsed !== '' ? Number(tUsed) : null,
-        reference_price: 0,
-        urls: [],
+        reference_price: initialUrls.length ? initialUrls[0].total_price : 0,
+        urls: initialUrls,
         suggested_urls: [
           {
             url: `https://www.amazon.fr/s?k=${q}`,
@@ -2576,13 +3550,22 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             fee_hint: 'Frais Catawiki 9 % + 3 € pré-calculés'
           }
         ],
-        history: []
+        history: initialUrls.length ? [{
+          timestamp: new Date().toISOString(),
+          new_price: initialUrls[0].condition !== 'used' ? initialUrls[0].total_price : null,
+          used_price: initialUrls[0].condition === 'used' ? initialUrls[0].total_price : null
+        }] : []
       };
 
       appState.watches.unshift(newWatch);
+      npFetchedInitialOffer = null;
       closeModal('addProductModal');
       ev.target.reset();
-      await persistState(`Référence ${brand} ${reference} ajoutée ! Ajoutez maintenant vos URLs.`);
+      await persistState(
+        initialUrls.length
+          ? `Fiche ${brand} ${reference} créée avec son prix ${fmtEur(initialUrls[0].total_price)} TTC !`
+          : `Référence ${brand} ${reference} ajoutée !`
+      );
       renderAllCards();
     }
 
