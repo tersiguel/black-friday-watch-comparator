@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-18T17:40:41.123206+00:00",
+  "updated_at": "2026-11-18T21:33:13.343434+00:00",
   "watches": {
     "citizen-cb1160-55e": {
       "name": "Citizen Collection Super Titanium CB1160-55E",
@@ -82,6 +82,15 @@
         },
         {
           "timestamp": "2026-11-18T17:40:41.123010+00:00",
+          "new_price": 422.16,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "new_url": "https://www.sakurawatches.com/citizen-collection-cb1160-55e-15415",
+          "used_price": 339.0,
+          "used_merchant": "Chrono24 (UE)",
+          "used_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55E&usedOrNew=used"
+        },
+        {
+          "timestamp": "2026-11-18T21:33:13.343225+00:00",
           "new_price": 422.16,
           "new_merchant": "Sakura Watches (Tokyo)",
           "new_url": "https://www.sakurawatches.com/citizen-collection-cb1160-55e-15415",
@@ -178,6 +187,15 @@
           "used_price": 345.0,
           "used_merchant": "Chrono24 (UE)",
           "used_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55A&usedOrNew=used"
+        },
+        {
+          "timestamp": "2026-11-18T21:33:13.343243+00:00",
+          "new_price": 424.96,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "new_url": "https://www.sakurawatches.com/citizen-collection-cb1160-55a",
+          "used_price": 345.0,
+          "used_merchant": "Chrono24 (UE)",
+          "used_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55A&usedOrNew=used"
         }
       ]
     },
@@ -262,6 +280,15 @@
         },
         {
           "timestamp": "2026-11-18T17:40:41.123040+00:00",
+          "new_price": 422.16,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "new_url": "https://www.sakurawatches.com/citizen-collection-cb1160-55l",
+          "used_price": 343.0,
+          "used_merchant": "Chrono24 (Occasion)",
+          "used_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55L&usedOrNew=used"
+        },
+        {
+          "timestamp": "2026-11-18T21:33:13.343256+00:00",
           "new_price": 422.16,
           "new_merchant": "Sakura Watches (Tokyo)",
           "new_url": "https://www.sakurawatches.com/citizen-collection-cb1160-55l",
@@ -358,6 +385,15 @@
           "used_price": 260.8,
           "used_merchant": "Catawiki",
           "used_url": "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction"
+        },
+        {
+          "timestamp": "2026-11-18T21:33:13.343268+00:00",
+          "new_price": 393.36,
+          "new_merchant": "Chrono24 (Import JP)",
+          "new_url": "https://www.chrono24.fr/seiko/ref-sbtm323.htm",
+          "used_price": 260.8,
+          "used_merchant": "Catawiki",
+          "used_url": "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction"
         }
       ]
     },
@@ -442,6 +478,15 @@
         },
         {
           "timestamp": "2026-11-18T17:40:41.123062+00:00",
+          "new_price": 369.36,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "new_url": "https://www.sakurawatches.com/seiko-selection-sbtm317",
+          "used_price": 255.35,
+          "used_merchant": "Catawiki",
+          "used_url": "https://www.catawiki.com/en/c/1037-seiko-watches"
+        },
+        {
+          "timestamp": "2026-11-18T21:33:13.343279+00:00",
           "new_price": 369.36,
           "new_merchant": "Sakura Watches (Tokyo)",
           "new_url": "https://www.sakurawatches.com/seiko-selection-sbtm317",
@@ -538,6 +583,15 @@
           "used_price": 591.8,
           "used_merchant": "Catawiki",
           "used_url": "https://www.catawiki.com/en/x/1477-junghans-watches"
+        },
+        {
+          "timestamp": "2026-11-18T21:33:13.343289+00:00",
+          "new_price": 989.0,
+          "new_merchant": "Uhr24.de",
+          "new_url": "https://uhr24.de/junghans/max-bill-mega-solar-59-2020-02",
+          "used_price": 591.8,
+          "used_merchant": "Catawiki",
+          "used_url": "https://www.catawiki.com/en/x/1477-junghans-watches"
         }
       ]
     },
@@ -622,6 +676,15 @@
         },
         {
           "timestamp": "2026-11-18T17:40:41.123083+00:00",
+          "new_price": 232.14,
+          "new_merchant": "Idealo.fr (Marchand UE)",
+          "new_url": "https://www.idealo.fr/prix/6800906/casio-wave-ceptor-titanium-lcw-m100.html",
+          "used_price": 157.0,
+          "used_merchant": "Chrono24 (Occasion)",
+          "used_url": "https://www.chrono24.fr/search/index.htm?query=LCW-M100TSE-1AER&usedOrNew=used"
+        },
+        {
+          "timestamp": "2026-11-18T21:33:13.343300+00:00",
           "new_price": 232.14,
           "new_merchant": "Idealo.fr (Marchand UE)",
           "new_url": "https://www.idealo.fr/prix/6800906/casio-wave-ceptor-titanium-lcw-m100.html",
@@ -718,6 +781,15 @@
           "used_price": 249.0,
           "used_merchant": "Chrono24 (Occasion)",
           "used_url": "https://www.chrono24.fr/search/index.htm?query=CB0250-84E&usedOrNew=used"
+        },
+        {
+          "timestamp": "2026-11-18T21:33:13.343317+00:00",
+          "new_price": 349.0,
+          "new_merchant": "Luna-Time FR",
+          "new_url": "https://www.luna-time.fr/Citizen-Montre-bracelet-Hommes-Chronographe-Montre-radio-pilotee-Eco-Drive-CB0250-84E",
+          "used_price": 249.0,
+          "used_merchant": "Chrono24 (Occasion)",
+          "used_url": "https://www.chrono24.fr/search/index.htm?query=CB0250-84E&usedOrNew=used"
         }
       ]
     },
@@ -802,6 +874,15 @@
         },
         {
           "timestamp": "2026-11-18T17:40:41.123114+00:00",
+          "new_price": 404.0,
+          "new_merchant": "Chrono24 (UE)",
+          "new_url": "https://www.chrono24.fr/search/index.htm?query=AT8110-61E&usedOrNew=new",
+          "used_price": 279.0,
+          "used_merchant": "Chrono24 (Occasion)",
+          "used_url": "https://www.chrono24.fr/search/index.htm?query=AT8110-61E&usedOrNew=used"
+        },
+        {
+          "timestamp": "2026-11-18T21:33:13.343330+00:00",
           "new_price": 404.0,
           "new_merchant": "Chrono24 (UE)",
           "new_url": "https://www.chrono24.fr/search/index.htm?query=AT8110-61E&usedOrNew=new",

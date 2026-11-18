@@ -255,13 +255,14 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     }
 
     .topbar-inner {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 12px 20px;
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      padding: 12px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
+      gap: 16px;
       flex-wrap: wrap;
     }
 
@@ -293,8 +294,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
     .search-box {
       flex: 1;
-      min-width: 220px;
-      max-width: 360px;
+      min-width: 240px;
+      max-width: 560px;
       position: relative;
     }
 
@@ -395,9 +396,10 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
     /* Filter Bar */
     .filter-strip {
-      max-width: 1180px;
-      margin: 18px auto 6px;
-      padding: 0 20px;
+      width: 100%;
+      max-width: none;
+      margin: 18px 0 6px;
+      padding: 0 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -451,15 +453,17 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
     /* Main Container: Vertical Stack of Cards (1 Card per Reference) */
     .cards-container {
-      max-width: 1180px;
-      margin: 12px auto 60px;
-      padding: 0 20px;
+      width: 100%;
+      max-width: none;
+      margin: 12px 0 60px;
+      padding: 0 24px;
       display: flex;
       flex-direction: column;
       gap: 28px;
     }
 
     .watch-card {
+      width: 100%;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
@@ -561,7 +565,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       font-size: 14px;
       color: var(--text-secondary);
       line-height: 1.55;
-      max-width: 680px;
+      max-width: 1040px;
     }
 
     .spec-pills {
@@ -727,8 +731,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
     .chart-canvas-wrap {
       position: relative;
-      height: 265px;
+      height: 295px;
       width: 100%;
+      min-width: 0;
     }
 
     .keepa-legend-panel {
@@ -1001,7 +1006,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       display: block;
       font-size: 11px;
       color: var(--text-muted);
-      max-width: 280px;
+      max-width: 560px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1311,6 +1316,12 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     }
 
     @media (max-width: 580px) {
+      .topbar-inner,
+      .filter-strip,
+      .cards-container {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
       .card-product-header {
         grid-template-columns: 1fr;
       }
