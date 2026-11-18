@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-18T07:18:16.494383+00:00",
+  "updated_at": "2026-11-18T09:30:24.420489+00:00",
   "watches": {
     "citizen-cb1160-55e": {
       "name": "Citizen Radio-Controlled CB1160-55E (Cadran Noir)",
@@ -78,6 +78,14 @@
             "Amazon FR": 419.0
           },
           "bf_score": 89
+        },
+        {
+          "timestamp": "2026-11-18T09:30:24.420283+00:00",
+          "best_price": 12.0,
+          "best_merchant": "Dealabs",
+          "best_url": "https://www.dealabs.com/bons-plans/clients-bouygues-telecombyou-12-mois-dabonnement-a-cafeyn-offerts-3458996",
+          "merchant_prices": {},
+          "bf_score": 100
         }
       ]
     },
@@ -158,6 +166,14 @@
             "Amazon FR": 425.0
           },
           "bf_score": 87
+        },
+        {
+          "timestamp": "2026-11-18T09:30:24.420324+00:00",
+          "best_price": 12.0,
+          "best_merchant": "Dealabs",
+          "best_url": "https://www.dealabs.com/bons-plans/clients-bouygues-telecombyou-12-mois-dabonnement-a-cafeyn-offerts-3458996",
+          "merchant_prices": {},
+          "bf_score": 100
         }
       ]
     },
@@ -237,6 +253,14 @@
             "Chrono24": 398.0,
             "Amazon FR": 422.0
           },
+          "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T09:30:24.420341+00:00",
+          "best_price": 12.0,
+          "best_merchant": "Dealabs",
+          "best_url": "https://www.dealabs.com/bons-plans/clients-bouygues-telecombyou-12-mois-dabonnement-a-cafeyn-offerts-3458996",
+          "merchant_prices": {},
           "bf_score": 100
         }
       ]
@@ -318,6 +342,16 @@
             "Catawiki (Enchères)": 242.8
           },
           "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T09:30:24.420356+00:00",
+          "best_price": 12.0,
+          "best_merchant": "Dealabs",
+          "best_url": "https://www.dealabs.com/bons-plans/clients-bouygues-telecombyou-12-mois-dabonnement-a-cafeyn-offerts-3458996",
+          "merchant_prices": {
+            "Sakura Watches (Tokyo)": 382.56
+          },
+          "bf_score": 100
         }
       ]
     },
@@ -396,6 +430,16 @@
             "Sakura Watches (Tokyo)": 369.36,
             "Chrono24": 294.0,
             "Catawiki (Enchères)": 253.7
+          },
+          "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T09:30:24.420371+00:00",
+          "best_price": 12.0,
+          "best_merchant": "Dealabs",
+          "best_url": "https://www.dealabs.com/bons-plans/clients-bouygues-telecombyou-12-mois-dabonnement-a-cafeyn-offerts-3458996",
+          "merchant_prices": {
+            "Sakura Watches (Tokyo)": 396.96
           },
           "bf_score": 100
         }
@@ -479,6 +523,14 @@
             "Catawiki (Enchères)": 569.8
           },
           "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T09:30:24.420385+00:00",
+          "best_price": 12.0,
+          "best_merchant": "Dealabs",
+          "best_url": "https://www.dealabs.com/bons-plans/clients-bouygues-telecombyou-12-mois-dabonnement-a-cafeyn-offerts-3458996",
+          "merchant_prices": {},
+          "bf_score": 100
         }
       ]
     },
@@ -557,6 +609,14 @@
             "Amazon FR": 184.5,
             "Ocarat": 215.0
           },
+          "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T09:30:24.420397+00:00",
+          "best_price": 12.0,
+          "best_merchant": "Dealabs",
+          "best_url": "https://www.dealabs.com/bons-plans/clients-bouygues-telecombyou-12-mois-dabonnement-a-cafeyn-offerts-3458996",
+          "merchant_prices": {},
           "bf_score": 100
         }
       ]
@@ -637,6 +697,14 @@
             "Amazon FR": 279.0
           },
           "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T09:30:24.420410+00:00",
+          "best_price": 12.0,
+          "best_merchant": "Dealabs",
+          "best_url": "https://www.dealabs.com/bons-plans/clients-bouygues-telecombyou-12-mois-dabonnement-a-cafeyn-offerts-3458996",
+          "merchant_prices": {},
+          "bf_score": 100
         }
       ]
     },
@@ -716,6 +784,14 @@
             "Ocarat": 369.0
           },
           "bf_score": 50
+        },
+        {
+          "timestamp": "2026-11-18T09:30:24.420421+00:00",
+          "best_price": 12.0,
+          "best_merchant": "Dealabs",
+          "best_url": "https://www.dealabs.com/bons-plans/clients-bouygues-telecombyou-12-mois-dabonnement-a-cafeyn-offerts-3458996",
+          "merchant_prices": {},
+          "bf_score": 100
         }
       ]
     }
