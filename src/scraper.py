@@ -83,6 +83,7 @@ EU_RETAIL_DOMAINS = (
     "zeitlounge.com",
     "luna-time.fr",
     "luna-time.nl",
+    "montre.com",
     "mastersintime.com",
     "watchxl.com",
     "rm-time.com",
@@ -150,6 +151,7 @@ def infer_merchant_name(url: str, fallback: str = "") -> str:
             "zeitlounge.com": "Zeitlounge",
             "luna-time.fr": "Luna-Time",
             "luna-time.nl": "Luna-Time NL",
+            "montre.com": "Montre.com",
             "mastersintime.com": "Masters In Time",
             "watchxl.com": "WatchXL",
             "rm-time.com": "RM-Time",
@@ -577,7 +579,10 @@ def extract_from_selectors(doc: lxml_html.HtmlElement, url: str = "") -> Optiona
         "//*[@data-testid='bid-amount']",
         "//*[contains(@class, 'be-lot-details-bidding-panel')]//*[contains(text(), '€')]",
         "//*[contains(@class, 'c-lot-card__price')]",
-        # Generic
+        # Magento / Holland Watch Group (montre.com, mastersintime.com) / Generic
+        "//*[@data-price-amount]/@data-price-amount",
+        "//*[contains(@class, 'product-info-price')]//*[contains(@class, 'price')]",
+        "//*[contains(@class, 'price-box')]//*[contains(@class, 'price')]",
         "//*[@data-testid='product-price']",
         "//*[contains(@class, 'f-priceBox-price')]",
         "//*[contains(@class, 'fpPrice')]",
@@ -586,13 +591,16 @@ def extract_from_selectors(doc: lxml_html.HtmlElement, url: str = "") -> Optiona
         "//*[contains(@class, 'special-price')]//*[contains(@class, 'price')]",
         "//*[contains(@class, 'final-price')]",
         "//*[contains(@class, 'price--main')]",
+        "//*[contains(@class, 'our-price')]",
+        "//*[contains(@class, 'pdp-price')]",
     ]
 
     price = None
     for xp in current_xpaths:
         nodes = doc.xpath(xp)
         for el in nodes:
-            val = parse_price_string(el.get("content") or el.text_content())
+            raw_cand = el if isinstance(el, str) else (el.get("data-price-amount") or el.get("content") or el.text_content())
+            val = parse_price_string(raw_cand)
             if val:
                 price = val
                 break
@@ -651,7 +659,7 @@ def extract_explicit_fees_and_condition(
         if any(k in url_lower for k in ("-used", "usedornew=used", "occasion", "catawiki.", "vinted.", "leboncoin.")):
             condition = "used"
         elif re.search(
-            r"\b(?:état\s*:\s*(?:occasion|très\s+bon|bon\s+état)|pre-owned|gebraucht|d'occasion|seconde\s+main)\b",
+            r"\b(?:état\s*:\s*(?:occasion|très\s+bon|bon\s+état)|condition\s*:\s*(?:used|pre-owned)|zustand\s*:\s*gebraucht|seconde\s+main)\b",
             body_text,
             re.I,
         ):

@@ -255,14 +255,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     }
 
     .topbar-inner {
-      width: 100%;
-      max-width: none;
-      margin: 0;
-      padding: 12px 24px;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 12px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 14px;
       flex-wrap: wrap;
     }
 
@@ -294,8 +293,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
     .search-box {
       flex: 1;
-      min-width: 240px;
-      max-width: 560px;
+      min-width: 220px;
+      max-width: 360px;
       position: relative;
     }
 
@@ -396,10 +395,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
     /* Filter Bar */
     .filter-strip {
-      width: 100%;
-      max-width: none;
-      margin: 18px 0 6px;
-      padding: 0 24px;
+      max-width: 1180px;
+      margin: 18px auto 6px;
+      padding: 0 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -453,17 +451,15 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
     /* Main Container: Vertical Stack of Cards (1 Card per Reference) */
     .cards-container {
-      width: 100%;
-      max-width: none;
-      margin: 12px 0 60px;
-      padding: 0 24px;
+      max-width: 1180px;
+      margin: 12px auto 60px;
+      padding: 0 20px;
       display: flex;
       flex-direction: column;
       gap: 28px;
     }
 
     .watch-card {
-      width: 100%;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
@@ -565,7 +561,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       font-size: 14px;
       color: var(--text-secondary);
       line-height: 1.55;
-      max-width: 1040px;
+      max-width: 680px;
     }
 
     .spec-pills {
@@ -731,9 +727,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
     .chart-canvas-wrap {
       position: relative;
-      height: 295px;
+      height: 265px;
       width: 100%;
-      min-width: 0;
     }
 
     .keepa-legend-panel {
@@ -1006,7 +1001,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       display: block;
       font-size: 11px;
       color: var(--text-muted);
-      max-width: 560px;
+      max-width: 280px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1316,12 +1311,6 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     }
 
     @media (max-width: 580px) {
-      .topbar-inner,
-      .filter-strip,
-      .cards-container {
-        padding-left: 12px;
-        padding-right: 12px;
-      }
       .card-product-header {
         grid-template-columns: 1fr;
       }
@@ -2281,8 +2270,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         return (eur >= minVal && eur <= maxVal) ? { eur, rawVal: raw, currency: curr } : null;
       }
 
-      const text = String(raw).replace(/[\u00A0\u202F]/g, ' ').trim();
+      let text = String(raw).replace(/[\u00A0\u202F]/g, ' ').trim();
       if (!text) return null;
+      text = text.replace(/(\d)[,.]\s*[-–—]/g, '$1');
       const curr = detectCurrencyJs(text, currencyHint);
 
       // French split euro format e.g. "429 € 90"
@@ -2513,6 +2503,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         'zeitlounge.com': 'Zeitlounge',
         'luna-time.fr': 'Luna-Time',
         'luna-time.nl': 'Luna-Time NL',
+        'montre.com': 'Montre.com',
         'mastersintime.com': 'Masters In Time',
         'watchxl.com': 'WatchXL',
         'rm-time.com': 'RM-Time',
@@ -2533,7 +2524,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       const condition = isUsedUrl ? 'used' : 'new';
 
       const nonEuDomains = ['sakurawatches.com', 'shoppinginjapan.net', 'seiyajapan.com', 'discovery-japan.me', 'creationwatches.com', 'gnomonwatches.com', 'timeshop4you.co.uk', 'amazon.co.jp', 'amazon.com', 'amazon.co.uk'];
-      const euDomains = ['amazon.fr', 'amazon.de', 'amazon.es', 'amazon.it', 'ocarat.com', 'montresandco.com', 'lepage.fr', 'histoiredeor.com', 'citizenwatch.eu', 'casio.com', 'uhr24.de', 'helveti.eu', 'irisimo.com', 'zeitlounge.com', 'luna-time.fr', 'luna-time.nl', 'mastersintime.com', 'watchxl.com', 'rm-time.com', 'watchhouse.de', 'fnac.com', 'darty.com', 'boulanger.com', 'cdiscount.com'];
+      const euDomains = ['amazon.fr', 'amazon.de', 'amazon.es', 'amazon.it', 'ocarat.com', 'montresandco.com', 'lepage.fr', 'histoiredeor.com', 'citizenwatch.eu', 'casio.com', 'uhr24.de', 'helveti.eu', 'irisimo.com', 'zeitlounge.com', 'luna-time.fr', 'luna-time.nl', 'montre.com', 'mastersintime.com', 'watchxl.com', 'rm-time.com', 'watchhouse.de', 'fnac.com', 'darty.com', 'boulanger.com', 'cdiscount.com'];
 
       const isNonEu = nonEuDomains.some(d => host === d || host.endsWith('.' + d));
       const isEu = euDomains.some(d => host === d || host.endsWith('.' + d));
@@ -2589,7 +2580,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
       let condition = jsonLdCond || null;
       if (!condition) {
-        if (rules.condition === 'used' || /\b(?:état\s*:\s*(?:occasion|très\s+bon|bon\s+état)|pre-owned|gebraucht|d'occasion|seconde\s+main)\b/i.test(text)) {
+        if (rules.condition === 'used' || /\b(?:état\s*:\s*(?:occasion|très\s+bon|bon\s+état)|condition\s*:\s*(?:used|pre-owned)|zustand\s*:\s*gebraucht|seconde\s+main)\b/i.test(text)) {
           condition = 'used';
         } else {
           condition = 'new';
@@ -2682,7 +2673,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           let spec = offers.priceSpecification;
           if (Array.isArray(spec)) spec = spec[0];
           const curr = String(offers.priceCurrency || (spec && spec.priceCurrency) || 'EUR').toUpperCase();
-          const rawP = offers.price ?? offers.lowPrice ?? (spec && spec.price);
+          const rawP = offers.price ?? offers.lowPrice ?? offers.minPrice ?? (spec && (spec.price ?? spec.minPrice));
           const parsed = parseAmountToEur(rawP, 5, 25000, curr);
           if (!parsed && offers.offers) return walkOffer(offers.offers);
           if (parsed) {
@@ -2783,6 +2774,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           '[data-testid="lot-bid-status-section"]',
           '.be-lot-details-bidding-panel',
           '.c-lot-card__price',
+          '[data-price-amount]',
+          '.product-info-price .price',
+          '.price-box .price',
+          '.our-price',
+          '.pdp-price',
+          '[data-product-price]',
+          '[data-price]',
           '[data-testid="product-price"]',
           '.f-priceBox-price',
           '.fpPrice',
@@ -2792,15 +2790,44 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           '.final-price',
           '.price--main',
           '.product__price',
-          '.woocommerce-Price-amount'
+          '.woocommerce-Price-amount',
+          '[class*="product-price"]',
+          '[class*="ProductPrice"]',
+          '[class*="price-current"]'
         ];
         for (const sel of cssSelectors) {
           const els = doc.querySelectorAll(sel);
           for (const el of els) {
-            const p = parseAmountToEur(el.getAttribute('content') || el.textContent, 5, 25000, metaCurr);
+            const rawCand = el.getAttribute('data-price-amount') || el.getAttribute('data-product-price') || el.getAttribute('data-price') || el.getAttribute('content') || el.textContent;
+            const p = parseAmountToEur(rawCand, 5, 25000, metaCurr);
             if (p) { base_price = p.eur; original_currency = p.currency; break; }
           }
           if (base_price !== null) break;
+        }
+      }
+
+      // 4. Embedded JSON / dataLayer fallback in <script> tags
+      if (base_price === null) {
+        const scripts = doc.querySelectorAll('script:not([type*="ld+json"])');
+        for (const sc of scripts) {
+          const stxt = sc.textContent || '';
+          if (stxt.length < 20 || stxt.length > 180000) continue;
+          const m = stxt.match(/"(?:price|finalPrice|product_price|sellingPrice|amount)"\s*:\s*"?(\d{2,5}(?:[.,]\d{1,2})?)"?/i);
+          if (m && m[1]) {
+            const p = parseAmountToEur(m[1], 35, 22000, metaCurr || 'EUR');
+            if (p) { base_price = p.eur; original_currency = p.currency; break; }
+          }
+        }
+      }
+
+      // 5. Visible main product area currency fallback
+      if (base_price === null) {
+        const mainArea = doc.querySelector('main, #product, .product-essential, .product-main, article') || doc.body;
+        const areaText = (mainArea ? mainArea.textContent : '').replace(/\s+/g, ' ');
+        const mVis = areaText.match(/(?:(?:€|EUR|US\s*\$|\$|£|GBP|CHF|¥|￥)\s*\d{1,3}(?:[\s.,]\d{3})*(?:[.,]\d{1,2}|[.,]\s*[-–—])?|\d{1,3}(?:[\s.,]\d{3})*(?:[.,]\d{1,2}|[.,]\s*[-–—])?\s*(?:€|EUR\b|USD\b|\$|£|GBP\b|CHF\b|¥|￥|JPY\b))/gi) || [];
+        for (const tok of mVis.slice(0, 12)) {
+          const p = parseAmountToEur(tok, 35, 22000, metaCurr);
+          if (p) { base_price = p.eur; original_currency = p.currency; break; }
         }
       }
 
@@ -2869,13 +2896,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         }
       }
 
-      // Find candidate watch prices in rendered text (explicit currency symbol/code required)
+      // Find candidate watch prices across full rendered markdown (handles 499,- € and mega-menus > 140 lines)
       let base_price = null;
       let original_currency = 'EUR';
-      const priceTokenRe = /(?:(?:€|EUR|US\s*\$|\$|£|GBP|CHF|¥|￥|JPY)\s*\d{1,3}(?:[\s.,]\d{3})*(?:[.,]\d{1,2})?|\d{1,3}(?:[\s.,]\d{3})*(?:[.,]\d{1,2})?\s*(?:€|EUR\b|USD\b|\$|£|GBP\b|CHF\b|¥|￥|JPY\b|円))/gi;
+      const priceTokenRe = /(?:(?:€|EUR|US\s*\$|\$|£|GBP|CHF|¥|￥|JPY)\s*\d{1,3}(?:[\s.,]\d{3})*(?:[.,]\d{1,2}|[.,]\s*[-–—])?|\d{1,3}(?:[\s.,]\d{3})*(?:[.,]\d{1,2}|[.,]\s*[-–—])?\s*(?:€|EUR\b|USD\b|\$|£|GBP\b|CHF\b|¥|￥|JPY\b|円))/gi;
       const candidates = [];
-      for (const ln of lines.slice(0, 140)) {
-        if (/livraison|shipping|versand|port|douane|frais|protection|retour/i.test(ln) && !/prix|price|enchère|offre/i.test(ln)) continue;
+      for (const ln of lines.slice(0, 600)) {
+        if (/(?:gratuit\s+dès|free\s+shipping\s+over|à\s+partir\s+de\s+\d+\s*€)/i.test(ln)) continue;
         const matches = ln.match(priceTokenRe) || [];
         for (const tok of matches) {
           const p = parseAmountToEur(tok, 35, 22000);
