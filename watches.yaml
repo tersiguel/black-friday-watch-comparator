@@ -10,6 +10,12 @@ settings:
   auto_discovery: true
   request_timeout: 15
   use_playwright_fallback: true
+  # Paramètres automatiques d'importation hors-UE (ex: Sakura Watches à Tokyo vers la France via DHL/FedEx)
+  japan_import:
+    shipping_eur: 24.0      # Port express assuré Japon -> France (~24 €)
+    vat_rate: 0.20          # TVA française à l'importation (20 % sur montre + port + douane)
+    customs_duty_eur: 0.80  # Droit de douane horlogerie UE plafonné à 0,80 € (HS 9102)
+    carrier_fee_eur: 18.0   # Frais de dédouanement / avance de fonds transporteur (DHL/FedEx ~18 €)
 
 watches:
   - id: citizen-cb1160-55e
@@ -26,7 +32,7 @@ watches:
       - url: https://www.chrono24.fr/search/index.htm?query=CB1160-55E
         merchant: Chrono24
       - url: https://www.sakurawatches.com/search/?search=CB1160-55E
-        merchant: Sakura Watches
+        merchant: Sakura Watches (Tokyo)
       - url: https://www.amazon.fr/s?k=Citizen+CB1160-55E
         merchant: Amazon FR
 
@@ -44,7 +50,7 @@ watches:
       - url: https://www.chrono24.fr/search/index.htm?query=CB1160-55A
         merchant: Chrono24
       - url: https://www.sakurawatches.com/search/?search=CB1160-55A
-        merchant: Sakura Watches
+        merchant: Sakura Watches (Tokyo)
       - url: https://www.amazon.fr/s?k=Citizen+CB1160-55A
         merchant: Amazon FR
 
@@ -62,7 +68,7 @@ watches:
       - url: https://www.chrono24.fr/search/index.htm?query=CB1160-55L
         merchant: Chrono24
       - url: https://www.sakurawatches.com/search/?search=CB1160-55L
-        merchant: Sakura Watches
+        merchant: Sakura Watches (Tokyo)
       - url: https://www.amazon.fr/s?k=Citizen+CB1160-55L
         merchant: Amazon FR
 
@@ -78,7 +84,7 @@ watches:
       - SBTM323
     urls:
       - url: https://www.sakurawatches.com/seiko-selection-sbtm323
-        merchant: Sakura Watches
+        merchant: Sakura Watches (Tokyo)
       - url: https://www.chrono24.fr/search/index.htm?query=SBTM323
         merchant: Chrono24
       - url: https://www.catawiki.com/en/a/th/8977-seiko-watches-auction
@@ -96,7 +102,7 @@ watches:
       - SBTM317
     urls:
       - url: https://www.sakurawatches.com/seiko-selection-sbtm317
-        merchant: Sakura Watches
+        merchant: Sakura Watches (Tokyo)
       - url: https://www.chrono24.fr/search/index.htm?query=SBTM317
         merchant: Chrono24
       - url: https://www.catawiki.com/en/c/1037-seiko-watches

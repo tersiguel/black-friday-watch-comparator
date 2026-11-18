@@ -1,40 +1,18 @@
 {
-  "updated_at": "2026-11-18T07:10:14.394684+00:00",
-  "updated_at_human": "18/11/2026 à 07:10 UTC",
-  "notification_title": "🔥 OBJECTIF ATTEINT : Citizen Radio-Controlled CB1160-55E (Cadran Noir) à 369.00 € !",
-  "notification_body": "• CB1160-55E : 369.00 € chez Sakura Watches (-33% vs neuf, ✅ 10€ sous ta cible, Score BF 100/100)\n• CB1160-55A : 374.00 € chez Sakura Watches (-32% vs neuf, ✅ 5€ sous ta cible, Score BF 100/100)\n• CB1160-55L : 359.00 € chez Dealabs • Import Japon (-35% vs neuf, ✅ 20€ sous ta cible, Score BF 100/100)\n• SBTM323 : 242.80 € chez Catawiki (Enchères) (-38% vs neuf, ✅ 36€ sous ta cible, Score BF 100/100) [📉 -29.20€]\n• SBTM317 : 253.70 € chez Catawiki (Enchères) (-36% vs neuf, ✅ 25€ sous ta cible, Score BF 100/100) [📉 -14.30€]\n• 059/2020.04 : 569.80 € chez Catawiki (Enchères) (-48% vs neuf, ✅ 229€ sous ta cible, Score BF 100/100) [📉 -209.20€]\n• LCW-M100TSE-1AER : 179.90 € chez Idealo Comparateur (-36% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100)\n• CB0250-84E : 264.00 € chez Ocarat (-34% vs neuf, ✅ 5€ sous ta cible, Score BF 100/100)\n• AT8110-61E : 349.00 € chez Amazon FR (-24% vs neuf, cible 319€ (+30€), Score BF 50/100)",
-  "click_url": "https://www.sakurawatches.com/search/?search=CB1160-55E",
+  "updated_at": "2026-11-18T07:18:16.495281+00:00",
+  "updated_at_human": "18/11/2026 à 07:18 UTC",
+  "notification_title": "🔥 OBJECTIF ATTEINT : Citizen Radio-Controlled CB1160-55L (Cadran Bleu) à 375.00 € !",
+  "notification_body": "• CB1160-55L : 375.00 € chez Dealabs • Amazon JP (-32% vs neuf, ✅ 4€ sous ta cible, Score BF 100/100) [📉 -27.00€]\n• SBTM323 : 242.80 € chez Catawiki (Enchères) (-38% vs neuf, ✅ 36€ sous ta cible, Score BF 100/100) [📉 -46.20€]\n• SBTM317 : 253.70 € chez Catawiki (Enchères) (-36% vs neuf, ✅ 25€ sous ta cible, Score BF 100/100) [📉 -28.30€]\n• 059/2020.04 : 569.80 € chez Catawiki (Enchères) (-48% vs neuf, ✅ 229€ sous ta cible, Score BF 100/100) [📉 -289.20€]\n• LCW-M100TSE-1AER : 179.90 € chez Idealo Comparateur (-36% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100) [📉 -19.10€]\n• CB0250-84E : 264.00 € chez Ocarat (-34% vs neuf, ✅ 5€ sous ta cible, Score BF 100/100) [📉 -15.00€]\n• CB1160-55E : 395.00 € chez Chrono24 (-28% vs neuf, cible 379€ (+16€), Score BF 89/100) [📉 -4.00€]\n• CB1160-55A : 399.00 € chez Chrono24 (-27% vs neuf, cible 379€ (+20€), Score BF 87/100) [📉 -4.00€]\n• AT8110-61E : 349.00 € chez Amazon FR (-24% vs neuf, cible 319€ (+30€), Score BF 50/100)",
+  "click_url": "https://www.dealabs.com/search?q=CB1160",
   "ntfy_topic": "bf-montres-solaires-2026",
   "ntfy_server": "https://ntfy.sh",
   "watches": [
     {
-      "id": "citizen-cb1160-55e",
-      "name": "Citizen Radio-Controlled CB1160-55E (Cadran Noir)",
-      "reference": "CB1160-55E",
-      "best_price": 369.0,
-      "best_merchant": "Sakura Watches",
-      "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55E",
-      "target_price": 379.0,
-      "bf_score": 100,
-      "verdict": "🔥 Deal Black Friday Exceptionnel"
-    },
-    {
-      "id": "citizen-cb1160-55a",
-      "name": "Citizen Radio-Controlled CB1160-55A (Cadran Blanc)",
-      "reference": "CB1160-55A",
-      "best_price": 374.0,
-      "best_merchant": "Sakura Watches",
-      "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55A",
-      "target_price": 379.0,
-      "bf_score": 100,
-      "verdict": "🔥 Deal Black Friday Exceptionnel"
-    },
-    {
       "id": "citizen-cb1160-55l",
       "name": "Citizen Radio-Controlled CB1160-55L (Cadran Bleu)",
       "reference": "CB1160-55L",
-      "best_price": 359.0,
-      "best_merchant": "Dealabs • Import Japon",
+      "best_price": 375.0,
+      "best_merchant": "Dealabs • Amazon JP",
       "best_url": "https://www.dealabs.com/search?q=CB1160",
       "target_price": 379.0,
       "bf_score": 100,
@@ -94,6 +72,28 @@
       "target_price": 269.0,
       "bf_score": 100,
       "verdict": "🔥 Deal Black Friday Exceptionnel"
+    },
+    {
+      "id": "citizen-cb1160-55e",
+      "name": "Citizen Radio-Controlled CB1160-55E (Cadran Noir)",
+      "reference": "CB1160-55E",
+      "best_price": 395.0,
+      "best_merchant": "Chrono24",
+      "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55E",
+      "target_price": 379.0,
+      "bf_score": 89,
+      "verdict": "🔥 Deal Black Friday Exceptionnel"
+    },
+    {
+      "id": "citizen-cb1160-55a",
+      "name": "Citizen Radio-Controlled CB1160-55A (Cadran Blanc)",
+      "reference": "CB1160-55A",
+      "best_price": 399.0,
+      "best_merchant": "Chrono24",
+      "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55A",
+      "target_price": 379.0,
+      "bf_score": 87,
+      "verdict": "👍 Bonne promo (Proche de la cible)"
     },
     {
       "id": "citizen-promaster-as4020",

@@ -18,7 +18,12 @@ from typing import Dict, Any, List, Tuple
 import yaml
 
 from src.models import WatchConfig, WatchURL, OfferResult, WatchAnalysis
-from src.scraper import scrape_offer, infer_merchant_name
+from src.scraper import (
+    scrape_offer,
+    infer_merchant_name,
+    is_non_eu_import_url,
+    compute_japan_import_price,
+)
 from src.discovery import discover_offers_for_watch
 from src.analyzer import load_history, save_history, analyze_watch_and_update_history
 from src.notifier import (
@@ -321,7 +326,7 @@ def generate_demo_offers_and_seed_history(
             "discovered": [],
         },
         "citizen-cb1160-55e": {
-            "past_prices": [449.0, 439.0, 425.0, 415.0, 399.0, 389.0],
+            "past_prices": [449.0, 439.0, 425.0, 415.0, 405.0, 399.0],
             "offers": [
                 OfferResult(
                     watch_id="citizen-cb1160-55e",
@@ -360,7 +365,7 @@ def generate_demo_offers_and_seed_history(
             "discovered": [],
         },
         "citizen-cb1160-55a": {
-            "past_prices": [455.0, 445.0, 429.0, 419.0, 405.0, 392.0],
+            "past_prices": [455.0, 445.0, 429.0, 419.0, 409.0, 403.0],
             "offers": [
                 OfferResult(
                     watch_id="citizen-cb1160-55a",
@@ -399,7 +404,7 @@ def generate_demo_offers_and_seed_history(
             "discovered": [],
         },
         "citizen-cb1160-55l": {
-            "past_prices": [459.0, 449.0, 435.0, 419.0, 405.0, 395.0],
+            "past_prices": [459.0, 449.0, 435.0, 419.0, 409.0, 402.0],
             "offers": [
                 OfferResult(
                     watch_id="citizen-cb1160-55l",
@@ -438,12 +443,13 @@ def generate_demo_offers_and_seed_history(
             "discovered": [
                 OfferResult(
                     watch_id="citizen-cb1160-55l",
-                    merchant="Dealabs • Import Japon",
+                    merchant="Dealabs • Amazon JP",
                     url="https://www.dealabs.com/search?q=CB1160",
-                    price=359.00,
+                    price=375.00,
                     original_price=549.00,
-                    title="Citizen Super Titanium CB1160-55L Solaire Radio-Pilotée",
+                    title="Citizen Super Titanium CB1160-55L Solaire Radio-Pilotée (Import Amazon.co.jp)",
                     extraction_method="dealabs-search",
+                    shipping_note="🇯🇵 Prix final TTC livré en France (port DHL & TVA/douane prépayés AmazonGlobal)",
                     timestamp=now_iso,
                     is_discovered=True,
                     temperature="287°",
@@ -533,20 +539,27 @@ def generate_demo_offers_and_seed_history(
         prof = demo_profiles.get(w.id)
         configured_urls = {u.url for u in w.urls}
         if not prof:
-            fallback_offers = [
-                OfferResult(
-                    watch_id=w.id,
-                    merchant=u.merchant or infer_merchant_name(u.url),
-                    url=u.url,
-                    price=round(w.target_price * 0.98, 2),
-                    original_price=w.reference_price,
-                    in_stock=True,
-                    title=w.name,
-                    extraction_method="demo",
-                    timestamp=now_iso,
+            fallback_offers = []
+            for u in w.urls:
+                raw_p = round(w.target_price * 0.98, 2)
+                imp_note = None
+                merch = u.merchant or infer_merchant_name(u.url)
+                if is_non_eu_import_url(u.url):
+                    raw_p, imp_note = compute_japan_import_price(raw_p)
+                fallback_offers.append(
+                    OfferResult(
+                        watch_id=w.id,
+                        merchant=merch,
+                        url=u.url,
+                        price=raw_p,
+                        original_price=w.reference_price,
+                        in_stock=True,
+                        title=w.name,
+                        extraction_method="demo",
+                        shipping_note=imp_note,
+                        timestamp=now_iso,
+                    )
                 )
-                for u in w.urls
-            ]
             direct_by_watch[w.id] = fallback_offers
             disc_by_watch[w.id] = []
             past_series = [
@@ -555,7 +568,27 @@ def generate_demo_offers_and_seed_history(
             ]
             filtered_offers = fallback_offers
         else:
-            filtered_offers = [o for o in prof["offers"] if o.url in configured_urls]
+            filtered_offers = []
+            for o in prof["offers"]:
+                if o.url not in configured_urls:
+                    continue
+                if o.price is not None and is_non_eu_import_url(o.url) and not o.shipping_note:
+                    landed_price, imp_note = compute_japan_import_price(o.price)
+                    o = OfferResult(
+                        watch_id=o.watch_id,
+                        merchant="Sakura Watches (Tokyo)" if "sakura" in o.url.lower() else o.merchant,
+                        url=o.url,
+                        price=landed_price,
+                        original_price=o.original_price,
+                        currency=o.currency,
+                        in_stock=o.in_stock,
+                        title=o.title,
+                        extraction_method=o.extraction_method,
+                        promo_code=o.promo_code,
+                        shipping_note=imp_note,
+                        timestamp=o.timestamp,
+                    )
+                filtered_offers.append(o)
             direct_by_watch[w.id] = filtered_offers
             disc_by_watch[w.id] = prof["discovered"]
             past_series = prof["past_prices"]
@@ -571,15 +604,19 @@ def generate_demo_offers_and_seed_history(
             },
         )
         if not w_hist["entries"] and filtered_offers:
+            min_offer = min(
+                filtered_offers,
+                key=lambda item: item.price if item.price is not None else 999999.0,
+            )
             for idx, past_p in enumerate(past_series):
                 day_ts = (now - timedelta(days=len(past_series) - idx)).isoformat()
                 w_hist["entries"].append(
                     {
                         "timestamp": day_ts,
                         "best_price": past_p,
-                        "best_merchant": filtered_offers[0].merchant,
-                        "best_url": filtered_offers[0].url,
-                        "merchant_prices": {filtered_offers[0].merchant: past_p},
+                        "best_merchant": min_offer.merchant,
+                        "best_url": min_offer.url,
+                        "merchant_prices": {min_offer.merchant: past_p},
                         "bf_score": 70,
                     }
                 )
@@ -601,6 +638,7 @@ def run_comparator(
     timeout = int(settings.get("request_timeout", 15))
     use_pw = bool(settings.get("use_playwright_fallback", True))
     auto_disc = bool(settings.get("auto_discovery", True))
+    import_settings = settings.get("japan_import", {})
 
     direct_by_watch: Dict[str, List[OfferResult]] = {}
     disc_by_watch: Dict[str, List[OfferResult]] = {}
@@ -621,6 +659,7 @@ def run_comparator(
                     merchant=u.merchant,
                     timeout=timeout,
                     use_playwright_fallback=use_pw,
+                    import_settings=import_settings,
                 )
                 if res.price is not None:
                     any_live_price = True

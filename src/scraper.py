@@ -60,8 +60,12 @@ def infer_merchant_name(url: str, fallback: str = "") -> str:
             "boulanger.com": "Boulanger",
             "chrono24.fr": "Chrono24",
             "chrono24.com": "Chrono24",
-            "sakurawatches.com": "Sakura Watches",
-            "creationwatches.com": "CreationWatches",
+            "sakurawatches.com": "Sakura Watches (Tokyo)",
+            "shoppinginjapan.net": "Shopping In Japan (Japon)",
+            "discovery-japan.me": "Discovery Japan",
+            "seiyajapan.com": "SeiyaJapan",
+            "creationwatches.com": "CreationWatches (Hors UE)",
+            "gnomonwatches.com": "Gnomon Watches (Hors UE)",
             "louis-pion.fr": "Louis Pion",
             "galerieslafayette.com": "Galeries Lafayette",
             "dealabs.com": "Dealabs",
@@ -75,6 +79,48 @@ def infer_merchant_name(url: str, fallback: str = "") -> str:
         return parts[0].capitalize() if parts else "Marchand"
     except Exception:
         return fallback or "Marchand"
+
+
+NON_EU_IMPORT_DOMAINS = (
+    "sakurawatches.com",
+    "shoppinginjapan.net",
+    "discovery-japan.me",
+    "seiyajapan.com",
+    "creationwatches.com",
+    "gnomonwatches.com",
+)
+
+
+def is_non_eu_import_url(url: str) -> bool:
+    """Return True if the URL belongs to a non-EU (e.g., Tokyo/Japan) boutique subject to French VAT & customs."""
+    try:
+        hostname = re.sub(r"^www\.", "", (urlparse(url).hostname or "").lower())
+        return any(hostname == d or hostname.endswith("." + d) for d in NON_EU_IMPORT_DOMAINS)
+    except Exception:
+        return False
+
+
+def compute_japan_import_price(
+    raw_price_ht: float,
+    shipping_eur: float = 24.0,
+    vat_rate: float = 0.20,
+    customs_duty_eur: float = 0.80,
+    carrier_fee_eur: float = 18.0,
+) -> Tuple[float, str]:
+    """
+    Compute true landed TTC price in France for a watch imported from Japan/non-EU (e.g. Sakura Watches Tokyo):
+      - Insured express shipping (DHL/FedEx): ~24 €
+      - EU watch customs duty (HS 9102): 0.80 €
+      - French import VAT (20%) applied on (watch + shipping + duty)
+      - Carrier customs clearance / disbursement fee (DHL/FedEx): ~18 €
+    """
+    taxes = (raw_price_ht + shipping_eur + customs_duty_eur) * vat_rate + customs_duty_eur
+    total_ttc = round(raw_price_ht + shipping_eur + taxes + carrier_fee_eur, 2)
+    note = (
+        f"🇯🇵 Prix HT Tokyo {raw_price_ht:.0f} € + {shipping_eur:.0f}€ port DHL "
+        f"+ {taxes:.0f}€ TVA/douane (20%) + {carrier_fee_eur:.0f}€ frais dossier"
+    )
+    return total_ttc, note
 
 
 def compute_catawiki_price_with_fees(raw_bid: float) -> float:
@@ -412,6 +458,7 @@ def scrape_offer(
     merchant: str = "",
     timeout: int = 15,
     use_playwright_fallback: bool = True,
+    import_settings: Optional[Dict[str, Any]] = None,
 ) -> OfferResult:
     """Scrape a single product URL using the 4-layer hybrid engine."""
     merchant_name = infer_merchant_name(url, merchant)
@@ -444,6 +491,15 @@ def scrape_offer(
             raw_bid = final_price
             final_price = compute_catawiki_price_with_fees(raw_bid)
             shipping_note = f"🔨 Enchère {raw_bid:.0f} € + 9% + 3€ frais Catawiki inclus (hors port)"
+        elif is_non_eu_import_url(url):
+            imp = import_settings or {}
+            final_price, shipping_note = compute_japan_import_price(
+                raw_price_ht=final_price,
+                shipping_eur=float(imp.get("shipping_eur", 24.0)),
+                vat_rate=float(imp.get("vat_rate", 0.20)),
+                customs_duty_eur=float(imp.get("customs_duty_eur", 0.80)),
+                carrier_fee_eur=float(imp.get("carrier_fee_eur", 18.0)),
+            )
 
         return OfferResult(
             watch_id=watch_id,

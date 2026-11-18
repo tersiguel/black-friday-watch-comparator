@@ -6,7 +6,13 @@ import tempfile
 import unittest
 
 from src.models import WatchConfig, OfferResult
-from src.scraper import parse_price_string, extract_from_html, compute_catawiki_price_with_fees
+from src.scraper import (
+    parse_price_string,
+    extract_from_html,
+    compute_catawiki_price_with_fees,
+    compute_japan_import_price,
+    is_non_eu_import_url,
+)
 from src.discovery import parse_dealabs_html_or_rss, parse_catawiki_html
 from src.analyzer import (
     detect_fake_promo,
@@ -147,6 +153,17 @@ class TestBlackFridayWatchComparator(unittest.TestCase):
         self.assertEqual(len(lots), 1)
         self.assertEqual(lots[0].price, 439.0)
         self.assertIn("9% + 3€", lots[0].shipping_note or "")
+
+    def test_japan_import_customs_and_shipping(self):
+        self.assertTrue(is_non_eu_import_url("https://www.sakurawatches.com/seiko-selection-sbtm323"))
+        self.assertFalse(is_non_eu_import_url("https://ocarat.com/montre-seiko.html"))
+
+        # 272€ HT + 24€ DHL + 0.80€ duty + 20% VAT on (272 + 24 + 0.80) [= 59.36€] + 18€ DHL fee = 374.16€
+        total_ttc, note = compute_japan_import_price(272.0)
+        self.assertEqual(total_ttc, 374.16)
+        self.assertIn("Prix HT Tokyo 272 €", note)
+        self.assertIn("port DHL", note)
+        self.assertIn("TVA/douane (20%)", note)
 
     def test_remove_invalid_url_from_config(self):
         with tempfile.TemporaryDirectory() as tmpdir:
