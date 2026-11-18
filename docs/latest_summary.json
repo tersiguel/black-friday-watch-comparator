@@ -1,110 +1,69 @@
 {
-  "updated_at": "2026-11-18T07:18:16.495281+00:00",
-  "updated_at_human": "18/11/2026 à 07:18 UTC",
-  "notification_title": "🔥 OBJECTIF ATTEINT : Citizen Radio-Controlled CB1160-55L (Cadran Bleu) à 375.00 € !",
-  "notification_body": "• CB1160-55L : 375.00 € chez Dealabs • Amazon JP (-32% vs neuf, ✅ 4€ sous ta cible, Score BF 100/100) [📉 -27.00€]\n• SBTM323 : 242.80 € chez Catawiki (Enchères) (-38% vs neuf, ✅ 36€ sous ta cible, Score BF 100/100) [📉 -46.20€]\n• SBTM317 : 253.70 € chez Catawiki (Enchères) (-36% vs neuf, ✅ 25€ sous ta cible, Score BF 100/100) [📉 -28.30€]\n• 059/2020.04 : 569.80 € chez Catawiki (Enchères) (-48% vs neuf, ✅ 229€ sous ta cible, Score BF 100/100) [📉 -289.20€]\n• LCW-M100TSE-1AER : 179.90 € chez Idealo Comparateur (-36% vs neuf, ✅ 9€ sous ta cible, Score BF 100/100) [📉 -19.10€]\n• CB0250-84E : 264.00 € chez Ocarat (-34% vs neuf, ✅ 5€ sous ta cible, Score BF 100/100) [📉 -15.00€]\n• CB1160-55E : 395.00 € chez Chrono24 (-28% vs neuf, cible 379€ (+16€), Score BF 89/100) [📉 -4.00€]\n• CB1160-55A : 399.00 € chez Chrono24 (-27% vs neuf, cible 379€ (+20€), Score BF 87/100) [📉 -4.00€]\n• AT8110-61E : 349.00 € chez Amazon FR (-24% vs neuf, cible 319€ (+30€), Score BF 50/100)",
-  "click_url": "https://www.dealabs.com/search?q=CB1160",
-  "ntfy_topic": "bf-montres-solaires-2026",
-  "ntfy_server": "https://ntfy.sh",
+  "updated_at": "2026-11-18T10:07:12.342144+00:00",
+  "watches_count": 9,
   "watches": [
     {
-      "id": "citizen-cb1160-55l",
-      "name": "Citizen Radio-Controlled CB1160-55L (Cadran Bleu)",
-      "reference": "CB1160-55L",
-      "best_price": 375.0,
-      "best_merchant": "Dealabs • Amazon JP",
-      "best_url": "https://www.dealabs.com/search?q=CB1160",
-      "target_price": 379.0,
-      "bf_score": 100,
-      "verdict": "🔥 Deal Black Friday Exceptionnel"
-    },
-    {
-      "id": "seiko-solar-radio-sbtm323",
-      "name": "Seiko Selection Solar Radio-Controlled SBTM323 (Cadran Noir)",
-      "reference": "SBTM323",
-      "best_price": 242.8,
-      "best_merchant": "Catawiki (Enchères)",
-      "best_url": "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction",
-      "target_price": 279.0,
-      "bf_score": 100,
-      "verdict": "🔥 Deal Black Friday Exceptionnel"
-    },
-    {
-      "id": "seiko-solar-radio-sbtm317",
-      "name": "Seiko Selection Solar Radio-Controlled SBTM317 (Cadran Vert)",
-      "reference": "SBTM317",
-      "best_price": 253.7,
-      "best_merchant": "Catawiki (Enchères)",
-      "best_url": "https://www.catawiki.com/en/c/1037-seiko-watches",
-      "target_price": 279.0,
-      "bf_score": 100,
-      "verdict": "🔥 Deal Black Friday Exceptionnel"
-    },
-    {
-      "id": "junghans-max-bill-mega-solar",
-      "name": "Junghans Max Bill MEGA Solar (Titane & Saphir)",
-      "reference": "059/2020.04",
-      "best_price": 569.8,
-      "best_merchant": "Catawiki (Enchères)",
-      "best_url": "https://www.catawiki.com/en/x/1477-junghans-watches",
-      "target_price": 799.0,
-      "bf_score": 100,
-      "verdict": "🔥 Deal Black Friday Exceptionnel"
-    },
-    {
-      "id": "casio-lineage-titanium",
-      "name": "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)",
-      "reference": "LCW-M100TSE-1AER",
-      "best_price": 179.9,
-      "best_merchant": "Idealo Comparateur",
-      "best_url": "https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER",
-      "target_price": 189.0,
-      "bf_score": 100,
-      "verdict": "🔥 Deal Black Friday Exceptionnel"
-    },
-    {
-      "id": "citizen-ecodrive-cb0250",
-      "name": "Citizen Eco-Drive Radio-Controlled CB0250-84E",
-      "reference": "CB0250-84E",
-      "best_price": 264.0,
-      "best_merchant": "Ocarat",
-      "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
-      "target_price": 269.0,
-      "bf_score": 100,
-      "verdict": "🔥 Deal Black Friday Exceptionnel"
-    },
-    {
       "id": "citizen-cb1160-55e",
-      "name": "Citizen Radio-Controlled CB1160-55E (Cadran Noir)",
       "reference": "CB1160-55E",
-      "best_price": 395.0,
-      "best_merchant": "Chrono24",
-      "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55E",
-      "target_price": 379.0,
-      "bf_score": 89,
-      "verdict": "🔥 Deal Black Friday Exceptionnel"
+      "target_price_new": 425.0,
+      "target_price_used": 330.0,
+      "urls_count": 4
     },
     {
       "id": "citizen-cb1160-55a",
-      "name": "Citizen Radio-Controlled CB1160-55A (Cadran Blanc)",
       "reference": "CB1160-55A",
-      "best_price": 399.0,
-      "best_merchant": "Chrono24",
-      "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55A",
-      "target_price": 379.0,
-      "bf_score": 87,
-      "verdict": "👍 Bonne promo (Proche de la cible)"
+      "target_price_new": 420.0,
+      "target_price_used": 335.0,
+      "urls_count": 3
+    },
+    {
+      "id": "citizen-cb1160-55l",
+      "reference": "CB1160-55L",
+      "target_price_new": 425.0,
+      "target_price_used": 335.0,
+      "urls_count": 3
+    },
+    {
+      "id": "seiko-solar-radio-sbtm323",
+      "reference": "SBTM323",
+      "target_price_new": 385.0,
+      "target_price_used": 270.0,
+      "urls_count": 3
+    },
+    {
+      "id": "seiko-solar-radio-sbtm317",
+      "reference": "SBTM317",
+      "target_price_new": 375.0,
+      "target_price_used": 265.0,
+      "urls_count": 3
+    },
+    {
+      "id": "junghans-max-bill-mega-solar",
+      "reference": "59/2020.02",
+      "target_price_new": 950.0,
+      "target_price_used": 620.0,
+      "urls_count": 4
+    },
+    {
+      "id": "casio-lineage-titanium",
+      "reference": "LCW-M100TSE-1AER",
+      "target_price_new": 225.0,
+      "target_price_used": 155.0,
+      "urls_count": 4
+    },
+    {
+      "id": "citizen-ecodrive-cb0250",
+      "reference": "CB0250-84E",
+      "target_price_new": 330.0,
+      "target_price_used": 240.0,
+      "urls_count": 3
     },
     {
       "id": "citizen-promaster-as4020",
-      "name": "Citizen Promaster Sky Eco-Drive AT8110-61E",
       "reference": "AT8110-61E",
-      "best_price": 349.0,
-      "best_merchant": "Amazon FR",
-      "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
-      "target_price": 319.0,
-      "bf_score": 50,
-      "verdict": "⚠️ Fausse Promo détectée"
+      "target_price_new": 390.0,
+      "target_price_used": 270.0,
+      "urls_count": 3
     }
   ]
 }

@@ -1,227 +1,207 @@
-"""Unit and integration tests for the Black Friday Watch Price Comparator (runnable via unittest or pytest)."""
+"""Unit and integration tests for KeepaWatch (Neuf/Occasion dual curves, fee pre-filling, thresholds, suggestions)."""
 
 import os
 import shutil
 import tempfile
 import unittest
 
-from src.models import WatchConfig, OfferResult
+from src.models import WatchConfig, WatchURL, OfferResult
 from src.scraper import (
     parse_price_string,
     extract_from_html,
-    compute_catawiki_price_with_fees,
-    compute_japan_import_price,
-    is_non_eu_import_url,
+    inspect_product_url,
+    compute_catawiki_fee_only,
+    compute_japan_customs_only,
 )
-from src.discovery import parse_dealabs_html_or_rss, parse_catawiki_html
-from src.analyzer import (
-    detect_fake_promo,
-    compute_bf_score_and_verdict,
-)
+from src.analyzer import analyze_watch_and_update_history
+from src.suggest import propose_product_pages
 from tracker import (
     run_comparator,
-    remove_url_from_config,
+    load_config,
     add_watch_to_config,
     remove_watch_from_config,
-    load_config,
-    DEFAULT_CONFIG_PATH,
+    add_url_to_config,
+    remove_url_from_config,
+    set_watch_thresholds,
 )
 
 
-class TestBlackFridayWatchComparator(unittest.TestCase):
+class TestKeepaWatchComparator(unittest.TestCase):
     def test_parse_price_string_formats(self):
-        self.assertEqual(parse_price_string("94,90 €"), 94.90)
-        self.assertEqual(parse_price_string("1 249,00 €"), 1249.00)
-        self.assertEqual(parse_price_string("129€90"), 129.90)
-        self.assertEqual(parse_price_string("EUR 184.50"), 184.50)
-        self.assertEqual(parse_price_string(264), 264.0)
+        self.assertEqual(parse_price_string("129,99 €"), 129.99)
+        self.assertEqual(parse_price_string("1 249,90 €"), 1249.90)
+        self.assertEqual(parse_price_string("94€90"), 94.90)
+        self.assertEqual(parse_price_string("Citizen CB1160-55E à 435,89 €"), 435.89)
 
-    def test_extract_from_json_ld_and_selector_enrichment(self):
-        sample_html = """
+    def test_inspect_url_prefills_clear_fees_or_leaves_manual(self):
+        # 1. Explicit shipping & used condition stated in clear text on page
+        html_clear = """
         <html>
           <head>
             <script type="application/ld+json">
             {
               "@context": "https://schema.org/",
               "@type": "Product",
-              "name": "Casio G-Shock GW-M5610U-1ER",
+              "name": "Seiko Selection SBTM323",
               "offers": {
                 "@type": "Offer",
                 "priceCurrency": "EUR",
-                "price": "99.90",
-                "availability": "https://schema.org/InStock"
+                "price": "278.00",
+                "itemCondition": "https://schema.org/UsedCondition"
               }
             }
             </script>
           </head>
           <body>
-            <span class="regular-price">149,00 €</span>
-            <p>Profitez de -10% supplémentaires avec le code BFWATCH10 dès maintenant !</p>
+            <div>État : Occasion</div>
+            <div>+ 28 € de frais de port</div>
+            <div>Expédié depuis le Japon</div>
           </body>
         </html>
         """
-        res = extract_from_html(sample_html, "https://ocarat.com/montre-casio.html")
-        self.assertIsNotNone(res)
-        assert res is not None
-        self.assertEqual(res["price"], 99.90)
-        self.assertEqual(res["original_price"], 149.00)
-        self.assertEqual(res["promo_code"], "BFWATCH10")
-        self.assertTrue(res["in_stock"])
-        self.assertEqual(res["method"], "json-ld")
+        res = inspect_product_url("https://www.chrono24.fr/seiko/ref-sbtm323.htm", html_str=html_clear)
+        self.assertEqual(res["base_price"], 278.00)
+        self.assertEqual(res["condition"], "used")
+        self.assertTrue(res["shipping_detected"])
+        self.assertEqual(res["shipping_fee"], 28.00)
+        self.assertTrue(res["site_fee_detected"])
+        self.assertEqual(res["site_fee"], 0.0)
+        self.assertTrue(res["customs_detected"])
+        # (278 + 28 + 0.80) * 0.20 + 0.80 + 18 = 61.36 + 0.80 + 18 = 80.16
+        self.assertEqual(res["customs_fee"], 80.16)
 
-    def test_fake_promo_detection_and_bf_score(self):
+        # 2. Unknown boutique with NO shipping/site/customs stated in clear text -> leaves None for user input
+        html_unknown = """
+        <html>
+          <head><meta property="product:price:amount" content="350.00" /></head>
+          <body><h1>Montre Solaire Rare</h1></body>
+        </html>
+        """
+        res_unknown = inspect_product_url("https://boutique-inconnue-exemple.org/montre-1", html_str=html_unknown)
+        self.assertEqual(res_unknown["base_price"], 350.00)
+        self.assertFalse(res_unknown["shipping_detected"])
+        self.assertIsNone(res_unknown["shipping_fee"])
+        self.assertFalse(res_unknown["site_fee_detected"])
+        self.assertIsNone(res_unknown["site_fee"])
+        self.assertFalse(res_unknown["customs_detected"])
+        self.assertIsNone(res_unknown["customs_fee"])
+
+    def test_catawiki_and_sakura_fee_formulas(self):
+        self.assertEqual(compute_catawiki_fee_only(400.0), 39.0)
+        # Sakura 312 € HT + 24 € DHL -> customs = (312+24+0.80)*0.20 + 0.80 + 18 = 86.16? Wait: 336.8*0.2=67.36 + 0.8 + 18 = 86.16
+        self.assertEqual(compute_japan_customs_only(312.0, shipping_eur=24.0), 86.16)
+
+    def test_dual_curve_history_and_separate_thresholds(self):
         watch = WatchConfig(
-            id="citizen-test",
-            name="Citizen Promaster AT8110-61E",
+            id="citizen-cb1160-55e",
+            name="Citizen CB1160-55E",
             brand="Citizen",
-            reference="AT8110-61E",
-            features="Eco-Drive Radio-Controlled",
-            target_price=319.0,
-            reference_price=459.0,
+            reference="CB1160-55E",
+            features="Super Titanium",
+            target_price_new=430.0,
+            target_price_used=350.0,
+            reference_price=549.0,
         )
-        fake_offer = OfferResult(
-            watch_id="citizen-test",
-            merchant="Amazon FR",
-            url="https://www.amazon.fr/dp/B00WG04A1M",
-            price=349.0,
-            original_price=529.0,
-        )
-        is_fake, reason = detect_fake_promo(fake_offer, watch, lowest_historical=329.0)
-        self.assertTrue(is_fake)
-        self.assertIn("gonflé", reason or "")
+        offers = [
+            OfferResult(
+                watch_id="citizen-cb1160-55e",
+                merchant="Sakura Watches (Tokyo)",
+                url="https://www.sakurawatches.com/citizen-collection-cb1160-55e-15415",
+                price=422.16,
+                base_price=312.0,
+                condition="new",
+                shipping_fee=24.0,
+                site_fee=0.0,
+                customs_fee=86.16,
+            ),
+            OfferResult(
+                watch_id="citizen-cb1160-55e",
+                merchant="Chrono24 (UE)",
+                url="https://www.chrono24.fr/search/index.htm?query=CB1160-55E&usedOrNew=used",
+                price=339.0,
+                base_price=325.0,
+                condition="used",
+                shipping_fee=14.0,
+                site_fee=0.0,
+                customs_fee=0.0,
+            ),
+        ]
+        history = {"updated_at": None, "watches": {}}
+        analysis = analyze_watch_and_update_history(watch, offers, history)
+        self.assertIsNotNone(analysis.best_new_offer)
+        self.assertEqual(analysis.best_new_offer.price, 422.16)
+        self.assertIsNotNone(analysis.best_used_offer)
+        self.assertEqual(analysis.best_used_offer.price, 339.0)
+        self.assertTrue(analysis.alert_new_triggered)
+        self.assertTrue(analysis.alert_used_triggered)
+        self.assertEqual(len(history["watches"]["citizen-cb1160-55e"]["entries"]), 1)
 
-        score_fake, verdict_fake, level_fake = compute_bf_score_and_verdict(
-            349.0, watch, lowest_historical=329.0, is_fake_promo=True
-        )
-        self.assertEqual(level_fake, "fake_promo")
-        self.assertIn("Fausse Promo", verdict_fake)
+    def test_on_demand_suggestions_never_modify_watch_urls(self):
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        _, watches = load_config(os.path.join(base_dir, "watches.yaml"))
+        w = watches[0]
+        before_count = len(w.urls)
+        suggestions = propose_product_pages(w, live_fetch=False)
+        self.assertGreaterEqual(len(suggestions), 1)
+        self.assertEqual(len(w.urls), before_count)
 
-        score_good, verdict_good, level_good = compute_bf_score_and_verdict(
-            289.0, watch, lowest_historical=315.0, is_fake_promo=False
-        )
-        self.assertGreaterEqual(score_good, 80)
-        self.assertIn(level_good, ("exceptional", "target_reached"))
+    def test_cli_crud_and_end_to_end_html_generation(self):
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        src_cfg = os.path.join(base_dir, "watches.yaml")
 
-    def test_dealabs_discovery_parsing(self):
-        watch = WatchConfig(
-            id="casio-gwm5610u",
-            name="Casio G-Shock GW-M5610U-1ER",
-            brand="Casio",
-            reference="GW-M5610U-1ER",
-            features="Tough Solar",
-            target_price=99.0,
-            reference_price=149.0,
-        )
-        rss_xml = """<?xml version="1.0" encoding="UTF-8"?>
-        <rss version="2.0">
-          <channel>
-            <item>
-              <title>Montre Casio G-Shock GW-M5610U-1ER Solaire Radio-Pilotée à 89,99 €</title>
-              <link>https://www.dealabs.com/bons-plans/casio-gw-m5610u-12345</link>
-              <description>Super promo Black Friday à 89,99 € au lieu de 149 €</description>
-            </item>
-          </channel>
-        </rss>
-        """
-        deals = parse_dealabs_html_or_rss(rss_xml, watch)
-        self.assertEqual(len(deals), 1)
-        self.assertEqual(deals[0].price, 89.99)
-        self.assertTrue(deals[0].is_discovered)
-
-    def test_catawiki_discovery_and_buyer_fees(self):
-        self.assertEqual(compute_catawiki_price_with_fees(400.0), 439.0)
-        watch = WatchConfig(
-            id="junghans-max-bill-mega-solar",
-            name="Junghans Max Bill MEGA Solar",
-            brand="Junghans",
-            reference="059/2020.04",
-            features="Titane Saphir",
-            target_price=799.0,
-            reference_price=1090.0,
-        )
-        sample_catawiki = """
-        <div>
-          <article class="c-lot-card">
-            <a href="/fr/l/106104294-junghans-max-bill-mega-solar">
-              <h3 class="c-lot-card__title">Junghans - Max Bill MEGA Solar - 059.2021.02</h3>
-              <div class="c-lot-card__price">400 €</div>
-            </a>
-          </article>
-        </div>
-        """
-        lots = parse_catawiki_html(sample_catawiki, watch)
-        self.assertEqual(len(lots), 1)
-        self.assertEqual(lots[0].price, 439.0)
-        self.assertIn("9% + 3€", lots[0].shipping_note or "")
-
-    def test_japan_import_customs_and_shipping(self):
-        self.assertTrue(is_non_eu_import_url("https://www.sakurawatches.com/seiko-selection-sbtm323"))
-        self.assertFalse(is_non_eu_import_url("https://ocarat.com/montre-seiko.html"))
-
-        # 272€ HT + 24€ DHL + 0.80€ duty + 20% VAT on (272 + 24 + 0.80) [= 59.36€] + 18€ DHL fee = 374.16€
-        total_ttc, note = compute_japan_import_price(272.0)
-        self.assertEqual(total_ttc, 374.16)
-        self.assertIn("Prix HT Tokyo 272 €", note)
-        self.assertIn("port DHL", note)
-        self.assertIn("TVA/douane (20%)", note)
-
-    def test_remove_invalid_url_from_config(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             cfg_copy = os.path.join(tmpdir, "watches.yaml")
-            shutil.copyfile(DEFAULT_CONFIG_PATH, cfg_copy)
-
-            _, initial_watches = load_config(cfg_copy)
-            first_watch = initial_watches[0]
-            target_url = first_watch.urls[0].url
-
-            removed = remove_url_from_config(target_url, watch_id=first_watch.id, config_path=cfg_copy)
-            self.assertTrue(removed)
-
-            _, watches = load_config(cfg_copy)
-            updated = next(w for w in watches if w.id == first_watch.id)
-            remaining_urls = [u.url for u in updated.urls]
-            self.assertNotIn(target_url, remaining_urls)
-
-    def test_add_and_remove_watch_model(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            cfg_copy = os.path.join(tmpdir, "watches.yaml")
-            shutil.copyfile(DEFAULT_CONFIG_PATH, cfg_copy)
-            _, before = load_config(cfg_copy)
-
-            added = add_watch_to_config(
-                name="Casio Oceanus OCW-T200S-1AJF",
-                brand="Casio",
-                reference="OCW-T200S-1AJF",
-                target_price=349.0,
-                reference_price=499.0,
-                url="https://www.sakurawatches.com/casio-oceanus-ocw-t200s-1ajf",
-                config_path=cfg_copy,
-            )
-            self.assertTrue(added)
-            _, watches = load_config(cfg_copy)
-            self.assertEqual(len(watches), len(before) + 1)
-
-            removed = remove_watch_from_config("OCW-T200S-1AJF", config_path=cfg_copy)
-            self.assertTrue(removed)
-            _, watches_after = load_config(cfg_copy)
-            self.assertEqual(len(watches_after), len(before))
-
-    def test_end_to_end_demo_pipeline(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            hist_path = os.path.join(tmpdir, "history.json")
+            shutil.copyfile(src_cfg, cfg_copy)
+            hist_path = os.path.join(tmpdir, "data", "history.json")
             docs_dir = os.path.join(tmpdir, "docs")
-            _, configured = load_config(DEFAULT_CONFIG_PATH)
+
+            # Add & remove watch
+            new_id = add_watch_to_config(
+                config_path=cfg_copy,
+                brand="Casio",
+                name="Casio Oceanus OCW-T200S-1AJF",
+                reference="OCW-T200S-1AJF",
+                target_price_new=380.0,
+                target_price_used=280.0,
+            )
+            add_url_to_config(
+                config_path=cfg_copy,
+                watch_id=new_id,
+                url="https://www.sakurawatches.com/casio-oceanus-ocw-t200s-1ajf",
+                condition="new",
+                manual_price=290.0,
+                shipping_fee=24.0,
+                site_fee=0.0,
+                customs_fee=81.76,
+                auto_inspect=False,
+            )
+            set_watch_thresholds(cfg_copy, new_id, 400.0, 275.0)
+            self.assertTrue(
+                remove_url_from_config(
+                    cfg_copy,
+                    "https://www.sakurawatches.com/casio-oceanus-ocw-t200s-1ajf",
+                    new_id,
+                )
+            )
+            self.assertTrue(remove_watch_from_config(cfg_copy, new_id))
+
+            # Full pipeline run
             analyses = run_comparator(
+                config_path=cfg_copy,
                 history_path=hist_path,
                 docs_dir=docs_dir,
                 demo_mode=True,
                 no_notify=True,
             )
-            self.assertEqual(len(analyses), len(configured))
-            self.assertTrue(os.path.isfile(os.path.join(docs_dir, "index.html")))
-            self.assertTrue(os.path.isfile(os.path.join(docs_dir, "sw.js")))
-            self.assertTrue(os.path.isfile(os.path.join(docs_dir, "latest_summary.json")))
-            self.assertTrue(os.path.isfile(hist_path))
+            self.assertEqual(len(analyses), 9)
+            index_html = os.path.join(docs_dir, "index.html")
+            self.assertTrue(os.path.exists(index_html))
+            with open(index_html, "r", encoding="utf-8") as f:
+                html = f.read()
+            self.assertIn("KeepaWatch", html)
+            self.assertIn("CB1160-55E", html)
+            self.assertIn("Proposer des pages produit", html)
+            self.assertIn("Frais de douane", html)
 
 
 if __name__ == "__main__":

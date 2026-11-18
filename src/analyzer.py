@@ -1,9 +1,9 @@
-"""Black Friday price history manager, fake promo detector, and BF Score calculator."""
+"""Keepa-style dual price history manager (Neuf & Occasion) and threshold alert analyzer."""
 
 import json
 import os
 from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Optional
 
 from src.models import WatchConfig, OfferResult, WatchAnalysis
 
@@ -29,188 +29,128 @@ def save_history(history_path: str, history: Dict[str, Any]) -> None:
         json.dump(history, f, indent=2, ensure_ascii=False)
 
 
-def detect_fake_promo(
-    best_offer: OfferResult,
-    watch: WatchConfig,
-    lowest_historical: Optional[float],
-) -> Tuple[bool, Optional[str]]:
-    """
-    Detect Black Friday fake promotions:
-    1. Merchant crossed-out 'original_price' is artificially inflated above official MSRP (> +8%).
-    2. Merchant claims a discount, yet current price is higher than the previously recorded low price.
-    """
-    if not best_offer or best_offer.price is None:
-        return False, None
-
-    # Check 1: Inflated crossed-out price vs official MSRP
-    if best_offer.original_price and watch.reference_price > 0:
-        if best_offer.original_price > watch.reference_price * 1.08:
-            return (
-                True,
-                f"Prix barré gonflé ({best_offer.original_price:.0f} € affiché vs {watch.reference_price:.0f} € prix public officiel)",
-            )
-
-    # Check 2: Claimed promo while higher than historical low by > 5%
-    if (
-        best_offer.original_price
-        and lowest_historical is not None
-        and best_offer.price > lowest_historical * 1.05
-    ):
-        return (
-            True,
-            f"Fausse baisse : affiché en promo à {best_offer.price:.2f} € mais déjà vu à {lowest_historical:.2f} €",
-        )
-
-    return False, None
-
-
-def compute_bf_score_and_verdict(
-    best_price: Optional[float],
-    watch: WatchConfig,
-    lowest_historical: Optional[float],
-    is_fake_promo: bool,
-) -> Tuple[int, str, str]:
-    """Compute a 0-100 Black Friday Deal Score and human-readable badge."""
-    if best_price is None:
-        return 0, "❌ Indisponible", "wait"
-
-    score = 50.0
-
-    # 1. Discount vs official MSRP (0 to +35 pts)
-    if watch.reference_price > 0:
-        discount_pct = ((watch.reference_price - best_price) / watch.reference_price) * 100.0
-        score += max(-20.0, min(35.0, discount_pct * 1.1))
-
-    # 2. Comparison vs user's target_price (-15 to +25 pts)
-    if watch.target_price > 0:
-        target_ratio = (watch.target_price - best_price) / watch.target_price
-        if best_price <= watch.target_price:
-            score += 18.0 + min(12.0, target_ratio * 60.0)
-        else:
-            score -= min(20.0, abs(target_ratio) * 50.0)
-
-    # 3. Historical low bonus/penalty
-    if lowest_historical is not None:
-        if best_price <= lowest_historical + 0.01:
-            score += 10.0  # All-time low!
-        elif best_price > lowest_historical * 1.10:
-            score -= 10.0
-
-    # 4. Fake promo penalty
-    if is_fake_promo:
-        score -= 22.0
-
-    final_score = int(round(max(5.0, min(100.0, score))))
-
-    if is_fake_promo and best_price > watch.target_price:
-        return final_score, "⚠️ Fausse Promo détectée", "fake_promo"
-    if best_price <= watch.target_price * 0.93 or final_score >= 88:
-        return final_score, "🔥 Deal Black Friday Exceptionnel", "exceptional"
-    if best_price <= watch.target_price:
-        return final_score, "✅ Sous le prix cible (À saisir)", "target_reached"
-    if final_score >= 68:
-        return final_score, "👍 Bonne promo (Proche de la cible)", "good"
-    return final_score, "⏳ Attendre le vrai Black Friday", "wait"
+def _compute_series_stats(values: List[float]) -> tuple[Optional[float], Optional[float], Optional[float]]:
+    if not values:
+        return None, None, None
+    low = round(min(values), 2)
+    high = round(max(values), 2)
+    avg = round(sum(values) / len(values), 2)
+    return low, high, avg
 
 
 def analyze_watch_and_update_history(
     watch: WatchConfig,
-    direct_offers: List[OfferResult],
-    discovered_offers: List[OfferResult],
+    offers: List[OfferResult],
     history: Dict[str, Any],
 ) -> WatchAnalysis:
-    """Analyze all scraped and discovered offers for a watch and update its history."""
+    """Analyze user-configured Neuf & Occasion offers for a watch and update its dual Keepa history."""
     watch_hist = history.setdefault("watches", {}).setdefault(
         watch.id,
         {
             "name": watch.name,
             "reference": watch.reference,
-            "target_price": watch.target_price,
+            "target_price_new": watch.target_price_new,
+            "target_price_used": watch.target_price_used,
             "reference_price": watch.reference_price,
             "entries": [],
         },
     )
+    watch_hist["name"] = watch.name
+    watch_hist["reference"] = watch.reference
+    watch_hist["target_price_new"] = watch.target_price_new
+    watch_hist["target_price_used"] = watch.target_price_used
 
     entries: List[Dict[str, Any]] = watch_hist.get("entries", [])
 
-    # Historical stats BEFORE adding current run
-    past_best_prices = [
-        e["best_price"] for e in entries if isinstance(e.get("best_price"), (int, float))
+    past_new = [
+        float(e["new_price"])
+        for e in entries
+        if isinstance(e.get("new_price"), (int, float))
     ]
-    previous_best_price = past_best_prices[-1] if past_best_prices else None
-    lowest_historical_before = min(past_best_prices) if past_best_prices else None
-
-    # Combine valid in-stock offers
-    all_valid_offers = [
-        o for o in (direct_offers + discovered_offers) if o.price is not None and o.in_stock
+    past_used = [
+        float(e["used_price"])
+        for e in entries
+        if isinstance(e.get("used_price"), (int, float))
     ]
-    all_valid_offers.sort(key=lambda o: o.price)  # type: ignore
 
-    best_offer = all_valid_offers[0] if all_valid_offers else None
-    best_price = best_offer.price if best_offer else None
+    previous_new_price = past_new[-1] if past_new else None
+    previous_used_price = past_used[-1] if past_used else None
 
-    # Update historical low/high including current price
-    all_prices = past_best_prices + ([best_price] if best_price is not None else [])
-    lowest_historical = min(all_prices) if all_prices else None
-    highest_historical = max(all_prices) if all_prices else None
+    valid_new = [
+        o for o in offers if o.price is not None and o.in_stock and o.condition != "used"
+    ]
+    valid_used = [
+        o for o in offers if o.price is not None and o.in_stock and o.condition == "used"
+    ]
+    valid_new.sort(key=lambda o: o.price)   # type: ignore
+    valid_used.sort(key=lambda o: o.price)  # type: ignore
 
-    is_fake, fake_reason = (
-        detect_fake_promo(best_offer, watch, lowest_historical_before)
-        if best_offer
-        else (False, None)
+    best_new_offer = valid_new[0] if valid_new else None
+    best_used_offer = valid_used[0] if valid_used else None
+
+    best_new_price = best_new_offer.price if best_new_offer else None
+    best_used_price = best_used_offer.price if best_used_offer else None
+
+    all_new = past_new + ([best_new_price] if best_new_price is not None else [])
+    all_used = past_used + ([best_used_price] if best_used_price is not None else [])
+
+    low_new, high_new, avg_new = _compute_series_stats(all_new)
+    low_used, high_used, avg_used = _compute_series_stats(all_used)
+
+    drop_new = (
+        round(previous_new_price - best_new_price, 2)
+        if (best_new_price is not None and previous_new_price is not None)
+        else 0.0
+    )
+    drop_used = (
+        round(previous_used_price - best_used_price, 2)
+        if (best_used_price is not None and previous_used_price is not None)
+        else 0.0
     )
 
-    bf_score, bf_verdict, bf_level = compute_bf_score_and_verdict(
-        best_price, watch, lowest_historical_before, is_fake
+    alert_new = bool(
+        best_new_price is not None
+        and watch.target_price_new is not None
+        and watch.target_price_new > 0
+        and best_new_price <= watch.target_price_new
+    )
+    alert_used = bool(
+        best_used_price is not None
+        and watch.target_price_used is not None
+        and watch.target_price_used > 0
+        and best_used_price <= watch.target_price_used
     )
 
-    discount_vs_msrp_pct = 0.0
-    if best_price is not None and watch.reference_price > 0:
-        discount_vs_msrp_pct = round(
-            ((watch.reference_price - best_price) / watch.reference_price) * 100.0, 1
-        )
-
-    discount_vs_target_diff = 0.0
-    if best_price is not None:
-        discount_vs_target_diff = round(best_price - watch.target_price, 2)
-
-    price_drop_vs_previous = 0.0
-    if best_price is not None and previous_best_price is not None:
-        price_drop_vs_previous = round(previous_best_price - best_price, 2)
-
-    # Record entry in history
-    now_iso = datetime.now(timezone.utc).isoformat()
-    merchant_prices = {
-        o.merchant: o.price for o in direct_offers if o.price is not None
-    }
-    if best_price is not None:
+    if best_new_price is not None or best_used_price is not None:
+        now_iso = datetime.now(timezone.utc).isoformat()
         entries.append(
             {
                 "timestamp": now_iso,
-                "best_price": best_price,
-                "best_merchant": best_offer.merchant if best_offer else "",
-                "best_url": best_offer.url if best_offer else "",
-                "merchant_prices": merchant_prices,
-                "bf_score": bf_score,
+                "new_price": best_new_price,
+                "new_merchant": best_new_offer.merchant if best_new_offer else "",
+                "new_url": best_new_offer.url if best_new_offer else "",
+                "used_price": best_used_price,
+                "used_merchant": best_used_offer.merchant if best_used_offer else "",
+                "used_url": best_used_offer.url if best_used_offer else "",
             }
         )
-        # Keep up to 180 snapshots per watch
-        watch_hist["entries"] = entries[-180:]
+        watch_hist["entries"] = entries[-365:]
 
     return WatchAnalysis(
         watch=watch,
-        offers=direct_offers,
-        discovered_offers=discovered_offers,
-        best_offer=best_offer,
-        lowest_historical_price=lowest_historical,
-        highest_historical_price=highest_historical,
-        previous_best_price=previous_best_price,
-        discount_vs_msrp_pct=discount_vs_msrp_pct,
-        discount_vs_target_diff=discount_vs_target_diff,
-        price_drop_vs_previous=price_drop_vs_previous,
-        is_fake_promo=is_fake,
-        fake_promo_reason=fake_reason,
-        bf_score=bf_score,
-        bf_verdict=bf_verdict,
-        bf_verdict_level=bf_level,
+        offers=offers,
+        best_new_offer=best_new_offer,
+        best_used_offer=best_used_offer,
+        lowest_new_historical=low_new,
+        highest_new_historical=high_new,
+        avg_new_historical=avg_new,
+        lowest_used_historical=low_used,
+        highest_used_historical=high_used,
+        avg_used_historical=avg_used,
+        previous_new_price=previous_new_price,
+        previous_used_price=previous_used_price,
+        drop_new_vs_previous=drop_new,
+        drop_used_vs_previous=drop_used,
+        alert_new_triggered=alert_new,
+        alert_used_triggered=alert_used,
     )

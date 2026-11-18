@@ -1,4 +1,4 @@
-"""Chrome Web Push (ntfy.sh) and Local Desktop System Notification dispatcher."""
+"""Chrome Web Push (ntfy.sh) and Local Desktop System Notification dispatcher for Neuf & Occasion thresholds."""
 
 import os
 import platform
@@ -13,51 +13,55 @@ def build_daily_recap_message(
     analyses: List[WatchAnalysis],
     dashboard_url: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Build a structured daily recap & price alert summary for Chrome notifications."""
-    valid = [a for a in analyses if a.best_offer and a.best_offer.price is not None]
-    valid.sort(key=lambda a: a.bf_score, reverse=True)
+    """Build a clear French notification summary for Neuf & Occasion threshold alerts."""
+    alerts: List[Dict[str, Any]] = []
+    for a in analyses:
+        if a.alert_new_triggered and a.best_new_offer and a.best_new_offer.price is not None:
+            alerts.append(
+                {
+                    "label": "NEUF",
+                    "watch": a.watch,
+                    "offer": a.best_new_offer,
+                    "threshold": a.watch.target_price_new,
+                }
+            )
+        if a.alert_used_triggered and a.best_used_offer and a.best_used_offer.price is not None:
+            alerts.append(
+                {
+                    "label": "OCCASION",
+                    "watch": a.watch,
+                    "offer": a.best_used_offer,
+                    "threshold": a.watch.target_price_used,
+                }
+            )
 
-    target_hits = [a for a in valid if a.best_offer.price <= a.watch.target_price]  # type: ignore
-    price_drops = [a for a in valid if a.price_drop_vs_previous > 0.5]
-
-    if target_hits:
-        best = target_hits[0]
-        title = f"🔥 OBJECTIF ATTEINT : {best.watch.name} à {best.best_offer.price:.2f} € !"
+    if alerts:
+        first = alerts[0]
+        title = (
+            f"🔔 SEUIL {first['label']} ATTEINT : {first['watch'].reference} "
+            f"à {first['offer'].price:.2f} € ({first['offer'].merchant})"
+        )
         priority = "high"
-        tags = "watch,fire,tada"
-    elif price_drops:
-        best = price_drops[0]
-        title = f"📉 Baisse de prix (-{best.price_drop_vs_previous:.2f} €) : {best.watch.name}"
-        priority = "high"
-        tags = "watch,chart_with_downwards_trend"
-    elif valid:
-        best = valid[0]
-        title = f"⌚ Récap Black Friday : Meilleur deal {best.watch.reference} à {best.best_offer.price:.2f} €"
-        priority = "default"
-        tags = "watch,shopping_cart"
+        tags = "watch,bell,tada"
     else:
-        title = "⌚ Récap Black Friday Montres : Aucun prix relevé"
-        priority = "low"
-        tags = "watch"
+        title = "⌚ Suivi Prix Montres — Récapitulatif Neuf & Occasion"
+        priority = "default"
+        tags = "watch,chart_with_downwards_trend"
 
-    lines = []
-    for a in valid:
-        offer = a.best_offer
-        assert offer is not None and offer.price is not None
-        diff_target = offer.price - a.watch.target_price
-        target_str = (
-            f"✅ {abs(diff_target):.0f}€ sous ta cible"
-            if diff_target <= 0
-            else f"cible {a.watch.target_price:.0f}€ (+{diff_target:.0f}€)"
-        )
-        drop_str = f" [📉 -{a.price_drop_vs_previous:.2f}€]" if a.price_drop_vs_previous > 0 else ""
-        lines.append(
-            f"• {a.watch.reference} : {offer.price:.2f} € chez {offer.merchant} "
-            f"(-{a.discount_vs_msrp_pct:.0f}% vs neuf, {target_str}, Score BF {a.bf_score}/100){drop_str}"
-        )
+    lines: List[str] = []
+    for a in analyses:
+        parts = []
+        if a.best_new_offer and a.best_new_offer.price is not None:
+            flag = "🔔 " if a.alert_new_triggered else ""
+            parts.append(f"{flag}Neuf {a.best_new_offer.price:.2f} € ({a.best_new_offer.merchant})")
+        if a.best_used_offer and a.best_used_offer.price is not None:
+            flag = "🔔 " if a.alert_used_triggered else ""
+            parts.append(f"{flag}Occasion {a.best_used_offer.price:.2f} € ({a.best_used_offer.merchant})")
+        if parts:
+            lines.append(f"• {a.watch.brand} {a.watch.reference} : " + " | ".join(parts))
 
-    body = "\n".join(lines) if lines else "Vérifie tes URLs dans watches.yaml."
-    click_url = dashboard_url or (valid[0].best_offer.url if valid and valid[0].best_offer else "")
+    body = "\n".join(lines) if lines else "Aucun prix relevé sur les pages suivies."
+    click_url = dashboard_url or (alerts[0]["offer"].url if alerts else "")
 
     return {
         "title": title,
@@ -65,7 +69,8 @@ def build_daily_recap_message(
         "priority": priority,
         "tags": tags,
         "click_url": click_url,
-        "has_alert": bool(target_hits or price_drops),
+        "has_alert": bool(alerts),
+        "alerts_count": len(alerts),
     }
 
 
@@ -75,11 +80,7 @@ def send_ntfy_chrome_push(
     summary: Dict[str, Any],
     timeout: int = 10,
 ) -> bool:
-    """
-    Send Web Push notification via ntfy.sh.
-    When subscribed in Google Chrome at https://ntfy.sh/app, Chrome Service Workers
-    display a native OS/Chrome notification even if the tab is closed.
-    """
+    """Send Web Push notification via ntfy.sh."""
     if not ntfy_topic or not ntfy_topic.strip():
         return False
 
@@ -102,7 +103,7 @@ def send_ntfy_chrome_push(
 
 
 def send_local_desktop_notification(summary: Dict[str, Any]) -> bool:
-    """Trigger a local OS desktop notification if run on the user's computer."""
+    """Trigger a local OS desktop notification if available."""
     title = summary["title"]
     body = summary["body"]
     system = platform.system().lower()

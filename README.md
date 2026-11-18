@@ -1,53 +1,31 @@
-# ⌚ Comparateur de Prix Black Friday — Montres Solaires Radio-Pilotées
+# ⌚ KeepaWatch — Suivi Prix Montres (Neuf & Occasion, Frais Inclus)
 
-Un comparateur de prix automatisé conçu pour suivre plusieurs modèles de **montres solaires radio-pilotées** (Casio Tough Solar Multi-Band 6, Citizen Eco-Drive Radio-Controlled, Seiko Solar Radio-Controlled...) en compétition pendant le Black Friday.
+Application de suivi d'évolution de prix inspirée de **Keepa**, dédiée aux références horlogères :
 
-## ✨ Fonctionnalités
+- **1 Fiche (Card) par référence produit** : photo studio, présentation courte, code EAN / ASIN / référence copiables et caractéristiques clés.
+- **Graphique style Keepa à double courbe** :
+  - **Courbe Prix Neuf** (tout frais compris)
+  - **Courbe Prix Occasion** (tout frais compris)
+  - Lignes pointillées des **seuils d'alerte Neuf & Occasion** et sélecteur de période (`7j`, `1 mois`, `3 mois`, `Tout`).
+- **Suivi maîtrisé par l'utilisateur** : aucune page n'est ajoutée automatiquement sans votre accord. Vous ajoutez vos produits et vos URLs de pages produit directement sous le graphique.
+- **Proposition de pages produit à la demande (`✨ Proposer des pages produit`)** : suggère des pages vérifiées à examiner et pré-remplir en un clic.
+- **Calcul complet et pré-remplissage des frais (`Port + Frais du site + Douane`)** :
+  - Lors de l'ajout d'une URL, l'application inspecte la page et pré-remplit les frais lorsqu'ils sont indiqués en clair sur le site ou issus d'un barème explicite (ex. livraison gratuite UE, frais Catawiki `9 % + 3 €`, protection Vinted, import Japon hors-UE `TVA 20 % + douane + frais transporteur`).
+  - Si un frais n'est pas indiqué en clair, le champ reste libre pour votre saisie manuelle.
+- **Formulaire de seuils de notification (Neuf & Occasion)** : déclenche une notification Chrome / Web Push (`ntfy.sh`) dès que le prix total passe sous votre seuil Neuf ou Occasion.
 
-- **Multi-modèles en compétition** : Configure tes modèles candidats, leurs prix cibles et leurs prix publics officiels dans [`watches.yaml`](watches.yaml).
-- **Double mode d'alimentation** :
-  1. **N'importe quelle URL marchand** (Amazon, Ocarat, Montres & Co, Chrono24, Fnac, Cdiscount, Sakura Watches...) grâce à un moteur hybride 4 couches : `JSON-LD Schema.org` → `OpenGraph / Meta` → `Sélecteurs CSS & Codes Promo` → `Fallback Playwright Chromium`.
-  2. **Découverte automatique par référence** : Recherche de nouvelles offres et deals sur **Dealabs** et **Idealo** à partir de la référence de chaque montre.
-- **Anti-Fausse Promo & Score Black Friday (/100)** : Détecte automatiquement les prix barrés gonflés au-dessus du prix officiel et les fausses remises par rapport au plus bas historique.
-- **Notifications Google Chrome (2 modes)** :
-  1. **Web Push Chrome (même onglet fermé)** via `ntfy.sh` : ouvre `https://ntfy.sh/app` dans Chrome, abonne-toi à ton canal (défini par `ntfy_topic` dans `watches.yaml`) et autorise les notifications Chrome.
-  2. **Notification native dans l'onglet du rapport HTML** : clique sur *« 🔔 Activer les notifications Chrome »* en haut du rapport.
-- **Gratuit & 100 % Cloud via GitHub Actions** : Tourne toutes les 6 heures sans laisser ton PC allumé et publie le tableau de bord interactif sur **GitHub Pages** (`docs/index.html`).
-
----
-
-## 🚀 Utilisation rapide
-
-### 1. Lancer une analyse (ou tester en mode démo)
+## 🚀 Commandes principales
 
 ```bash
-# Générer immédiatement le rapport avec les données de simulation Black Friday
-python3 tracker.py run --demo
-
-# Lancer le relevé réel sur toutes tes URLs et la découverte automatique
+# Mettre à jour les prix des URLs suivies et générer docs/index.html
 python3 tracker.py run
+
+# Lancer le serveur local interactif (sauvegarde directe dans watches.yaml + inspection live des URLs)
+python3 tracker.py serve --port 8000
+
+# Ajouter un produit en ligne de commande
+python3 tracker.py add-watch --brand "Citizen" --name "Citizen CB1160-55W" --reference "CB1160-55W" --target-new 410 --target-used 310
+
+# Ajouter une URL produit (avec auto-détection ou saisie des frais)
+python3 tracker.py add-url --watch-id citizen-cb1160-55e --url "https://..." --condition new
 ```
-
-### 2. Ajouter n'importe quelle URL de montre en une commande
-
-```bash
-python3 tracker.py add-url \
-  --watch casio-gwm5610u \
-  --url "https://www.boulanger.com/ref/..." \
-  --merchant "Boulanger"
-```
-
-### 3. Tester ta notification Google Chrome
-
-```bash
-python3 tracker.py test-notify
-```
-
----
-
-## ☁️ Activer l'automatisation GitHub Actions + GitHub Pages
-
-1. Pousse ce dépôt sur ton compte GitHub.
-2. Dans **Settings → Pages**, choisis **Deploy from a branch** → branche `main` → dossier `/docs`.
-3. Ton rapport HTML sera accessible partout sur `https://<ton-pseudo>.github.io/<nom-du-repo>/`.
-4. *(Optionnel)* Pour personnaliser ton canal secret `ntfy.sh`, modifie `ntfy_topic` dans `watches.yaml` ou ajoute un secret `NTFY_TOPIC` dans **Settings → Secrets and variables → Actions**.

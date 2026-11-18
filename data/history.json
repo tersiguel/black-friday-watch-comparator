@@ -1,721 +1,732 @@
 {
-  "updated_at": "2026-11-18T07:18:16.494383+00:00",
+  "updated_at": "2026-11-18T10:07:12.340911+00:00",
   "watches": {
     "citizen-cb1160-55e": {
-      "name": "Citizen Radio-Controlled CB1160-55E (Cadran Noir)",
+      "name": "Citizen Collection Super Titanium CB1160-55E",
       "reference": "CB1160-55E",
-      "target_price": 379.0,
+      "target_price_new": 425.0,
+      "target_price_used": 330.0,
       "reference_price": 549.0,
       "entries": [
         {
-          "timestamp": "2026-11-12T07:18:16.493656+00:00",
-          "best_price": 449.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55E",
-          "merchant_prices": {
-            "Chrono24": 449.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-04T10:07:12.340384+00:00",
+          "new_price": 460.15,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 379.68,
+          "used_merchant": "Chrono24 (UE)"
         },
         {
-          "timestamp": "2026-11-13T07:18:16.493656+00:00",
-          "best_price": 439.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55E",
-          "merchant_prices": {
-            "Chrono24": 439.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-11T10:07:12.340384+00:00",
+          "new_price": 460.15,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 366.12,
+          "used_merchant": "Chrono24 (UE)"
         },
         {
-          "timestamp": "2026-11-14T07:18:16.493656+00:00",
-          "best_price": 425.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55E",
-          "merchant_prices": {
-            "Chrono24": 425.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-18T10:07:12.340384+00:00",
+          "new_price": 447.49,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 366.12,
+          "used_merchant": "Chrono24 (UE)"
         },
         {
-          "timestamp": "2026-11-15T07:18:16.493656+00:00",
-          "best_price": 415.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55E",
-          "merchant_prices": {
-            "Chrono24": 415.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-25T10:07:12.340384+00:00",
+          "new_price": 447.49,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 355.95,
+          "used_merchant": "Chrono24 (UE)"
         },
         {
-          "timestamp": "2026-11-16T07:18:16.493656+00:00",
-          "best_price": 405.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55E",
-          "merchant_prices": {
-            "Chrono24": 405.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-31T10:07:12.340384+00:00",
+          "new_price": 439.05,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 355.95,
+          "used_merchant": "Chrono24 (UE)"
         },
         {
-          "timestamp": "2026-11-17T07:18:16.493656+00:00",
-          "best_price": 399.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55E",
-          "merchant_prices": {
-            "Chrono24": 399.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-11-06T10:07:12.340384+00:00",
+          "new_price": 443.27,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 349.17,
+          "used_merchant": "Chrono24 (UE)"
         },
         {
-          "timestamp": "2026-11-18T07:18:16.494147+00:00",
-          "best_price": 395.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55E",
-          "merchant_prices": {
-            "Sakura Watches (Tokyo)": 490.56,
-            "Chrono24": 395.0,
-            "Amazon FR": 419.0
-          },
-          "bf_score": 89
+          "timestamp": "2026-11-11T10:07:12.340384+00:00",
+          "new_price": 430.6,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 349.17,
+          "used_merchant": "Chrono24 (UE)"
+        },
+        {
+          "timestamp": "2026-11-15T10:07:12.340384+00:00",
+          "new_price": 430.6,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 342.39,
+          "used_merchant": "Chrono24 (UE)"
+        },
+        {
+          "timestamp": "2026-11-17T10:07:12.340384+00:00",
+          "new_price": 426.38,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 339.0,
+          "used_merchant": "Chrono24 (UE)"
+        },
+        {
+          "timestamp": "2026-11-18T10:07:12.340700+00:00",
+          "new_price": 422.16,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "new_url": "https://www.sakurawatches.com/citizen-collection-cb1160-55e-15415",
+          "used_price": 339.0,
+          "used_merchant": "Chrono24 (UE)",
+          "used_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55E&usedOrNew=used"
         }
       ]
     },
     "citizen-cb1160-55a": {
-      "name": "Citizen Radio-Controlled CB1160-55A (Cadran Blanc)",
+      "name": "Citizen Collection Super Titanium CB1160-55A",
       "reference": "CB1160-55A",
-      "target_price": 379.0,
+      "target_price_new": 420.0,
+      "target_price_used": 335.0,
       "reference_price": 549.0,
       "entries": [
         {
-          "timestamp": "2026-11-12T07:18:16.493656+00:00",
-          "best_price": 455.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55A",
-          "merchant_prices": {
-            "Chrono24": 455.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-04T10:07:12.340384+00:00",
+          "new_price": 463.21,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 386.4,
+          "used_merchant": "Chrono24 (UE)"
         },
         {
-          "timestamp": "2026-11-13T07:18:16.493656+00:00",
-          "best_price": 445.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55A",
-          "merchant_prices": {
-            "Chrono24": 445.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-11T10:07:12.340384+00:00",
+          "new_price": 463.21,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 372.6,
+          "used_merchant": "Chrono24 (UE)"
         },
         {
-          "timestamp": "2026-11-14T07:18:16.493656+00:00",
-          "best_price": 429.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55A",
-          "merchant_prices": {
-            "Chrono24": 429.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-18T10:07:12.340384+00:00",
+          "new_price": 450.46,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 372.6,
+          "used_merchant": "Chrono24 (UE)"
         },
         {
-          "timestamp": "2026-11-15T07:18:16.493656+00:00",
-          "best_price": 419.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55A",
-          "merchant_prices": {
-            "Chrono24": 419.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-25T10:07:12.340384+00:00",
+          "new_price": 450.46,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 362.25,
+          "used_merchant": "Chrono24 (UE)"
         },
         {
-          "timestamp": "2026-11-16T07:18:16.493656+00:00",
-          "best_price": 409.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55A",
-          "merchant_prices": {
-            "Chrono24": 409.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-31T10:07:12.340384+00:00",
+          "new_price": 441.96,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 362.25,
+          "used_merchant": "Chrono24 (UE)"
         },
         {
-          "timestamp": "2026-11-17T07:18:16.493656+00:00",
-          "best_price": 403.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55A",
-          "merchant_prices": {
-            "Chrono24": 403.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-11-06T10:07:12.340384+00:00",
+          "new_price": 446.21,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 355.35,
+          "used_merchant": "Chrono24 (UE)"
         },
         {
-          "timestamp": "2026-11-18T07:18:16.494165+00:00",
-          "best_price": 399.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55A",
-          "merchant_prices": {
-            "Sakura Watches (Tokyo)": 496.56,
-            "Chrono24": 399.0,
-            "Amazon FR": 425.0
-          },
-          "bf_score": 87
+          "timestamp": "2026-11-11T10:07:12.340384+00:00",
+          "new_price": 433.46,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 355.35,
+          "used_merchant": "Chrono24 (UE)"
+        },
+        {
+          "timestamp": "2026-11-15T10:07:12.340384+00:00",
+          "new_price": 433.46,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 348.45,
+          "used_merchant": "Chrono24 (UE)"
+        },
+        {
+          "timestamp": "2026-11-17T10:07:12.340384+00:00",
+          "new_price": 429.21,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 345.0,
+          "used_merchant": "Chrono24 (UE)"
+        },
+        {
+          "timestamp": "2026-11-18T10:07:12.340716+00:00",
+          "new_price": 424.96,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "new_url": "https://www.sakurawatches.com/citizen-collection-cb1160-55a",
+          "used_price": 345.0,
+          "used_merchant": "Chrono24 (UE)",
+          "used_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55A&usedOrNew=used"
         }
       ]
     },
     "citizen-cb1160-55l": {
-      "name": "Citizen Radio-Controlled CB1160-55L (Cadran Bleu)",
+      "name": "Citizen Collection Super Titanium CB1160-55L",
       "reference": "CB1160-55L",
-      "target_price": 379.0,
+      "target_price_new": 425.0,
+      "target_price_used": 335.0,
       "reference_price": 549.0,
       "entries": [
         {
-          "timestamp": "2026-11-12T07:18:16.493656+00:00",
-          "best_price": 459.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55L",
-          "merchant_prices": {
-            "Chrono24": 459.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-04T10:07:12.340384+00:00",
+          "new_price": 460.15,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 384.16,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-13T07:18:16.493656+00:00",
-          "best_price": 449.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55L",
-          "merchant_prices": {
-            "Chrono24": 449.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-11T10:07:12.340384+00:00",
+          "new_price": 460.15,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 370.44,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-14T07:18:16.493656+00:00",
-          "best_price": 435.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55L",
-          "merchant_prices": {
-            "Chrono24": 435.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-18T10:07:12.340384+00:00",
+          "new_price": 447.49,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 370.44,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-15T07:18:16.493656+00:00",
-          "best_price": 419.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55L",
-          "merchant_prices": {
-            "Chrono24": 419.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-25T10:07:12.340384+00:00",
+          "new_price": 447.49,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 360.15,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-16T07:18:16.493656+00:00",
-          "best_price": 409.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55L",
-          "merchant_prices": {
-            "Chrono24": 409.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-31T10:07:12.340384+00:00",
+          "new_price": 439.05,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 360.15,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-17T07:18:16.493656+00:00",
-          "best_price": 402.0,
-          "best_merchant": "Chrono24",
-          "best_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55L",
-          "merchant_prices": {
-            "Chrono24": 402.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-11-06T10:07:12.340384+00:00",
+          "new_price": 443.27,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 353.29,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-18T07:18:16.494177+00:00",
-          "best_price": 375.0,
-          "best_merchant": "Dealabs • Amazon JP",
-          "best_url": "https://www.dealabs.com/search?q=CB1160",
-          "merchant_prices": {
-            "Sakura Watches (Tokyo)": 494.16,
-            "Chrono24": 398.0,
-            "Amazon FR": 422.0
-          },
-          "bf_score": 100
+          "timestamp": "2026-11-11T10:07:12.340384+00:00",
+          "new_price": 430.6,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 353.29,
+          "used_merchant": "Chrono24 (Occasion)"
+        },
+        {
+          "timestamp": "2026-11-15T10:07:12.340384+00:00",
+          "new_price": 430.6,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 346.43,
+          "used_merchant": "Chrono24 (Occasion)"
+        },
+        {
+          "timestamp": "2026-11-17T10:07:12.340384+00:00",
+          "new_price": 426.38,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 343.0,
+          "used_merchant": "Chrono24 (Occasion)"
+        },
+        {
+          "timestamp": "2026-11-18T10:07:12.340728+00:00",
+          "new_price": 422.16,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "new_url": "https://www.sakurawatches.com/citizen-collection-cb1160-55l",
+          "used_price": 343.0,
+          "used_merchant": "Chrono24 (Occasion)",
+          "used_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55L&usedOrNew=used"
         }
       ]
     },
     "seiko-solar-radio-sbtm323": {
-      "name": "Seiko Selection Solar Radio-Controlled SBTM323 (Cadran Noir)",
+      "name": "Seiko Selection S Series Solar Radio SBTM323",
       "reference": "SBTM323",
-      "target_price": 279.0,
-      "reference_price": 395.0,
+      "target_price_new": 385.0,
+      "target_price_used": 270.0,
+      "reference_price": 430.0,
       "entries": [
         {
-          "timestamp": "2026-11-12T07:18:16.493656+00:00",
-          "best_price": 325.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 325.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-04T10:07:12.340384+00:00",
+          "new_price": 428.76,
+          "new_merchant": "Chrono24 (Import JP)",
+          "used_price": 292.1,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-13T07:18:16.493656+00:00",
-          "best_price": 319.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 319.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-11T10:07:12.340384+00:00",
+          "new_price": 428.76,
+          "new_merchant": "Chrono24 (Import JP)",
+          "used_price": 281.66,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-14T07:18:16.493656+00:00",
-          "best_price": 310.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 310.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-18T10:07:12.340384+00:00",
+          "new_price": 416.96,
+          "new_merchant": "Chrono24 (Import JP)",
+          "used_price": 281.66,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-15T07:18:16.493656+00:00",
-          "best_price": 299.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 299.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-25T10:07:12.340384+00:00",
+          "new_price": 416.96,
+          "new_merchant": "Chrono24 (Import JP)",
+          "used_price": 273.84,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-16T07:18:16.493656+00:00",
-          "best_price": 295.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 295.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-31T10:07:12.340384+00:00",
+          "new_price": 409.09,
+          "new_merchant": "Chrono24 (Import JP)",
+          "used_price": 273.84,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-17T07:18:16.493656+00:00",
-          "best_price": 289.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 289.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-11-06T10:07:12.340384+00:00",
+          "new_price": 413.03,
+          "new_merchant": "Chrono24 (Import JP)",
+          "used_price": 268.62,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-18T07:18:16.494185+00:00",
-          "best_price": 242.8,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction",
-          "merchant_prices": {
-            "Sakura Watches (Tokyo)": 374.16,
-            "Chrono24": 298.0,
-            "Catawiki (Enchères)": 242.8
-          },
-          "bf_score": 100
+          "timestamp": "2026-11-11T10:07:12.340384+00:00",
+          "new_price": 401.23,
+          "new_merchant": "Chrono24 (Import JP)",
+          "used_price": 268.62,
+          "used_merchant": "Catawiki"
+        },
+        {
+          "timestamp": "2026-11-15T10:07:12.340384+00:00",
+          "new_price": 401.23,
+          "new_merchant": "Chrono24 (Import JP)",
+          "used_price": 263.41,
+          "used_merchant": "Catawiki"
+        },
+        {
+          "timestamp": "2026-11-17T10:07:12.340384+00:00",
+          "new_price": 397.29,
+          "new_merchant": "Chrono24 (Import JP)",
+          "used_price": 260.8,
+          "used_merchant": "Catawiki"
+        },
+        {
+          "timestamp": "2026-11-18T10:07:12.340738+00:00",
+          "new_price": 393.36,
+          "new_merchant": "Chrono24 (Import JP)",
+          "new_url": "https://www.chrono24.fr/seiko/ref-sbtm323.htm",
+          "used_price": 260.8,
+          "used_merchant": "Catawiki",
+          "used_url": "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction"
         }
       ]
     },
     "seiko-solar-radio-sbtm317": {
-      "name": "Seiko Selection Solar Radio-Controlled SBTM317 (Cadran Vert)",
+      "name": "Seiko Selection S Series Solar Radio SBTM317",
       "reference": "SBTM317",
-      "target_price": 279.0,
-      "reference_price": 395.0,
+      "target_price_new": 375.0,
+      "target_price_used": 265.0,
+      "reference_price": 430.0,
       "entries": [
         {
-          "timestamp": "2026-11-12T07:18:16.493656+00:00",
-          "best_price": 329.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/c/1037-seiko-watches",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 329.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-04T10:07:12.340384+00:00",
+          "new_price": 402.6,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 285.99,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-13T07:18:16.493656+00:00",
-          "best_price": 319.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/c/1037-seiko-watches",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 319.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-11T10:07:12.340384+00:00",
+          "new_price": 402.6,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 275.78,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-14T07:18:16.493656+00:00",
-          "best_price": 309.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/c/1037-seiko-watches",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 309.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-18T10:07:12.340384+00:00",
+          "new_price": 391.52,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 275.78,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-15T07:18:16.493656+00:00",
-          "best_price": 298.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/c/1037-seiko-watches",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 298.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-25T10:07:12.340384+00:00",
+          "new_price": 391.52,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 268.12,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-16T07:18:16.493656+00:00",
-          "best_price": 289.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/c/1037-seiko-watches",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 289.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-31T10:07:12.340384+00:00",
+          "new_price": 384.13,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 268.12,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-17T07:18:16.493656+00:00",
-          "best_price": 282.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/c/1037-seiko-watches",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 282.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-11-06T10:07:12.340384+00:00",
+          "new_price": 387.83,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 263.01,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-18T07:18:16.494192+00:00",
-          "best_price": 253.7,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/c/1037-seiko-watches",
-          "merchant_prices": {
-            "Sakura Watches (Tokyo)": 369.36,
-            "Chrono24": 294.0,
-            "Catawiki (Enchères)": 253.7
-          },
-          "bf_score": 100
+          "timestamp": "2026-11-11T10:07:12.340384+00:00",
+          "new_price": 376.75,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 263.01,
+          "used_merchant": "Catawiki"
+        },
+        {
+          "timestamp": "2026-11-15T10:07:12.340384+00:00",
+          "new_price": 376.75,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 257.9,
+          "used_merchant": "Catawiki"
+        },
+        {
+          "timestamp": "2026-11-17T10:07:12.340384+00:00",
+          "new_price": 373.05,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": 255.35,
+          "used_merchant": "Catawiki"
+        },
+        {
+          "timestamp": "2026-11-18T10:07:12.340749+00:00",
+          "new_price": 369.36,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "new_url": "https://www.sakurawatches.com/seiko-selection-sbtm317",
+          "used_price": 255.35,
+          "used_merchant": "Catawiki",
+          "used_url": "https://www.catawiki.com/en/c/1037-seiko-watches"
         }
       ]
     },
     "junghans-max-bill-mega-solar": {
-      "name": "Junghans Max Bill MEGA Solar (Titane & Saphir)",
-      "reference": "059/2020.04",
-      "target_price": 799.0,
-      "reference_price": 1090.0,
+      "name": "Junghans Max Bill MEGA Solar Titane & Saphir",
+      "reference": "59/2020.02",
+      "target_price_new": 950.0,
+      "target_price_used": 620.0,
+      "reference_price": 1315.0,
       "entries": [
         {
-          "timestamp": "2026-11-12T07:18:16.493656+00:00",
-          "best_price": 989.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/x/1477-junghans-watches",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 989.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-04T10:07:12.340384+00:00",
+          "new_price": 1078.01,
+          "new_merchant": "Uhr24.de",
+          "used_price": 662.82,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-13T07:18:16.493656+00:00",
-          "best_price": 965.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/x/1477-junghans-watches",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 965.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-11T10:07:12.340384+00:00",
+          "new_price": 1078.01,
+          "new_merchant": "Uhr24.de",
+          "used_price": 639.14,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-14T07:18:16.493656+00:00",
-          "best_price": 939.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/x/1477-junghans-watches",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 939.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-18T10:07:12.340384+00:00",
+          "new_price": 1048.34,
+          "new_merchant": "Uhr24.de",
+          "used_price": 639.14,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-15T07:18:16.493656+00:00",
-          "best_price": 910.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/x/1477-junghans-watches",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 910.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-25T10:07:12.340384+00:00",
+          "new_price": 1048.34,
+          "new_merchant": "Uhr24.de",
+          "used_price": 621.39,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-16T07:18:16.493656+00:00",
-          "best_price": 889.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/x/1477-junghans-watches",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 889.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-31T10:07:12.340384+00:00",
+          "new_price": 1028.56,
+          "new_merchant": "Uhr24.de",
+          "used_price": 621.39,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-17T07:18:16.493656+00:00",
-          "best_price": 859.0,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/x/1477-junghans-watches",
-          "merchant_prices": {
-            "Catawiki (Enchères)": 859.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-11-06T10:07:12.340384+00:00",
+          "new_price": 1038.45,
+          "new_merchant": "Uhr24.de",
+          "used_price": 609.55,
+          "used_merchant": "Catawiki"
         },
         {
-          "timestamp": "2026-11-18T07:18:16.494200+00:00",
-          "best_price": 569.8,
-          "best_merchant": "Catawiki (Enchères)",
-          "best_url": "https://www.catawiki.com/en/x/1477-junghans-watches",
-          "merchant_prices": {
-            "Amazon DE": 789.0,
-            "Ocarat": 869.0,
-            "Chrono24": 835.0,
-            "Catawiki (Enchères)": 569.8
-          },
-          "bf_score": 100
+          "timestamp": "2026-11-11T10:07:12.340384+00:00",
+          "new_price": 1008.78,
+          "new_merchant": "Uhr24.de",
+          "used_price": 609.55,
+          "used_merchant": "Catawiki"
+        },
+        {
+          "timestamp": "2026-11-15T10:07:12.340384+00:00",
+          "new_price": 1008.78,
+          "new_merchant": "Uhr24.de",
+          "used_price": 597.72,
+          "used_merchant": "Catawiki"
+        },
+        {
+          "timestamp": "2026-11-17T10:07:12.340384+00:00",
+          "new_price": 998.89,
+          "new_merchant": "Uhr24.de",
+          "used_price": 591.8,
+          "used_merchant": "Catawiki"
+        },
+        {
+          "timestamp": "2026-11-18T10:07:12.340758+00:00",
+          "new_price": 989.0,
+          "new_merchant": "Uhr24.de",
+          "new_url": "https://uhr24.de/junghans/max-bill-mega-solar-59-2020-02",
+          "used_price": 591.8,
+          "used_merchant": "Catawiki",
+          "used_url": "https://www.catawiki.com/en/x/1477-junghans-watches"
         }
       ]
     },
     "casio-lineage-titanium": {
-      "name": "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)",
+      "name": "Casio Wave Ceptor / Lineage Titane LCW-M100TSE-1AER",
       "reference": "LCW-M100TSE-1AER",
-      "target_price": 189.0,
-      "reference_price": 279.0,
+      "target_price_new": 225.0,
+      "target_price_used": 155.0,
+      "reference_price": 299.0,
       "entries": [
         {
-          "timestamp": "2026-11-12T07:18:16.493656+00:00",
-          "best_price": 249.0,
-          "best_merchant": "Amazon FR",
-          "best_url": "https://www.amazon.fr/dp/B07571V4V5",
-          "merchant_prices": {
-            "Amazon FR": 249.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-04T10:07:12.340384+00:00",
+          "new_price": 253.03,
+          "new_merchant": "Idealo.fr (Marchand UE)",
+          "used_price": 175.84,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-13T07:18:16.493656+00:00",
-          "best_price": 239.0,
-          "best_merchant": "Amazon FR",
-          "best_url": "https://www.amazon.fr/dp/B07571V4V5",
-          "merchant_prices": {
-            "Amazon FR": 239.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-11T10:07:12.340384+00:00",
+          "new_price": 253.03,
+          "new_merchant": "Idealo.fr (Marchand UE)",
+          "used_price": 169.56,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-14T07:18:16.493656+00:00",
-          "best_price": 229.0,
-          "best_merchant": "Amazon FR",
-          "best_url": "https://www.amazon.fr/dp/B07571V4V5",
-          "merchant_prices": {
-            "Amazon FR": 229.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-18T10:07:12.340384+00:00",
+          "new_price": 246.07,
+          "new_merchant": "Idealo.fr (Marchand UE)",
+          "used_price": 169.56,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-15T07:18:16.493656+00:00",
-          "best_price": 219.0,
-          "best_merchant": "Amazon FR",
-          "best_url": "https://www.amazon.fr/dp/B07571V4V5",
-          "merchant_prices": {
-            "Amazon FR": 219.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-25T10:07:12.340384+00:00",
+          "new_price": 246.07,
+          "new_merchant": "Idealo.fr (Marchand UE)",
+          "used_price": 164.85,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-16T07:18:16.493656+00:00",
-          "best_price": 209.0,
-          "best_merchant": "Amazon FR",
-          "best_url": "https://www.amazon.fr/dp/B07571V4V5",
-          "merchant_prices": {
-            "Amazon FR": 209.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-31T10:07:12.340384+00:00",
+          "new_price": 241.43,
+          "new_merchant": "Idealo.fr (Marchand UE)",
+          "used_price": 164.85,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-17T07:18:16.493656+00:00",
-          "best_price": 199.0,
-          "best_merchant": "Amazon FR",
-          "best_url": "https://www.amazon.fr/dp/B07571V4V5",
-          "merchant_prices": {
-            "Amazon FR": 199.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-11-06T10:07:12.340384+00:00",
+          "new_price": 243.75,
+          "new_merchant": "Idealo.fr (Marchand UE)",
+          "used_price": 161.71,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-18T07:18:16.494206+00:00",
-          "best_price": 179.9,
-          "best_merchant": "Idealo Comparateur",
-          "best_url": "https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER",
-          "merchant_prices": {
-            "Amazon FR": 184.5,
-            "Ocarat": 215.0
-          },
-          "bf_score": 100
+          "timestamp": "2026-11-11T10:07:12.340384+00:00",
+          "new_price": 236.78,
+          "new_merchant": "Idealo.fr (Marchand UE)",
+          "used_price": 161.71,
+          "used_merchant": "Chrono24 (Occasion)"
+        },
+        {
+          "timestamp": "2026-11-15T10:07:12.340384+00:00",
+          "new_price": 236.78,
+          "new_merchant": "Idealo.fr (Marchand UE)",
+          "used_price": 158.57,
+          "used_merchant": "Chrono24 (Occasion)"
+        },
+        {
+          "timestamp": "2026-11-17T10:07:12.340384+00:00",
+          "new_price": 234.46,
+          "new_merchant": "Idealo.fr (Marchand UE)",
+          "used_price": 157.0,
+          "used_merchant": "Chrono24 (Occasion)"
+        },
+        {
+          "timestamp": "2026-11-18T10:07:12.340767+00:00",
+          "new_price": 232.14,
+          "new_merchant": "Idealo.fr (Marchand UE)",
+          "new_url": "https://www.idealo.fr/prix/6800906/casio-wave-ceptor-titanium-lcw-m100.html",
+          "used_price": 157.0,
+          "used_merchant": "Chrono24 (Occasion)",
+          "used_url": "https://www.chrono24.fr/search/index.htm?query=LCW-M100TSE-1AER&usedOrNew=used"
         }
       ]
     },
     "citizen-ecodrive-cb0250": {
-      "name": "Citizen Eco-Drive Radio-Controlled CB0250-84E",
+      "name": "Citizen Radio-Controlled Eco-Drive CB0250-84E",
       "reference": "CB0250-84E",
-      "target_price": 269.0,
+      "target_price_new": 330.0,
+      "target_price_used": 240.0,
       "reference_price": 399.0,
       "entries": [
         {
-          "timestamp": "2026-11-12T07:18:16.493656+00:00",
-          "best_price": 339.0,
-          "best_merchant": "Ocarat",
-          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
-          "merchant_prices": {
-            "Ocarat": 339.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-04T10:07:12.340384+00:00",
+          "new_price": 380.41,
+          "new_merchant": "Luna-Time FR",
+          "used_price": 278.88,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-13T07:18:16.493656+00:00",
-          "best_price": 329.0,
-          "best_merchant": "Ocarat",
-          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
-          "merchant_prices": {
-            "Ocarat": 329.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-11T10:07:12.340384+00:00",
+          "new_price": 380.41,
+          "new_merchant": "Luna-Time FR",
+          "used_price": 268.92,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-14T07:18:16.493656+00:00",
-          "best_price": 315.0,
-          "best_merchant": "Ocarat",
-          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
-          "merchant_prices": {
-            "Ocarat": 315.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-18T10:07:12.340384+00:00",
+          "new_price": 369.94,
+          "new_merchant": "Luna-Time FR",
+          "used_price": 268.92,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-15T07:18:16.493656+00:00",
-          "best_price": 299.0,
-          "best_merchant": "Ocarat",
-          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
-          "merchant_prices": {
-            "Ocarat": 299.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-25T10:07:12.340384+00:00",
+          "new_price": 369.94,
+          "new_merchant": "Luna-Time FR",
+          "used_price": 261.45,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-16T07:18:16.493656+00:00",
-          "best_price": 289.0,
-          "best_merchant": "Ocarat",
-          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
-          "merchant_prices": {
-            "Ocarat": 289.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-31T10:07:12.340384+00:00",
+          "new_price": 362.96,
+          "new_merchant": "Luna-Time FR",
+          "used_price": 261.45,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-17T07:18:16.493656+00:00",
-          "best_price": 279.0,
-          "best_merchant": "Ocarat",
-          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
-          "merchant_prices": {
-            "Ocarat": 279.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-11-06T10:07:12.340384+00:00",
+          "new_price": 366.45,
+          "new_merchant": "Luna-Time FR",
+          "used_price": 256.47,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-18T07:18:16.494225+00:00",
-          "best_price": 264.0,
-          "best_merchant": "Ocarat",
-          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
-          "merchant_prices": {
-            "Ocarat": 264.0,
-            "Amazon FR": 279.0
-          },
-          "bf_score": 100
+          "timestamp": "2026-11-11T10:07:12.340384+00:00",
+          "new_price": 355.98,
+          "new_merchant": "Luna-Time FR",
+          "used_price": 256.47,
+          "used_merchant": "Chrono24 (Occasion)"
+        },
+        {
+          "timestamp": "2026-11-15T10:07:12.340384+00:00",
+          "new_price": 355.98,
+          "new_merchant": "Luna-Time FR",
+          "used_price": 251.49,
+          "used_merchant": "Chrono24 (Occasion)"
+        },
+        {
+          "timestamp": "2026-11-17T10:07:12.340384+00:00",
+          "new_price": 352.49,
+          "new_merchant": "Luna-Time FR",
+          "used_price": 249.0,
+          "used_merchant": "Chrono24 (Occasion)"
+        },
+        {
+          "timestamp": "2026-11-18T10:07:12.340783+00:00",
+          "new_price": 349.0,
+          "new_merchant": "Luna-Time FR",
+          "new_url": "https://www.luna-time.fr/Citizen-Montre-bracelet-Hommes-Chronographe-Montre-radio-pilotee-Eco-Drive-CB0250-84E",
+          "used_price": 249.0,
+          "used_merchant": "Chrono24 (Occasion)",
+          "used_url": "https://www.chrono24.fr/search/index.htm?query=CB0250-84E&usedOrNew=used"
         }
       ]
     },
     "citizen-promaster-as4020": {
-      "name": "Citizen Promaster Sky Eco-Drive AT8110-61E",
+      "name": "Citizen Radio-Controlled Chronographe AT8110-61E",
       "reference": "AT8110-61E",
-      "target_price": 319.0,
-      "reference_price": 459.0,
+      "target_price_new": 390.0,
+      "target_price_used": 270.0,
+      "reference_price": 486.0,
       "entries": [
         {
-          "timestamp": "2026-11-12T07:18:16.493656+00:00",
-          "best_price": 329.0,
-          "best_merchant": "Amazon FR",
-          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
-          "merchant_prices": {
-            "Amazon FR": 329.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-04T10:07:12.340384+00:00",
+          "new_price": 440.36,
+          "new_merchant": "Chrono24 (UE)",
+          "used_price": 312.48,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-13T07:18:16.493656+00:00",
-          "best_price": 335.0,
-          "best_merchant": "Amazon FR",
-          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
-          "merchant_prices": {
-            "Amazon FR": 335.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-11T10:07:12.340384+00:00",
+          "new_price": 440.36,
+          "new_merchant": "Chrono24 (UE)",
+          "used_price": 301.32,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-14T07:18:16.493656+00:00",
-          "best_price": 349.0,
-          "best_merchant": "Amazon FR",
-          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
-          "merchant_prices": {
-            "Amazon FR": 349.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-18T10:07:12.340384+00:00",
+          "new_price": 428.24,
+          "new_merchant": "Chrono24 (UE)",
+          "used_price": 301.32,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-15T07:18:16.493656+00:00",
-          "best_price": 359.0,
-          "best_merchant": "Amazon FR",
-          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
-          "merchant_prices": {
-            "Amazon FR": 359.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-25T10:07:12.340384+00:00",
+          "new_price": 428.24,
+          "new_merchant": "Chrono24 (UE)",
+          "used_price": 292.95,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-16T07:18:16.493656+00:00",
-          "best_price": 355.0,
-          "best_merchant": "Amazon FR",
-          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
-          "merchant_prices": {
-            "Amazon FR": 355.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-10-31T10:07:12.340384+00:00",
+          "new_price": 420.16,
+          "new_merchant": "Chrono24 (UE)",
+          "used_price": 292.95,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-17T07:18:16.493656+00:00",
-          "best_price": 349.0,
-          "best_merchant": "Amazon FR",
-          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
-          "merchant_prices": {
-            "Amazon FR": 349.0
-          },
-          "bf_score": 70
+          "timestamp": "2026-11-06T10:07:12.340384+00:00",
+          "new_price": 424.2,
+          "new_merchant": "Chrono24 (UE)",
+          "used_price": 287.37,
+          "used_merchant": "Chrono24 (Occasion)"
         },
         {
-          "timestamp": "2026-11-18T07:18:16.494239+00:00",
-          "best_price": 349.0,
-          "best_merchant": "Amazon FR",
-          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
-          "merchant_prices": {
-            "Amazon FR": 349.0,
-            "Ocarat": 369.0
-          },
-          "bf_score": 50
+          "timestamp": "2026-11-11T10:07:12.340384+00:00",
+          "new_price": 412.08,
+          "new_merchant": "Chrono24 (UE)",
+          "used_price": 287.37,
+          "used_merchant": "Chrono24 (Occasion)"
+        },
+        {
+          "timestamp": "2026-11-15T10:07:12.340384+00:00",
+          "new_price": 412.08,
+          "new_merchant": "Chrono24 (UE)",
+          "used_price": 281.79,
+          "used_merchant": "Chrono24 (Occasion)"
+        },
+        {
+          "timestamp": "2026-11-17T10:07:12.340384+00:00",
+          "new_price": 408.04,
+          "new_merchant": "Chrono24 (UE)",
+          "used_price": 279.0,
+          "used_merchant": "Chrono24 (Occasion)"
+        },
+        {
+          "timestamp": "2026-11-18T10:07:12.340794+00:00",
+          "new_price": 404.0,
+          "new_merchant": "Chrono24 (UE)",
+          "new_url": "https://www.chrono24.fr/search/index.htm?query=AT8110-61E&usedOrNew=new",
+          "used_price": 279.0,
+          "used_merchant": "Chrono24 (Occasion)",
+          "used_url": "https://www.chrono24.fr/search/index.htm?query=AT8110-61E&usedOrNew=used"
         }
       ]
     }

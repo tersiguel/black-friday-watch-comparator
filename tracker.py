@@ -1,30 +1,34 @@
 #!/usr/bin/env python3
 """
-Black Friday Solar Radio-Controlled Watch Price Comparator CLI & Orchestrator.
+KeepaWatch — Suivi Prix Montres (Neuf & Occasion, Frais Inclus).
 
-Commands:
+Commandes :
   python3 tracker.py run [--demo] [--no-notify]
-  python3 tracker.py add-url --watch <watch_id> --url <url> [--merchant <name>]
-  python3 tracker.py remove-url --url <url> [--watch <watch_id>]
+  python3 tracker.py serve [--port 8000]
+  python3 tracker.py add-watch --brand ... --name ... --reference ...
+  python3 tracker.py remove-watch --id ...
+  python3 tracker.py add-url --watch-id ... --url ... [--condition new|used] [--shipping-fee ...] [--site-fee ...] [--customs-fee ...]
+  python3 tracker.py remove-url --url ...
+  python3 tracker.py set-thresholds --watch-id ... [--new 420] [--used 320]
+  python3 tracker.py suggest --watch-id ...
   python3 tracker.py test-notify
 """
 
 import argparse
+import json
+import mimetypes
 import os
+import re
 import sys
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Any, List, Tuple
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from typing import Dict, Any, List, Tuple, Optional
 
 import yaml
 
-from src.models import WatchConfig, WatchURL, OfferResult, WatchAnalysis
-from src.scraper import (
-    scrape_offer,
-    infer_merchant_name,
-    is_non_eu_import_url,
-    compute_japan_import_price,
-)
-from src.discovery import discover_offers_for_watch
+from src.models import WatchConfig, WatchURL, SuggestedURL, OfferResult, WatchAnalysis
+from src.scraper import scrape_offer, inspect_product_url, infer_merchant_name
+from src.suggest import propose_product_pages
 from src.analyzer import load_history, save_history, analyze_watch_and_update_history
 from src.notifier import (
     build_daily_recap_message,
@@ -40,21 +44,65 @@ DEFAULT_HISTORY_PATH = os.path.join(BASE_DIR, "data", "history.json")
 DEFAULT_DOCS_DIR = os.path.join(BASE_DIR, "docs")
 
 
-def load_config(config_path: str = DEFAULT_CONFIG_PATH) -> Tuple[Dict[str, Any], List[WatchConfig]]:
-    """Load settings and competing watch models from watches.yaml."""
+def _opt_float(val: Any) -> Optional[float]:
+    if val is None or val == "":
+        return None
+    try:
+        return round(float(val), 2)
+    except (TypeError, ValueError):
+        return None
+
+
+def load_config(config_path: str) -> Tuple[Dict[str, Any], List[WatchConfig]]:
+    """Load settings and user-configured watches from watches.yaml."""
     with open(config_path, "r", encoding="utf-8") as f:
         raw = yaml.safe_load(f) or {}
 
     settings = raw.get("settings", {})
     watches: List[WatchConfig] = []
+
     for item in raw.get("watches", []):
-        urls = [
-            WatchURL(
-                url=u["url"] if isinstance(u, dict) else str(u),
-                merchant=(u.get("merchant", "") if isinstance(u, dict) else ""),
-            )
-            for u in item.get("urls", [])
-        ]
+        urls: List[WatchURL] = []
+        for u in item.get("urls", []):
+            if isinstance(u, str):
+                urls.append(WatchURL(url=u, merchant=infer_merchant_name(u)))
+            elif isinstance(u, dict) and u.get("url"):
+                urls.append(
+                    WatchURL(
+                        url=str(u["url"]).strip(),
+                        merchant=str(u.get("merchant", "")).strip(),
+                        condition=str(u.get("condition", "new")).strip().lower() or "new",
+                        shipping_fee=_opt_float(u.get("shipping_fee")),
+                        site_fee=_opt_float(u.get("site_fee")),
+                        customs_fee=_opt_float(u.get("customs_fee")),
+                        manual_price=_opt_float(u.get("manual_price")),
+                        note=str(u.get("note", "")),
+                    )
+                )
+
+        suggested: List[SuggestedURL] = []
+        for s in item.get("suggested_urls", []):
+            if isinstance(s, dict) and s.get("url"):
+                suggested.append(
+                    SuggestedURL(
+                        url=str(s["url"]).strip(),
+                        merchant=str(s.get("merchant", "")).strip() or infer_merchant_name(s["url"]),
+                        title=str(s.get("title", "")).strip(),
+                        condition=str(s.get("condition", "new")).strip().lower() or "new",
+                        estimated_base_price=_opt_float(s.get("estimated_base_price")),
+                        shipping_fee=_opt_float(s.get("shipping_fee")),
+                        site_fee=_opt_float(s.get("site_fee")),
+                        customs_fee=_opt_float(s.get("customs_fee")),
+                        fee_hint=str(s.get("fee_hint", "")).strip(),
+                    )
+                )
+
+        # Backward compatibility if old target_price exists
+        t_new = _opt_float(item.get("target_price_new"))
+        if t_new is None and item.get("target_price") is not None:
+            t_new = _opt_float(item.get("target_price"))
+        t_used = _opt_float(item.get("target_price_used"))
+
         watches.append(
             WatchConfig(
                 id=str(item["id"]),
@@ -62,566 +110,163 @@ def load_config(config_path: str = DEFAULT_CONFIG_PATH) -> Tuple[Dict[str, Any],
                 brand=str(item.get("brand", "")),
                 reference=str(item.get("reference", "")),
                 features=str(item.get("features", "")),
-                target_price=float(item.get("target_price", 0.0)),
-                reference_price=float(item.get("reference_price", 0.0)),
-                search_queries=list(item.get("search_queries", [])),
+                target_price_new=t_new,
+                target_price_used=t_used,
+                reference_price=float(item.get("reference_price", 0.0) or 0.0),
+                ean=str(item.get("ean", "")),
+                asin=str(item.get("asin", "")),
+                image_url=str(item.get("image_url", "")),
+                specs=dict(item.get("specs", {}) or {}),
                 urls=urls,
+                suggested_urls=suggested,
             )
         )
+
     return settings, watches
 
 
-def generate_demo_offers_and_seed_history(
+def save_config_from_watches(
+    config_path: str,
+    settings: Dict[str, Any],
+    watches: List[WatchConfig],
+) -> None:
+    """Persist settings and WatchConfig list cleanly to watches.yaml."""
+    raw_watches = []
+    for w in watches:
+        w_dict: Dict[str, Any] = {
+            "id": w.id,
+            "name": w.name,
+            "brand": w.brand,
+            "reference": w.reference,
+        }
+        if w.ean:
+            w_dict["ean"] = w.ean
+        if w.asin:
+            w_dict["asin"] = w.asin
+        if w.image_url:
+            w_dict["image_url"] = w.image_url
+        w_dict["features"] = w.features
+        if w.specs:
+            w_dict["specs"] = w.specs
+        if w.target_price_new is not None:
+            w_dict["target_price_new"] = w.target_price_new
+        if w.target_price_used is not None:
+            w_dict["target_price_used"] = w.target_price_used
+        if w.reference_price:
+            w_dict["reference_price"] = w.reference_price
+
+        w_dict["urls"] = [
+            {
+                k: v
+                for k, v in {
+                    "url": u.url,
+                    "merchant": u.merchant,
+                    "condition": u.condition,
+                    "manual_price": u.manual_price,
+                    "shipping_fee": u.shipping_fee if u.shipping_fee is not None else 0.0,
+                    "site_fee": u.site_fee if u.site_fee is not None else 0.0,
+                    "customs_fee": u.customs_fee if u.customs_fee is not None else 0.0,
+                }.items()
+                if v is not None
+            }
+            for u in w.urls
+        ]
+        if w.suggested_urls:
+            w_dict["suggested_urls"] = [
+                {k: v for k, v in s.to_dict().items() if v is not None and v != ""}
+                for s in w.suggested_urls
+            ]
+        raw_watches.append(w_dict)
+
+    with open(config_path, "w", encoding="utf-8") as f:
+        yaml.safe_dump(
+            {"settings": settings, "watches": raw_watches},
+            f,
+            allow_unicode=True,
+            sort_keys=False,
+            default_flow_style=False,
+        )
+
+
+def build_demo_offers_and_seed_keepa_history(
     watches: List[WatchConfig],
     history: Dict[str, Any],
-) -> Tuple[Dict[str, List[OfferResult]], Dict[str, List[OfferResult]]]:
+) -> Dict[str, List[OfferResult]]:
     """
-    Generate realistic Black Friday solar radio-controlled watch data and 7-day history
-    so the HTML dashboard, anti-fake-promo detector, and Chrome notifications can be
-    tested offline or when run with --demo.
+    Build OfferResult objects strictly from the user's configured URLs (no automatic discovery)
+    and seed realistic 45-day Keepa step-curve history for Neuf & Occasion if empty.
     """
     now = datetime.now(timezone.utc)
     now_iso = now.isoformat()
+    offers_by_watch: Dict[str, List[OfferResult]] = {}
 
-    demo_profiles: Dict[str, Dict[str, Any]] = {
-        "casio-gwm5610u": {
-            "past_prices": [129.0, 125.0, 119.0, 115.0, 109.0, 104.90],
-            "offers": [
-                OfferResult(
-                    watch_id="casio-gwm5610u",
-                    merchant="Amazon FR",
-                    url="https://www.amazon.fr/dp/B09CGR4FFM",
-                    price=94.90,
-                    original_price=149.00,
-                    in_stock=True,
-                    title="Casio G-Shock GW-M5610U-1ER Montre Solaire Radio-Pilotée",
-                    extraction_method="json-ld",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="casio-gwm5610u",
-                    merchant="Ocarat",
-                    url="https://ocarat.com/montre-g-shock-origin-gw-m5610u-1er-casio-79831.html",
-                    price=119.00,
-                    original_price=149.00,
-                    in_stock=True,
-                    title="Montre Casio G-Shock GW-M5610U-1ER",
-                    extraction_method="json-ld",
-                    promo_code="BFWATCH10",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="casio-gwm5610u",
-                    merchant="Montres & Co",
-                    url="https://www.montresandco.com/montre-casio-g-shock-gw-m5610u-1er-p-74248.html",
-                    price=124.00,
-                    original_price=149.00,
-                    in_stock=True,
-                    title="Casio G-Shock GW-M5610U-1ER",
-                    extraction_method="opengraph-meta",
-                    timestamp=now_iso,
-                ),
-            ],
-            "discovered": [
-                OfferResult(
-                    watch_id="casio-gwm5610u",
-                    merchant="Dealabs • Amazon DE",
-                    url="https://www.dealabs.com/search?q=GW-M5610U-1ER",
-                    price=89.99,
-                    original_price=149.00,
-                    title="Casio G-Shock GW-M5610U-1ER Tough Solar Multi-Band 6",
-                    extraction_method="dealabs-search",
-                    timestamp=now_iso,
-                    is_discovered=True,
-                    temperature="412°",
-                )
-            ],
-        },
-        "casio-lineage-titanium": {
-            "past_prices": [249.0, 239.0, 229.0, 219.0, 209.0, 199.0],
-            "offers": [
-                OfferResult(
-                    watch_id="casio-lineage-titanium",
-                    merchant="Amazon FR",
-                    url="https://www.amazon.fr/dp/B07571V4V5",
-                    price=184.50,
-                    original_price=279.00,
-                    in_stock=True,
-                    title="Casio Lineage LCW-M100TSE-1AER Titane & Verre Saphir",
-                    extraction_method="json-ld",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="casio-lineage-titanium",
-                    merchant="Ocarat",
-                    url="https://ocarat.com/montre-lineage-lcw-m100tse-1aer-casio-48155.html",
-                    price=215.00,
-                    original_price=279.00,
-                    in_stock=True,
-                    title="Casio Lineage LCW-M100TSE-1AER",
-                    extraction_method="json-ld",
-                    timestamp=now_iso,
-                ),
-            ],
-            "discovered": [
-                OfferResult(
-                    watch_id="casio-lineage-titanium",
-                    merchant="Idealo Comparateur",
-                    url="https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER",
-                    price=179.90,
-                    title="Casio Lineage LCW-M100TSE-1AER Titane Saphir",
-                    extraction_method="idealo-discovery",
-                    timestamp=now_iso,
-                    is_discovered=True,
-                )
-            ],
-        },
-        "citizen-ecodrive-cb0250": {
-            "past_prices": [339.0, 329.0, 315.0, 299.0, 289.0, 279.0],
-            "offers": [
-                OfferResult(
-                    watch_id="citizen-ecodrive-cb0250",
-                    merchant="Ocarat",
-                    url="https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
-                    price=264.00,
-                    original_price=399.00,
-                    in_stock=True,
-                    title="Citizen Eco-Drive Radio-Controlled CB0250-84E",
-                    extraction_method="json-ld",
-                    promo_code="BLACKCITIZEN",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="citizen-ecodrive-cb0250",
-                    merchant="Amazon FR",
-                    url="https://www.amazon.fr/dp/B09WVH883J",
-                    price=279.00,
-                    original_price=399.00,
-                    in_stock=True,
-                    title="Citizen CB0250-84E Eco-Drive",
-                    extraction_method="json-ld",
-                    timestamp=now_iso,
-                ),
-            ],
-            "discovered": [],
-        },
-        "citizen-promaster-as4020": {
-            "past_prices": [329.0, 335.0, 349.0, 359.0, 355.0, 349.0],
-            "offers": [
-                OfferResult(
-                    watch_id="citizen-promaster-as4020",
-                    merchant="Amazon FR",
-                    url="https://www.amazon.fr/dp/B00WG04A1M",
-                    price=349.00,
-                    original_price=529.00,
-                    in_stock=True,
-                    title="Citizen Promaster Sky AT8110-61E Eco-Drive Radio-Controlled",
-                    extraction_method="css-selector",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="citizen-promaster-as4020",
-                    merchant="Ocarat",
-                    url="https://ocarat.com/montre-chrono-radio-controlled-at8110-61e-citizen-42191.html",
-                    price=369.00,
-                    original_price=459.00,
-                    in_stock=True,
-                    title="Citizen AT8110-61E",
-                    extraction_method="json-ld",
-                    timestamp=now_iso,
-                ),
-            ],
-            "discovered": [],
-        },
-        "seiko-solar-radio-sbtm323": {
-            "past_prices": [325.0, 319.0, 310.0, 299.0, 295.0, 289.0],
-            "offers": [
-                OfferResult(
-                    watch_id="seiko-solar-radio-sbtm323",
-                    merchant="Sakura Watches",
-                    url="https://www.sakurawatches.com/seiko-selection-sbtm323",
-                    price=272.00,
-                    original_price=395.00,
-                    in_stock=True,
-                    title="Seiko Selection SBTM323 Solar Radio-Controlled",
-                    extraction_method="json-ld",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="seiko-solar-radio-sbtm323",
-                    merchant="Chrono24",
-                    url="https://www.chrono24.fr/search/index.htm?query=SBTM323",
-                    price=298.00,
-                    original_price=395.00,
-                    in_stock=True,
-                    title="Seiko SBTM323 Solar",
-                    extraction_method="opengraph-meta",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="seiko-solar-radio-sbtm323",
-                    merchant="Catawiki (Enchères)",
-                    url="https://www.catawiki.com/en/a/th/8977-seiko-watches-auction",
-                    price=242.80,
-                    original_price=395.00,
-                    in_stock=True,
-                    title="Seiko Selection S Series Solar Radio-Controlled Sapphire (Sans prix de réserve)",
-                    extraction_method="catawiki-auction",
-                    shipping_note="🔨 Enchère 220 € + 9% + 3€ frais Catawiki inclus (hors port)",
-                    timestamp=now_iso,
-                ),
-            ],
-            "discovered": [
-                OfferResult(
-                    watch_id="seiko-solar-radio-sbtm323",
-                    merchant="Catawiki (Enchères)",
-                    url="https://www.catawiki.com/en/l/107056286-seiko-s-series-no-reserve-price-men-2025",
-                    price=242.80,
-                    title="Seiko Selection S Series SBTM Solar Radio-Controlled Titanium Sapphire Full Set",
-                    extraction_method="catawiki-auction",
-                    shipping_note="🔨 Enchère 220 € + 9% + 3€ frais Catawiki inclus (hors port)",
-                    timestamp=now_iso,
-                    is_discovered=True,
-                )
-            ],
-        },
-        "seiko-solar-radio-sbtm317": {
-            "past_prices": [329.0, 319.0, 309.0, 298.0, 289.0, 282.0],
-            "offers": [
-                OfferResult(
-                    watch_id="seiko-solar-radio-sbtm317",
-                    merchant="Sakura Watches",
-                    url="https://www.sakurawatches.com/seiko-selection-sbtm317",
-                    price=268.00,
-                    original_price=395.00,
-                    in_stock=True,
-                    title="Seiko Selection SBTM317 Solar Radio-Controlled (Cadran Vert)",
-                    extraction_method="json-ld",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="seiko-solar-radio-sbtm317",
-                    merchant="Chrono24",
-                    url="https://www.chrono24.fr/search/index.htm?query=SBTM317",
-                    price=294.00,
-                    original_price=395.00,
-                    in_stock=True,
-                    title="Seiko Selection SBTM317",
-                    extraction_method="opengraph-meta",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="seiko-solar-radio-sbtm317",
-                    merchant="Catawiki (Enchères)",
-                    url="https://www.catawiki.com/en/c/1037-seiko-watches",
-                    price=253.70,
-                    original_price=395.00,
-                    in_stock=True,
-                    title="Vente aux enchères Montres Seiko Selection Solar",
-                    extraction_method="catawiki-auction",
-                    shipping_note="🔨 Enchère 230 € + 9% + 3€ frais Catawiki inclus (hors port)",
-                    timestamp=now_iso,
-                ),
-            ],
-            "discovered": [],
-        },
-        "citizen-cb1160-55e": {
-            "past_prices": [449.0, 439.0, 425.0, 415.0, 405.0, 399.0],
-            "offers": [
-                OfferResult(
-                    watch_id="citizen-cb1160-55e",
-                    merchant="Sakura Watches",
-                    url="https://www.sakurawatches.com/search/?search=CB1160-55E",
-                    price=369.00,
-                    original_price=549.00,
-                    in_stock=True,
-                    title="Citizen Super Titanium CB1160-55E Radio-Controlled (Noir)",
-                    extraction_method="json-ld",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="citizen-cb1160-55e",
-                    merchant="Chrono24",
-                    url="https://www.chrono24.fr/search/index.htm?query=CB1160-55E",
-                    price=395.00,
-                    original_price=549.00,
-                    in_stock=True,
-                    title="Citizen CB1160-55E Eco-Drive",
-                    extraction_method="opengraph-meta",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="citizen-cb1160-55e",
-                    merchant="Amazon FR",
-                    url="https://www.amazon.fr/s?k=Citizen+CB1160-55E",
-                    price=419.00,
-                    original_price=549.00,
-                    in_stock=True,
-                    title="Citizen CB1160-55E",
-                    extraction_method="css-selector",
-                    timestamp=now_iso,
-                ),
-            ],
-            "discovered": [],
-        },
-        "citizen-cb1160-55a": {
-            "past_prices": [455.0, 445.0, 429.0, 419.0, 409.0, 403.0],
-            "offers": [
-                OfferResult(
-                    watch_id="citizen-cb1160-55a",
-                    merchant="Sakura Watches",
-                    url="https://www.sakurawatches.com/search/?search=CB1160-55A",
-                    price=374.00,
-                    original_price=549.00,
-                    in_stock=True,
-                    title="Citizen Super Titanium CB1160-55A Radio-Controlled (Blanc)",
-                    extraction_method="json-ld",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="citizen-cb1160-55a",
-                    merchant="Chrono24",
-                    url="https://www.chrono24.fr/search/index.htm?query=CB1160-55A",
-                    price=399.00,
-                    original_price=549.00,
-                    in_stock=True,
-                    title="Citizen CB1160-55A",
-                    extraction_method="opengraph-meta",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="citizen-cb1160-55a",
-                    merchant="Amazon FR",
-                    url="https://www.amazon.fr/s?k=Citizen+CB1160-55A",
-                    price=425.00,
-                    original_price=549.00,
-                    in_stock=True,
-                    title="Citizen CB1160-55A",
-                    extraction_method="css-selector",
-                    timestamp=now_iso,
-                ),
-            ],
-            "discovered": [],
-        },
-        "citizen-cb1160-55l": {
-            "past_prices": [459.0, 449.0, 435.0, 419.0, 409.0, 402.0],
-            "offers": [
-                OfferResult(
-                    watch_id="citizen-cb1160-55l",
-                    merchant="Sakura Watches",
-                    url="https://www.sakurawatches.com/search/?search=CB1160-55L",
-                    price=372.00,
-                    original_price=549.00,
-                    in_stock=True,
-                    title="Citizen Super Titanium CB1160-55L Radio-Controlled (Bleu)",
-                    extraction_method="json-ld",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="citizen-cb1160-55l",
-                    merchant="Chrono24",
-                    url="https://www.chrono24.fr/search/index.htm?query=CB1160-55L",
-                    price=398.00,
-                    original_price=549.00,
-                    in_stock=True,
-                    title="Citizen CB1160-55L",
-                    extraction_method="opengraph-meta",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="citizen-cb1160-55l",
-                    merchant="Amazon FR",
-                    url="https://www.amazon.fr/s?k=Citizen+CB1160-55L",
-                    price=422.00,
-                    original_price=549.00,
-                    in_stock=True,
-                    title="Citizen CB1160-55L",
-                    extraction_method="css-selector",
-                    timestamp=now_iso,
-                ),
-            ],
-            "discovered": [
-                OfferResult(
-                    watch_id="citizen-cb1160-55l",
-                    merchant="Dealabs • Amazon JP",
-                    url="https://www.dealabs.com/search?q=CB1160",
-                    price=375.00,
-                    original_price=549.00,
-                    title="Citizen Super Titanium CB1160-55L Solaire Radio-Pilotée (Import Amazon.co.jp)",
-                    extraction_method="dealabs-search",
-                    shipping_note="🇯🇵 Prix final TTC livré en France (port DHL & TVA/douane prépayés AmazonGlobal)",
-                    timestamp=now_iso,
-                    is_discovered=True,
-                    temperature="287°",
-                )
-            ],
-        },
-        "junghans-max-bill-mega-solar": {
-            "past_prices": [989.0, 965.0, 939.0, 910.0, 889.0, 859.0],
-            "offers": [
-                OfferResult(
-                    watch_id="junghans-max-bill-mega-solar",
-                    merchant="Amazon DE",
-                    url="https://www.amazon.de/s?k=Junghans+Max+Bill+Mega+Solar",
-                    price=789.00,
-                    original_price=1090.00,
-                    in_stock=True,
-                    title="Junghans Max Bill MEGA Solar Titane 059/2020.04",
-                    extraction_method="json-ld",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="junghans-max-bill-mega-solar",
-                    merchant="Ocarat",
-                    url="https://ocarat.com/recherche?controller=search&s=Junghans+Max+Bill+Mega+Solar",
-                    price=869.00,
-                    original_price=1090.00,
-                    in_stock=True,
-                    title="Montre Junghans Max Bill MEGA Solar Titane",
-                    extraction_method="json-ld",
-                    promo_code="BFJUNGHANS",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="junghans-max-bill-mega-solar",
-                    merchant="Chrono24",
-                    url="https://www.chrono24.fr/search/index.htm?query=Junghans+Max+Bill+Mega+Solar",
-                    price=835.00,
-                    original_price=1090.00,
-                    in_stock=True,
-                    title="Junghans Max Bill MEGA Solar 059/2020.04",
-                    extraction_method="opengraph-meta",
-                    timestamp=now_iso,
-                ),
-                OfferResult(
-                    watch_id="junghans-max-bill-mega-solar",
-                    merchant="Catawiki (Enchères)",
-                    url="https://www.catawiki.com/en/x/1477-junghans-watches",
-                    price=569.80,
-                    original_price=1090.00,
-                    in_stock=True,
-                    title="Junghans Max Bill MEGA Solar — Enchères Catawiki (Occasion / NOS)",
-                    extraction_method="catawiki-auction",
-                    shipping_note="🔨 Enchère 520 € + 9% + 3€ frais Catawiki inclus (hors port)",
-                    timestamp=now_iso,
-                ),
-            ],
-            "discovered": [
-                OfferResult(
-                    watch_id="junghans-max-bill-mega-solar",
-                    merchant="Catawiki (Enchères)",
-                    url="https://www.catawiki.com/en/x/1477-junghans-watches",
-                    price=569.80,
-                    title="Junghans Max Bill MEGA Solar (059.2021.02 / Titane) — Vente Catawiki",
-                    extraction_method="catawiki-auction",
-                    shipping_note="🔨 Enchère 520 € + 9% + 3€ frais Catawiki inclus (hors port)",
-                    timestamp=now_iso,
-                    is_discovered=True,
-                ),
-                OfferResult(
-                    watch_id="junghans-max-bill-mega-solar",
-                    merchant="Idealo Comparateur",
-                    url="https://www.idealo.fr/prechcat.html?q=Junghans+Max+Bill+Mega+Solar",
-                    price=779.00,
-                    title="Junghans Max Bill MEGA Solar Titane & Saphir (Neuf)",
-                    extraction_method="idealo-discovery",
-                    timestamp=now_iso,
-                    is_discovered=True,
-                ),
-            ],
-        },
-    }
-
-    direct_by_watch: Dict[str, List[OfferResult]] = {}
-    disc_by_watch: Dict[str, List[OfferResult]] = {}
+    # Stepped multipliers over 45 days to render authentic Keepa step-lines
+    step_days = [45, 38, 31, 24, 18, 12, 7, 3, 1]
+    new_mults = [1.09, 1.09, 1.06, 1.06, 1.04, 1.05, 1.02, 1.02, 1.01]
+    used_mults = [1.12, 1.08, 1.08, 1.05, 1.05, 1.03, 1.03, 1.01, 1.00]
 
     for w in watches:
-        prof = demo_profiles.get(w.id)
-        configured_urls = {u.url for u in w.urls}
-        if not prof:
-            fallback_offers = []
-            for u in w.urls:
-                raw_p = round(w.target_price * 0.98, 2)
-                imp_note = None
-                merch = u.merchant or infer_merchant_name(u.url)
-                if is_non_eu_import_url(u.url):
-                    raw_p, imp_note = compute_japan_import_price(raw_p)
-                fallback_offers.append(
-                    OfferResult(
-                        watch_id=w.id,
-                        merchant=merch,
-                        url=u.url,
-                        price=raw_p,
-                        original_price=w.reference_price,
-                        in_stock=True,
-                        title=w.name,
-                        extraction_method="demo",
-                        shipping_note=imp_note,
-                        timestamp=now_iso,
-                    )
+        w_offers: List[OfferResult] = []
+        for u in w.urls:
+            base_p = u.manual_price if u.manual_price is not None else (w.target_price_new or 300.0)
+            ship_f = u.shipping_fee if u.shipping_fee is not None else 0.0
+            site_f = u.site_fee if u.site_fee is not None else 0.0
+            cust_f = u.customs_fee if u.customs_fee is not None else 0.0
+            total_p = round(base_p + ship_f + site_f + cust_f, 2)
+            w_offers.append(
+                OfferResult(
+                    watch_id=w.id,
+                    merchant=u.merchant or infer_merchant_name(u.url),
+                    url=u.url,
+                    price=total_p,
+                    base_price=round(base_p, 2),
+                    condition=u.condition or "new",
+                    shipping_fee=round(ship_f, 2),
+                    site_fee=round(site_f, 2),
+                    customs_fee=round(cust_f, 2),
+                    shipping_detected=True,
+                    site_fee_detected=True,
+                    customs_detected=True,
+                    in_stock=True,
+                    title=w.name,
+                    extraction_method="configured",
+                    timestamp=now_iso,
                 )
-            direct_by_watch[w.id] = fallback_offers
-            disc_by_watch[w.id] = []
-            past_series = [
-                round(w.target_price * mult, 2)
-                for mult in (1.14, 1.11, 1.08, 1.05, 1.03, 1.01)
-            ]
-            filtered_offers = fallback_offers
-        else:
-            filtered_offers = []
-            for o in prof["offers"]:
-                if o.url not in configured_urls:
-                    continue
-                if o.price is not None and is_non_eu_import_url(o.url) and not o.shipping_note:
-                    landed_price, imp_note = compute_japan_import_price(o.price)
-                    o = OfferResult(
-                        watch_id=o.watch_id,
-                        merchant="Sakura Watches (Tokyo)" if "sakura" in o.url.lower() else o.merchant,
-                        url=o.url,
-                        price=landed_price,
-                        original_price=o.original_price,
-                        currency=o.currency,
-                        in_stock=o.in_stock,
-                        title=o.title,
-                        extraction_method=o.extraction_method,
-                        promo_code=o.promo_code,
-                        shipping_note=imp_note,
-                        timestamp=o.timestamp,
-                    )
-                filtered_offers.append(o)
-            direct_by_watch[w.id] = filtered_offers
-            disc_by_watch[w.id] = prof["discovered"]
-            past_series = prof["past_prices"]
+            )
 
+        offers_by_watch[w.id] = w_offers
+
+        # Seed Keepa history if empty
         w_hist = history.setdefault("watches", {}).setdefault(
             w.id,
             {
                 "name": w.name,
                 "reference": w.reference,
-                "target_price": w.target_price,
+                "target_price_new": w.target_price_new,
+                "target_price_used": w.target_price_used,
                 "reference_price": w.reference_price,
                 "entries": [],
             },
         )
-        if not w_hist["entries"] and filtered_offers:
-            min_offer = min(
-                filtered_offers,
-                key=lambda item: item.price if item.price is not None else 999999.0,
-            )
-            for idx, past_p in enumerate(past_series):
-                day_ts = (now - timedelta(days=len(past_series) - idx)).isoformat()
+        if not w_hist["entries"] and w_offers:
+            new_candidates = [o for o in w_offers if o.condition != "used" and o.price is not None]
+            used_candidates = [o for o in w_offers if o.condition == "used" and o.price is not None]
+            best_new = min(new_candidates, key=lambda x: x.price) if new_candidates else None  # type: ignore
+            best_used = min(used_candidates, key=lambda x: x.price) if used_candidates else None  # type: ignore
+
+            for idx, d_ago in enumerate(step_days):
+                ts = (now - timedelta(days=d_ago)).isoformat()
                 w_hist["entries"].append(
                     {
-                        "timestamp": day_ts,
-                        "best_price": past_p,
-                        "best_merchant": min_offer.merchant,
-                        "best_url": min_offer.url,
-                        "merchant_prices": {min_offer.merchant: past_p},
-                        "bf_score": 70,
+                        "timestamp": ts,
+                        "new_price": round(best_new.price * new_mults[idx], 2) if best_new and best_new.price else None,
+                        "new_merchant": best_new.merchant if best_new else "",
+                        "used_price": round(best_used.price * used_mults[idx], 2) if best_used and best_used.price else None,
+                        "used_merchant": best_used.merchant if best_used else "",
                     }
                 )
 
-    return direct_by_watch, disc_by_watch
+    return offers_by_watch
 
 
 def run_comparator(
@@ -631,318 +276,502 @@ def run_comparator(
     demo_mode: bool = False,
     no_notify: bool = False,
 ) -> List[WatchAnalysis]:
-    """Run the full Black Friday watch comparison pipeline."""
+    """Run the Keepa-style watch price tracker strictly on user-configured URLs."""
     settings, watches = load_config(config_path)
     history = load_history(history_path)
 
     timeout = int(settings.get("request_timeout", 15))
     use_pw = bool(settings.get("use_playwright_fallback", True))
-    auto_disc = bool(settings.get("auto_discovery", True))
     import_settings = settings.get("japan_import", {})
 
-    direct_by_watch: Dict[str, List[OfferResult]] = {}
-    disc_by_watch: Dict[str, List[OfferResult]] = {}
+    offers_by_watch: Dict[str, List[OfferResult]] = {}
 
     if demo_mode:
-        direct_by_watch, disc_by_watch = generate_demo_offers_and_seed_history(watches, history)
+        offers_by_watch = build_demo_offers_and_seed_keepa_history(watches, history)
     else:
-        any_live_price = False
         for w in watches:
-            print(f"🔎 Analyse de {w.name} ({len(w.urls)} URLs)...")
+            print(f"🔎 Relevé des pages suivies pour {w.brand} {w.reference} ({len(w.urls)} URLs)...")
             w_offers: List[OfferResult] = []
-            existing_urls = set()
             for u in w.urls:
-                existing_urls.add(u.url)
                 res = scrape_offer(
                     watch_id=w.id,
                     url=u.url,
                     merchant=u.merchant,
+                    condition=u.condition,
+                    shipping_fee=u.shipping_fee,
+                    site_fee=u.site_fee,
+                    customs_fee=u.customs_fee,
+                    manual_price=u.manual_price,
                     timeout=timeout,
                     use_playwright_fallback=use_pw,
                     import_settings=import_settings,
                 )
-                if res.price is not None:
-                    any_live_price = True
                 w_offers.append(res)
-            direct_by_watch[w.id] = w_offers
-
-            if auto_disc:
-                disc = discover_offers_for_watch(w, existing_urls, timeout=timeout)
-                if any(d.price is not None for d in disc):
-                    any_live_price = True
-                disc_by_watch[w.id] = disc
-            else:
-                disc_by_watch[w.id] = []
-
-        if not any_live_price:
-            print("ℹ️ Accès réseau marchand restreint dans cet environnement : chargement des données de démonstration Black Friday.")
-            direct_by_watch, disc_by_watch = generate_demo_offers_and_seed_history(watches, history)
+            offers_by_watch[w.id] = w_offers
 
     analyses: List[WatchAnalysis] = []
     for w in watches:
         analysis = analyze_watch_and_update_history(
             watch=w,
-            direct_offers=direct_by_watch.get(w.id, []),
-            discovered_offers=disc_by_watch.get(w.id, []),
+            offers=offers_by_watch.get(w.id, []),
             history=history,
         )
         analyses.append(analysis)
 
     save_history(history_path, history)
 
-    dashboard_url = os.environ.get("GITHUB_PAGES_URL", "")
-    summary = build_daily_recap_message(analyses, dashboard_url=dashboard_url)
+    index_path = os.path.join(docs_dir, "index.html")
+    generate_html_report(analyses, history, settings, index_path)
 
-    report_path = generate_html_report(
-        analyses=analyses,
-        history=history,
-        settings=settings,
-        summary=summary,
-        output_dir=docs_dir,
-    )
+    dashboard_url = os.environ.get("GITHUB_PAGES_URL", "")
+    recap = build_daily_recap_message(analyses, dashboard_url=dashboard_url)
 
     print("\n" + "=" * 72)
-    print(summary["title"])
+    print(recap["title"])
     print("-" * 72)
-    print(summary["body"])
+    print(recap["body"])
     print("=" * 72)
-    print(f"📊 Rapport HTML généré : {report_path}")
+    print(f"📊 Interface KeepaWatch générée : {index_path}")
 
-    if not no_notify:
+    if not no_notify and recap.get("has_alert"):
         ntfy_topic = os.environ.get("NTFY_TOPIC") or settings.get("ntfy_topic", "")
         ntfy_server = settings.get("ntfy_server", "https://ntfy.sh")
+        send_local_desktop_notification(recap)
         if ntfy_topic:
-            sent = send_ntfy_chrome_push(ntfy_server, ntfy_topic, summary)
-            status = "✅ envoyée" if sent else "⚠️ ignorée (réseau/sandbox)"
-            print(f"📲 Notification Web Push Chrome (ntfy.sh/{ntfy_topic}) : {status}")
-        send_local_desktop_notification(summary)
+            ok = send_ntfy_chrome_push(ntfy_server, ntfy_topic, recap)
+            if ok:
+                print(f"🔔 Alerte Web Push envoyée sur {ntfy_server}/{ntfy_topic}")
 
     return analyses
 
 
-def add_url_to_config(
-    watch_id: str,
-    url: str,
-    merchant: str = "",
-    config_path: str = DEFAULT_CONFIG_PATH,
-) -> bool:
-    """Add any new product URL to an existing watch in watches.yaml."""
-    with open(config_path, "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
-
-    for item in data.get("watches", []):
-        if item.get("id") == watch_id:
-            urls = item.setdefault("urls", [])
-            merchant_label = merchant or infer_merchant_name(url)
-            urls.append({"url": url, "merchant": merchant_label})
-            with open(config_path, "w", encoding="utf-8") as out:
-                yaml.safe_dump(data, out, allow_unicode=True, sort_keys=False)
-            print(f"✅ URL ajoutée à {item.get('name')} ({merchant_label}) : {url}")
-            return True
-
-    print(f"❌ Montre introuvable avec l'identifiant '{watch_id}'.")
-    return False
-
-
-def remove_url_from_config(
-    url: str,
-    watch_id: str = "",
-    config_path: str = DEFAULT_CONFIG_PATH,
-) -> bool:
-    """Remove an invalid or unwanted product URL from watches.yaml."""
-    target_url = url.strip()
-    if not target_url:
-        print("❌ URL vide.")
-        return False
-
-    with open(config_path, "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
-
-    removed_count = 0
-    for item in data.get("watches", []):
-        if watch_id and item.get("id") != watch_id:
-            continue
-        urls = item.get("urls", [])
-        new_urls = []
-        for u in urls:
-            u_str = u.get("url", "") if isinstance(u, dict) else str(u)
-            if u_str.strip() == target_url:
-                removed_count += 1
-                print(f"🗑️ Lien supprimé de {item.get('name')} : {u_str}")
-            else:
-                new_urls.append(u)
-        item["urls"] = new_urls
-
-    if removed_count > 0:
-        with open(config_path, "w", encoding="utf-8") as out:
-            yaml.safe_dump(data, out, allow_unicode=True, sort_keys=False)
-        return True
-
-    print(f"⚠️ Aucun lien correspondant à '{target_url}' trouvé dans {config_path}.")
-    return False
-
-
-def slugify_id(text: str) -> str:
-    import re
-    s = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
-    return s or "montre"
+# ==============================================================================
+# CLI Helpers (Add/Remove Watch, Add/Remove URL, Set Thresholds, Suggest, Serve)
+# ==============================================================================
 
 
 def add_watch_to_config(
-    name: str,
+    config_path: str,
     brand: str,
+    name: str,
     reference: str,
-    target_price: float,
-    reference_price: float,
-    url: str = "",
-    features: str = "Solaire • Radio-pilotée",
-    watch_id: str = "",
-    config_path: str = DEFAULT_CONFIG_PATH,
-) -> bool:
-    """Add a new competing watch model to watches.yaml."""
-    with open(config_path, "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
+    target_price_new: Optional[float] = None,
+    target_price_used: Optional[float] = None,
+    reference_price: float = 0.0,
+    features: str = "",
+    image_url: str = "",
+    ean: str = "",
+    urls: Optional[List[str]] = None,
+) -> str:
+    settings, watches = load_config(config_path)
+    slug = re.sub(r"[^a-z0-9]+", "-", f"{brand}-{reference}".lower()).strip("-") or "watch"
+    if any(w.id == slug for w in watches):
+        raise ValueError(f"La référence '{slug}' existe déjà dans {config_path}.")
 
-    watches = data.setdefault("watches", [])
-    final_id = watch_id.strip() or slugify_id(f"{brand}-{reference}")
-
-    if any(w.get("id") == final_id for w in watches):
-        print(f"⚠️ Un modèle avec l'identifiant '{final_id}' existe déjà.")
-        return False
-
-    urls_list = []
-    if url.strip():
-        urls_list.append({"url": url.strip(), "merchant": infer_merchant_name(url.strip())})
-
-    new_entry = {
-        "id": final_id,
-        "name": name,
-        "brand": brand,
-        "reference": reference,
-        "features": features,
-        "target_price": float(target_price),
-        "reference_price": float(reference_price),
-        "search_queries": [reference, f"{brand} {reference}"],
-        "urls": urls_list,
-    }
-    watches.append(new_entry)
-
-    with open(config_path, "w", encoding="utf-8") as out:
-        yaml.safe_dump(data, out, allow_unicode=True, sort_keys=False)
-
-    print(f"✅ Nouveau modèle ajouté : {name} (id: {final_id})")
-    return True
+    watch_urls = [WatchURL(url=u, merchant=infer_merchant_name(u)) for u in (urls or []) if u.strip()]
+    watches.append(
+        WatchConfig(
+            id=slug,
+            name=name.strip(),
+            brand=brand.strip(),
+            reference=reference.strip(),
+            features=features.strip() or f"Montre {brand} réf. {reference}",
+            target_price_new=target_price_new,
+            target_price_used=target_price_used,
+            reference_price=reference_price,
+            ean=ean.strip(),
+            image_url=image_url.strip(),
+            urls=watch_urls,
+        )
+    )
+    save_config_from_watches(config_path, settings, watches)
+    print(f"✅ Produit ajouté : {name} (id: {slug})")
+    return slug
 
 
-def remove_watch_from_config(
-    watch_id_or_ref: str,
-    config_path: str = DEFAULT_CONFIG_PATH,
-) -> bool:
-    """Remove an entire watch model by its id or reference from watches.yaml."""
-    key = watch_id_or_ref.strip().lower()
-    with open(config_path, "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
-
-    watches = data.get("watches", [])
+def remove_watch_from_config(config_path: str, identifier: str) -> bool:
+    settings, watches = load_config(config_path)
+    needle = identifier.strip().lower()
     kept = []
-    removed = []
+    removed = None
     for w in watches:
-        if str(w.get("id", "")).lower() == key or str(w.get("reference", "")).lower() == key:
-            removed.append(w.get("name", key))
+        if w.id.lower() == needle or w.reference.lower() == needle:
+            removed = w
         else:
             kept.append(w)
-
     if not removed:
-        print(f"⚠️ Aucune montre trouvée avec l'id ou la référence '{watch_id_or_ref}'.")
+        print(f"⚠️ Aucun produit trouvé pour '{identifier}'")
         return False
-
-    data["watches"] = kept
-    with open(config_path, "w", encoding="utf-8") as out:
-        yaml.safe_dump(data, out, allow_unicode=True, sort_keys=False)
-
-    for r in removed:
-        print(f"🗑️ Modèle supprimé : {r}")
+    save_config_from_watches(config_path, settings, kept)
+    print(f"🗑️ Produit supprimé : {removed.name}")
     return True
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Comparateur de Prix Black Friday — Montres Solaires Radio-Pilotées"
+def add_url_to_config(
+    config_path: str,
+    watch_id: str,
+    url: str,
+    merchant: str = "",
+    condition: str = "new",
+    shipping_fee: Optional[float] = None,
+    site_fee: Optional[float] = None,
+    customs_fee: Optional[float] = None,
+    manual_price: Optional[float] = None,
+    auto_inspect: bool = True,
+) -> None:
+    settings, watches = load_config(config_path)
+    target = next((w for w in watches if w.id == watch_id or w.reference.lower() == watch_id.lower()), None)
+    if not target:
+        raise ValueError(f"Référence '{watch_id}' introuvable dans {config_path}.")
+
+    if auto_inspect and any(v is None for v in (shipping_fee, site_fee, customs_fee, manual_price)):
+        info = inspect_product_url(url, import_settings=settings.get("japan_import"))
+        merchant = merchant or info["merchant"]
+        if manual_price is None and info["base_price"] is not None:
+            manual_price = info["base_price"]
+        if shipping_fee is None and info["shipping_detected"]:
+            shipping_fee = info["shipping_fee"]
+        if site_fee is None and info["site_fee_detected"]:
+            site_fee = info["site_fee"]
+        if customs_fee is None and info["customs_detected"]:
+            customs_fee = info["customs_fee"]
+        if not condition and info["condition"]:
+            condition = info["condition"]
+
+    target.urls.append(
+        WatchURL(
+            url=url.strip(),
+            merchant=merchant or infer_merchant_name(url),
+            condition=condition or "new",
+            shipping_fee=shipping_fee if shipping_fee is not None else 0.0,
+            site_fee=site_fee if site_fee is not None else 0.0,
+            customs_fee=customs_fee if customs_fee is not None else 0.0,
+            manual_price=manual_price,
+        )
     )
+    save_config_from_watches(config_path, settings, watches)
+    print(f"✅ URL ajoutée à {target.reference} : {url}")
+
+
+def remove_url_from_config(config_path: str, url: str, watch_id: str = "") -> bool:
+    settings, watches = load_config(config_path)
+    target_url = url.strip().rstrip("/")
+    removed = False
+    for w in watches:
+        if watch_id and w.id != watch_id:
+            continue
+        before = len(w.urls)
+        w.urls = [u for u in w.urls if u.url.strip().rstrip("/") != target_url]
+        if len(w.urls) < before:
+            removed = True
+            print(f"🗑️ Lien supprimé de {w.name} : {url}")
+    if removed:
+        save_config_from_watches(config_path, settings, watches)
+    return removed
+
+
+def set_watch_thresholds(
+    config_path: str,
+    watch_id: str,
+    threshold_new: Optional[float],
+    threshold_used: Optional[float],
+) -> None:
+    settings, watches = load_config(config_path)
+    target = next((w for w in watches if w.id == watch_id or w.reference.lower() == watch_id.lower()), None)
+    if not target:
+        raise ValueError(f"Référence '{watch_id}' introuvable.")
+    if threshold_new is not None:
+        target.target_price_new = threshold_new
+    if threshold_used is not None:
+        target.target_price_used = threshold_used
+    save_config_from_watches(config_path, settings, watches)
+    print(
+        f"🔔 Seuils mis à jour pour {target.reference} : "
+        f"Neuf={target.target_price_new} € | Occasion={target.target_price_used} €"
+    )
+
+
+def serve_interactive_app(
+    config_path: str = DEFAULT_CONFIG_PATH,
+    history_path: str = DEFAULT_HISTORY_PATH,
+    docs_dir: str = DEFAULT_DOCS_DIR,
+    port: int = 8000,
+) -> None:
+    """Start a local HTTP server serving docs/ and REST endpoints (/api/ping, /api/inspect-url, /api/save-state)."""
+
+    class KeepaWatchHandler(BaseHTTPRequestHandler):
+        def _send_json(self, code: int, payload: Dict[str, Any]) -> None:
+            raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+            self.send_response(code)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+
+        def do_GET(self) -> None:
+            if self.path.startswith("/api/ping"):
+                self._send_json(200, {"ok": True})
+                return
+
+            rel = self.path.split("?")[0].lstrip("/") or "index.html"
+            file_path = os.path.abspath(os.path.join(docs_dir, rel))
+            if not file_path.startswith(os.path.abspath(docs_dir)) or not os.path.isfile(file_path):
+                self.send_error(404, "Not found")
+                return
+
+            ctype, _ = mimetypes.guess_type(file_path)
+            with open(file_path, "rb") as f:
+                data = f.read()
+            self.send_response(200)
+            self.send_header("Content-Type", ctype or "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+
+        def do_POST(self) -> None:
+            length = int(self.headers.get("Content-Length", "0"))
+            raw_body = self.rfile.read(length).decode("utf-8", errors="replace") if length > 0 else "{}"
+            try:
+                body = json.loads(raw_body)
+            except Exception:
+                body = {}
+
+            if self.path.startswith("/api/inspect-url"):
+                url = str(body.get("url", "")).strip()
+                settings, _ = load_config(config_path)
+                res = inspect_product_url(url, import_settings=settings.get("japan_import"))
+                self._send_json(200, res)
+                return
+
+            if self.path.startswith("/api/save-state"):
+                settings, _ = load_config(config_path)
+                if isinstance(body.get("settings"), dict):
+                    settings.update(body["settings"])
+                new_watches: List[WatchConfig] = []
+                for w in body.get("watches", []):
+                    urls = [
+                        WatchURL(
+                            url=str(u.get("url", "")),
+                            merchant=str(u.get("merchant", "")),
+                            condition=str(u.get("condition", "new")),
+                            shipping_fee=_opt_float(u.get("shipping_fee")),
+                            site_fee=_opt_float(u.get("site_fee")),
+                            customs_fee=_opt_float(u.get("customs_fee")),
+                            manual_price=_opt_float(u.get("base_price")),
+                        )
+                        for u in w.get("urls", [])
+                        if u.get("url")
+                    ]
+                    sugg = [
+                        SuggestedURL(
+                            url=str(s.get("url", "")),
+                            merchant=str(s.get("merchant", "")),
+                            title=str(s.get("title", "")),
+                            condition=str(s.get("condition", "new")),
+                            estimated_base_price=_opt_float(s.get("estimated_base_price")),
+                            shipping_fee=_opt_float(s.get("shipping_fee")),
+                            site_fee=_opt_float(s.get("site_fee")),
+                            customs_fee=_opt_float(s.get("customs_fee")),
+                            fee_hint=str(s.get("fee_hint", "")),
+                        )
+                        for s in w.get("suggested_urls", [])
+                        if s.get("url")
+                    ]
+                    new_watches.append(
+                        WatchConfig(
+                            id=str(w.get("id")),
+                            name=str(w.get("name")),
+                            brand=str(w.get("brand", "")),
+                            reference=str(w.get("reference", "")),
+                            features=str(w.get("features", "")),
+                            target_price_new=_opt_float(w.get("target_price_new")),
+                            target_price_used=_opt_float(w.get("target_price_used")),
+                            reference_price=float(w.get("reference_price", 0) or 0),
+                            ean=str(w.get("ean", "")),
+                            asin=str(w.get("asin", "")),
+                            image_url=str(w.get("image_url", "")),
+                            specs=dict(w.get("specs", {}) or {}),
+                            urls=urls,
+                            suggested_urls=sugg,
+                        )
+                    )
+                save_config_from_watches(config_path, settings, new_watches)
+                self._send_json(200, {"saved": True})
+                return
+
+            self.send_error(404, "Unknown endpoint")
+
+        def log_message(self, fmt: str, *args: Any) -> None:
+            return
+
+    server = ThreadingHTTPServer(("127.0.0.1", port), KeepaWatchHandler)
+    print(f"🚀 Serveur KeepaWatch actif sur http://localhost:{port}")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nArrêt du serveur.")
+
+
+def build_cli() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="KeepaWatch — Suivi Prix Montres Neuf & Occasion")
     sub = parser.add_subparsers(dest="command")
 
-    run_p = sub.add_parser("run", help="Lancer le relevé des prix, l'analyse et générer le rapport HTML")
-    run_p.add_argument("--demo", action="store_true", help="Utiliser des données de simulation Black Friday réalistes")
-    run_p.add_argument("--no-notify", action="store_true", help="Ne pas envoyer de notification push")
-    run_p.add_argument("--config", default=DEFAULT_CONFIG_PATH, help="Chemin vers watches.yaml")
+    p_run = sub.add_parser("run", help="Relever les prix des URLs suivies et générer le rapport HTML")
+    p_run.add_argument("--config", default=DEFAULT_CONFIG_PATH)
+    p_run.add_argument("--history", default=DEFAULT_HISTORY_PATH)
+    p_run.add_argument("--docs-dir", default=DEFAULT_DOCS_DIR)
+    p_run.add_argument("--demo", action="store_true", help="Utiliser les prix configurés & initialiser l'historique Keepa")
+    p_run.add_argument("--no-notify", action="store_true")
 
-    add_w = sub.add_parser("add-watch", help="Ajouter un nouveau modèle de montre en compétition dans watches.yaml")
-    add_w.add_argument("--name", required=True, help="Nom complet (ex: 'Casio Oceanus OCW-T200S-1AJF')")
-    add_w.add_argument("--brand", required=True, help="Marque (ex: Casio, Citizen, Seiko, Junghans)")
-    add_w.add_argument("--ref", required=True, help="Référence exacte (ex: OCW-T200S-1AJF)")
-    add_w.add_argument("--target", required=True, type=float, help="Prix cible Black Friday en € (ex: 349)")
-    add_w.add_argument("--msrp", required=True, type=float, help="Prix public conseillé officiel en € (ex: 499)")
-    add_w.add_argument("--url", default="", help="Première URL marchand (optionnel)")
-    add_w.add_argument("--features", default="Solaire • Radio-pilotée", help="Caractéristiques clés")
-    add_w.add_argument("--id", default="", help="Identifiant court personnalisé (optionnel)")
-    add_w.add_argument("--config", default=DEFAULT_CONFIG_PATH, help="Chemin vers watches.yaml")
+    p_serve = sub.add_parser("serve", help="Lancer le serveur interactif local relié à watches.yaml")
+    p_serve.add_argument("--port", type=int, default=8000)
+    p_serve.add_argument("--config", default=DEFAULT_CONFIG_PATH)
+    p_serve.add_argument("--docs-dir", default=DEFAULT_DOCS_DIR)
 
-    rem_w = sub.add_parser("remove-watch", help="Supprimer un modèle de montre de watches.yaml")
-    rem_w.add_argument("--watch", required=True, help="ID ou référence de la montre (ex: citizen-promaster-as4020 ou AT8110-61E)")
-    rem_w.add_argument("--config", default=DEFAULT_CONFIG_PATH, help="Chemin vers watches.yaml")
+    p_add_w = sub.add_parser("add-watch", help="Ajouter une référence produit")
+    p_add_w.add_argument("--config", default=DEFAULT_CONFIG_PATH)
+    p_add_w.add_argument("--brand", required=True)
+    p_add_w.add_argument("--name", required=True)
+    p_add_w.add_argument("--reference", required=True)
+    p_add_w.add_argument("--target-new", type=float, default=None)
+    p_add_w.add_argument("--target-used", type=float, default=None)
+    p_add_w.add_argument("--reference-price", type=float, default=0.0)
+    p_add_w.add_argument("--features", default="")
+    p_add_w.add_argument("--image-url", default="")
+    p_add_w.add_argument("--ean", default="")
+    p_add_w.add_argument("--url", action="append", default=[])
 
-    add_p = sub.add_parser("add-url", help="Ajouter une URL de marchand à une montre dans watches.yaml")
-    add_p.add_argument("--watch", required=True, help="Identifiant de la montre (ex: casio-gwm5610u)")
-    add_p.add_argument("--url", required=True, help="URL complète de la fiche produit")
-    add_p.add_argument("--merchant", default="", help="Nom du marchand (optionnel, détecté auto)")
+    p_rm_w = sub.add_parser("remove-watch", help="Supprimer une référence produit")
+    p_rm_w.add_argument("--config", default=DEFAULT_CONFIG_PATH)
+    p_rm_w.add_argument("--id", required=True)
 
-    rem_p = sub.add_parser("remove-url", help="Supprimer un lien invalide ou obsolète de watches.yaml")
-    rem_p.add_argument("--url", required=True, help="URL complète à supprimer")
-    rem_p.add_argument("--watch", default="", help="Identifiant de la montre (optionnel)")
-    rem_p.add_argument("--config", default=DEFAULT_CONFIG_PATH, help="Chemin vers watches.yaml")
+    p_add_u = sub.add_parser("add-url", help="Ajouter une URL produit avec frais")
+    p_add_u.add_argument("--config", default=DEFAULT_CONFIG_PATH)
+    p_add_u.add_argument("--watch-id", required=True)
+    p_add_u.add_argument("--url", required=True)
+    p_add_u.add_argument("--merchant", default="")
+    p_add_u.add_argument("--condition", choices=["new", "used"], default="new")
+    p_add_u.add_argument("--price", type=float, default=None)
+    p_add_u.add_argument("--shipping-fee", type=float, default=None)
+    p_add_u.add_argument("--site-fee", type=float, default=None)
+    p_add_u.add_argument("--customs-fee", type=float, default=None)
+    p_add_u.add_argument("--no-inspect", action="store_true")
 
-    sub.add_parser("test-notify", help="Envoyer une notification de test vers Chrome (ntfy.sh & local)")
+    p_rm_u = sub.add_parser("remove-url", help="Supprimer une URL produit")
+    p_rm_u.add_argument("--config", default=DEFAULT_CONFIG_PATH)
+    p_rm_u.add_argument("--url", required=True)
+    p_rm_u.add_argument("--watch-id", default="")
 
+    p_th = sub.add_parser("set-thresholds", help="Définir les seuils d'alerte Neuf & Occasion")
+    p_th.add_argument("--config", default=DEFAULT_CONFIG_PATH)
+    p_th.add_argument("--watch-id", required=True)
+    p_th.add_argument("--new", type=float, default=None)
+    p_th.add_argument("--used", type=float, default=None)
+
+    p_sug = sub.add_parser("suggest", help="Proposer des pages produit à ajouter pour une référence")
+    p_sug.add_argument("--config", default=DEFAULT_CONFIG_PATH)
+    p_sug.add_argument("--watch-id", required=True)
+
+    p_test = sub.add_parser("test-notify", help="Tester l'envoi de notification")
+    p_test.add_argument("--config", default=DEFAULT_CONFIG_PATH)
+
+    return parser
+
+
+def main() -> int:
+    parser = build_cli()
     args = parser.parse_args()
+    cmd = args.command or "run"
 
-    if args.command == "add-watch":
-        add_watch_to_config(
-            name=args.name,
-            brand=args.brand,
-            reference=args.ref,
-            target_price=args.target,
-            reference_price=args.msrp,
-            url=args.url,
-            features=args.features,
-            watch_id=args.id,
-            config_path=args.config,
+    if cmd == "run":
+        run_comparator(
+            config_path=getattr(args, "config", DEFAULT_CONFIG_PATH),
+            history_path=getattr(args, "history", DEFAULT_HISTORY_PATH),
+            docs_dir=getattr(args, "docs_dir", DEFAULT_DOCS_DIR),
+            demo_mode=getattr(args, "demo", False),
+            no_notify=getattr(args, "no_notify", False),
         )
-    elif args.command == "remove-watch":
-        remove_watch_from_config(args.watch, config_path=args.config)
-    elif args.command == "add-url":
-        add_url_to_config(args.watch, args.url, args.merchant)
-    elif args.command == "remove-url":
-        remove_url_from_config(args.url, args.watch, config_path=args.config)
-    elif args.command == "test-notify":
-        settings, _ = load_config()
-        dummy_summary = {
-            "title": "🧪 Test Radar Black Friday — Notifications Chrome Opérationnelles !",
-            "body": "Tu recevras ici le récapitulatif quotidien et les alertes de baisse sur tes montres solaires radio-pilotées.",
+        return 0
+
+    if cmd == "serve":
+        serve_interactive_app(
+            config_path=args.config,
+            docs_dir=args.docs_dir,
+            port=args.port,
+        )
+        return 0
+
+    if cmd == "add-watch":
+        add_watch_to_config(
+            config_path=args.config,
+            brand=args.brand,
+            name=args.name,
+            reference=args.reference,
+            target_price_new=args.target_new,
+            target_price_used=args.target_used,
+            reference_price=args.reference_price,
+            features=args.features,
+            image_url=args.image_url,
+            ean=args.ean,
+            urls=args.url,
+        )
+        return 0
+
+    if cmd == "remove-watch":
+        ok = remove_watch_from_config(args.config, args.id)
+        return 0 if ok else 1
+
+    if cmd == "add-url":
+        add_url_to_config(
+            config_path=args.config,
+            watch_id=args.watch_id,
+            url=args.url,
+            merchant=args.merchant,
+            condition=args.condition,
+            shipping_fee=args.shipping_fee,
+            site_fee=args.site_fee,
+            customs_fee=args.customs_fee,
+            manual_price=args.price,
+            auto_inspect=not args.no_inspect,
+        )
+        return 0
+
+    if cmd == "remove-url":
+        ok = remove_url_from_config(args.config, args.url, args.watch_id)
+        return 0 if ok else 1
+
+    if cmd == "set-thresholds":
+        set_watch_thresholds(args.config, args.watch_id, args.new, args.used)
+        return 0
+
+    if cmd == "suggest":
+        _, watches = load_config(args.config)
+        target = next((w for w in watches if w.id == args.watch_id or w.reference.lower() == args.watch_id.lower()), None)
+        if not target:
+            print(f"Référence '{args.watch_id}' introuvable.")
+            return 1
+        props = propose_product_pages(target, live_fetch=True)
+        for p in props:
+            print(f"• [{p['condition'].upper()}] {p['merchant']} — {p['url']} ({p.get('fee_hint', '')})")
+        return 0
+
+    if cmd == "test-notify":
+        settings, _ = load_config(args.config)
+        sample = {
+            "title": "🔔 Test Alerte KeepaWatch (Neuf & Occasion)",
+            "body": "Les alertes de seuil Neuf et Occasion sont opérationnelles !",
             "priority": "high",
-            "tags": "watch,white_check_mark",
-            "click_url": "",
+            "tags": "watch,bell",
+            "click_url": "https://ntfy.sh/app",
         }
+        send_local_desktop_notification(sample)
         topic = os.environ.get("NTFY_TOPIC") or settings.get("ntfy_topic", "")
-        server = settings.get("ntfy_server", "https://ntfy.sh")
-        ok = send_ntfy_chrome_push(server, topic, dummy_summary)
-        send_local_desktop_notification(dummy_summary)
-        print(f"Notification de test envoyée sur {server}/{topic} (succès={ok})")
-    else:
-        demo = getattr(args, "demo", False)
-        no_notify = getattr(args, "no_notify", False)
-        cfg = getattr(args, "config", DEFAULT_CONFIG_PATH)
-        run_comparator(config_path=cfg, demo_mode=demo, no_notify=no_notify)
+        if topic:
+            send_ntfy_chrome_push(settings.get("ntfy_server", "https://ntfy.sh"), topic, sample)
+        return 0
+
+    return 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
