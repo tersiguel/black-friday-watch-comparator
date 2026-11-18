@@ -1,4 +1,4 @@
-"""Automatic offer and deal discovery engine by watch reference and keywords."""
+"""Automatic offer and deal discovery engine by watch reference and keywords (Dealabs, Idealo, Catawiki)."""
 
 import re
 import xml.etree.ElementTree as ET
@@ -9,7 +9,7 @@ from urllib.parse import quote_plus
 from lxml import html as lxml_html
 
 from src.models import WatchConfig, OfferResult
-from src.scraper import http_get_text, parse_price_string
+from src.scraper import http_get_text, parse_price_string, compute_catawiki_price_with_fees
 
 
 def parse_dealabs_html_or_rss(content: str, watch: WatchConfig) -> List[OfferResult]:
@@ -19,7 +19,6 @@ def parse_dealabs_html_or_rss(content: str, watch: WatchConfig) -> List[OfferRes
     ref_norm = re.sub(r"[^a-z0-9]", "", watch.reference.lower())
     brand_norm = watch.brand.lower()
 
-    # 1. Try XML / RSS if applicable
     if content.lstrip().startswith("<?xml") or "<rss" in content[:300]:
         try:
             root = ET.fromstring(content)
@@ -47,7 +46,6 @@ def parse_dealabs_html_or_rss(content: str, watch: WatchConfig) -> List[OfferRes
         except Exception:
             pass
 
-    # 2. Parse HTML thread cards via lxml
     try:
         doc = lxml_html.fromstring(content)
     except Exception:
@@ -97,30 +95,110 @@ def parse_dealabs_html_or_rss(content: str, watch: WatchConfig) -> List[OfferRes
     return results
 
 
+def parse_catawiki_html(content: str, watch: WatchConfig) -> List[OfferResult]:
+    """Parse Catawiki auction search/category HTML and compute fee-inclusive prices (bid + 9% + 3€)."""
+    results: List[OfferResult] = []
+    if not content or not content.strip():
+        return results
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    try:
+        doc = lxml_html.fromstring(content)
+    except Exception:
+        return results
+
+    cards = doc.xpath(
+        "//article[contains(@class, 'c-lot-card')] | "
+        "//*[@data-testid='lot-card'] | "
+        "//a[contains(@href, '/l/')]/ancestor::article[1] | "
+        "//a[contains(@href, '/l/')]"
+    )
+    seen_hrefs: Set[str] = set()
+    for card in cards[:8]:
+        if card.tag == "a":
+            href = card.get("href", "")
+            link_el = card
+        else:
+            links = card.xpath(".//a[contains(@href, '/l/')] | .//a[@href]")
+            if not links:
+                continue
+            link_el = links[0]
+            href = link_el.get("href", "")
+
+        if not href:
+            continue
+        if href.startswith("/"):
+            href = "https://www.catawiki.com" + href
+        if href in seen_hrefs:
+            continue
+
+        title_nodes = card.xpath(
+            ".//*[contains(@class, 'c-lot-card__title')] | "
+            ".//*[@data-testid='lot-card-title'] | "
+            ".//h2 | .//h3 | .//p[1]"
+        )
+        title = " ".join(
+            (title_nodes[0].text_content() if title_nodes else link_el.text_content()).split()
+        )
+        if not title:
+            continue
+
+        price_nodes = card.xpath(
+            ".//*[contains(@class, 'c-lot-card__price')] | "
+            ".//*[@data-testid='lot-card-price'] | "
+            ".//*[contains(text(), '€')]"
+        )
+        raw_bid = parse_price_string(
+            price_nodes[0].text_content() if price_nodes else card.text_content()
+        )
+        if not raw_bid:
+            continue
+
+        seen_hrefs.add(href)
+        total_with_fees = compute_catawiki_price_with_fees(raw_bid)
+        results.append(
+            OfferResult(
+                watch_id=watch.id,
+                merchant="Catawiki (Enchères)",
+                url=href,
+                price=total_with_fees,
+                title=title,
+                extraction_method="catawiki-auction",
+                shipping_note=f"🔨 Enchère {raw_bid:.0f} € + 9% + 3€ frais Catawiki inclus (hors port)",
+                timestamp=now_iso,
+                is_discovered=True,
+            )
+        )
+
+    return results
+
+
 def discover_offers_for_watch(
     watch: WatchConfig,
     existing_urls: Set[str],
     timeout: int = 12,
 ) -> List[OfferResult]:
-    """Search Dealabs and web aggregators for new offers matching the watch reference."""
+    """Search Dealabs, Idealo, and Catawiki auctions for offers matching the watch."""
     discovered: List[OfferResult] = []
     seen_urls = set(existing_urls)
 
     queries = watch.search_queries or [f"{watch.brand} {watch.reference}"]
     for query in queries[:2]:
         encoded = quote_plus(query)
+
+        # 1. Dealabs search
         dealabs_url = f"https://www.dealabs.com/search?q={encoded}"
         try:
             status, text = http_get_text(dealabs_url, timeout=timeout)
             if status == 200:
-                deals = parse_dealabs_html_or_rss(text, watch)
-                for d in deals:
+                for d in parse_dealabs_html_or_rss(text, watch):
                     if d.url not in seen_urls:
                         seen_urls.add(d.url)
                         discovered.append(d)
         except Exception:
             pass
 
+        # 2. Idealo FR search
         idealo_url = f"https://www.idealo.fr/prechcat.html?q={encoded}"
         try:
             status, text = http_get_text(idealo_url, timeout=timeout)
@@ -150,6 +228,18 @@ def discover_offers_for_watch(
                                     is_discovered=True,
                                 )
                             )
+        except Exception:
+            pass
+
+        # 3. Catawiki Auctions search
+        catawiki_url = f"https://www.catawiki.com/fr/s?q={encoded}"
+        try:
+            status, text = http_get_text(catawiki_url, timeout=timeout)
+            if status == 200:
+                for lot in parse_catawiki_html(text, watch)[:2]:
+                    if lot.url not in seen_urls:
+                        seen_urls.add(lot.url)
+                        discovered.append(lot)
         except Exception:
             pass
 

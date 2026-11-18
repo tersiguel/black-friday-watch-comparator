@@ -81,6 +81,8 @@ watches:
         merchant: Sakura Watches
       - url: https://www.chrono24.fr/search/index.htm?query=SBTM323
         merchant: Chrono24
+      - url: https://www.catawiki.com/en/a/th/8977-seiko-watches-auction
+        merchant: Catawiki (Enchères)
 
   - id: seiko-solar-radio-sbtm317
     name: Seiko Selection Solar Radio-Controlled SBTM317 (Cadran Vert)
@@ -97,6 +99,8 @@ watches:
         merchant: Sakura Watches
       - url: https://www.chrono24.fr/search/index.htm?query=SBTM317
         merchant: Chrono24
+      - url: https://www.catawiki.com/en/c/1037-seiko-watches
+        merchant: Catawiki (Enchères)
 
   - id: junghans-max-bill-mega-solar
     name: Junghans Max Bill MEGA Solar (Titane & Saphir)
@@ -116,6 +120,8 @@ watches:
         merchant: Chrono24
       - url: https://www.amazon.de/s?k=Junghans+Max+Bill+Mega+Solar
         merchant: Amazon DE
+      - url: https://www.catawiki.com/en/x/1477-junghans-watches
+        merchant: Catawiki (Enchères)
 
   - id: casio-lineage-titanium
     name: Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)

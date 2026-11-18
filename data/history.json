@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-18T00:00:50.771007+00:00",
+  "updated_at": "2026-11-18T07:10:14.393398+00:00",
   "watches": {
     "casio-lineage-titanium": {
       "name": "Casio Lineage LCW-M100TSE-1AER (Titane & Saphir)",
@@ -113,6 +113,17 @@
         },
         {
           "timestamp": "2026-11-18T00:00:50.770882+00:00",
+          "best_price": 179.9,
+          "best_merchant": "Idealo Comparateur",
+          "best_url": "https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER",
+          "merchant_prices": {
+            "Amazon FR": 184.5,
+            "Ocarat": 215.0
+          },
+          "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T07:10:14.393240+00:00",
           "best_price": 179.9,
           "best_merchant": "Idealo Comparateur",
           "best_url": "https://www.idealo.fr/prechcat.html?q=LCW-M100TSE-1AER",
@@ -244,6 +255,17 @@
             "Amazon FR": 279.0
           },
           "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T07:10:14.393259+00:00",
+          "best_price": 264.0,
+          "best_merchant": "Ocarat",
+          "best_url": "https://ocarat.com/montre-radio-controlled-cb0250-84e-citizen-86531.html",
+          "merchant_prices": {
+            "Ocarat": 264.0,
+            "Amazon FR": 279.0
+          },
+          "bf_score": 100
         }
       ]
     },
@@ -359,6 +381,17 @@
         },
         {
           "timestamp": "2026-11-18T00:00:50.770921+00:00",
+          "best_price": 349.0,
+          "best_merchant": "Amazon FR",
+          "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
+          "merchant_prices": {
+            "Amazon FR": 349.0,
+            "Ocarat": 369.0
+          },
+          "bf_score": 50
+        },
+        {
+          "timestamp": "2026-11-18T07:10:14.393276+00:00",
           "best_price": 349.0,
           "best_merchant": "Amazon FR",
           "best_url": "https://www.amazon.fr/dp/B00WG04A1M",
@@ -490,6 +523,18 @@
             "Chrono24": 298.0
           },
           "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T07:10:14.393216+00:00",
+          "best_price": 242.8,
+          "best_merchant": "Catawiki (Enchères)",
+          "best_url": "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction",
+          "merchant_prices": {
+            "Sakura Watches": 272.0,
+            "Chrono24": 298.0,
+            "Catawiki (Enchères)": 242.8
+          },
+          "bf_score": 100
         }
       ]
     },
@@ -561,6 +606,18 @@
         },
         {
           "timestamp": "2026-11-18T00:00:50.770818+00:00",
+          "best_price": 369.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55E",
+          "merchant_prices": {
+            "Sakura Watches": 369.0,
+            "Chrono24": 395.0,
+            "Amazon FR": 419.0
+          },
+          "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T07:10:14.393179+00:00",
           "best_price": 369.0,
           "best_merchant": "Sakura Watches",
           "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55E",
@@ -650,6 +707,18 @@
             "Amazon FR": 425.0
           },
           "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T07:10:14.393198+00:00",
+          "best_price": 374.0,
+          "best_merchant": "Sakura Watches",
+          "best_url": "https://www.sakurawatches.com/search/?search=CB1160-55A",
+          "merchant_prices": {
+            "Sakura Watches": 374.0,
+            "Chrono24": 399.0,
+            "Amazon FR": 425.0
+          },
+          "bf_score": 100
         }
       ]
     },
@@ -721,6 +790,18 @@
         },
         {
           "timestamp": "2026-11-18T00:00:50.770844+00:00",
+          "best_price": 359.0,
+          "best_merchant": "Dealabs • Import Japon",
+          "best_url": "https://www.dealabs.com/search?q=CB1160",
+          "merchant_prices": {
+            "Sakura Watches": 372.0,
+            "Chrono24": 398.0,
+            "Amazon FR": 422.0
+          },
+          "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T07:10:14.393207+00:00",
           "best_price": 359.0,
           "best_merchant": "Dealabs • Import Japon",
           "best_url": "https://www.dealabs.com/search?q=CB1160",
@@ -809,6 +890,18 @@
             "Chrono24": 294.0
           },
           "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T07:10:14.393224+00:00",
+          "best_price": 253.7,
+          "best_merchant": "Catawiki (Enchères)",
+          "best_url": "https://www.catawiki.com/en/c/1037-seiko-watches",
+          "merchant_prices": {
+            "Sakura Watches": 268.0,
+            "Chrono24": 294.0,
+            "Catawiki (Enchères)": 253.7
+          },
+          "bf_score": 100
         }
       ]
     },
@@ -887,6 +980,19 @@
             "Amazon DE": 789.0,
             "Ocarat": 869.0,
             "Chrono24": 835.0
+          },
+          "bf_score": 100
+        },
+        {
+          "timestamp": "2026-11-18T07:10:14.393232+00:00",
+          "best_price": 569.8,
+          "best_merchant": "Catawiki (Enchères)",
+          "best_url": "https://www.catawiki.com/en/x/1477-junghans-watches",
+          "merchant_prices": {
+            "Amazon DE": 789.0,
+            "Ocarat": 869.0,
+            "Chrono24": 835.0,
+            "Catawiki (Enchères)": 569.8
           },
           "bf_score": 100
         }

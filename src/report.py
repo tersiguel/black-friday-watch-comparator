@@ -200,6 +200,7 @@ self.addEventListener('notificationclick', (event) => {
             if o.price is not None:
                 old_p = f'<span class="line-through text-xs text-slate-400 dark:text-slate-500 ml-1">{o.original_price:.2f} €</span>' if o.original_price else ""
                 promo_b = f'<span class="ml-2 px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 text-[10px] font-mono">Code: {html.escape(o.promo_code)}</span>' if o.promo_code else ""
+                ship_b = f'<div class="text-[11px] text-amber-600 dark:text-amber-400 mt-0.5">{html.escape(o.shipping_note)}</div>' if o.shipping_note else ""
                 stock_b = '<span class="text-emerald-600 dark:text-emerald-400 text-xs">● En stock</span>' if o.in_stock else '<span class="text-rose-600 dark:text-rose-400 text-xs">● Rupture</span>'
                 offer_items_html.append(f"""
                 <div data-offer-url="{o_url_escaped}" class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 transition">
@@ -207,6 +208,7 @@ self.addEventListener('notificationclick', (event) => {
                         <span class="font-medium text-slate-800 dark:text-slate-200 text-sm">{html.escape(o.merchant)}</span>
                         <span class="ml-2">{stock_b}</span>
                         {promo_b}
+                        {ship_b}
                     </div>
                     <div class="flex items-center gap-2">
                         <div class="text-right mr-1">
@@ -284,6 +286,7 @@ self.addEventListener('notificationclick', (event) => {
                 d_url_js = html.escape(json.dumps(d.url))
                 d_merch_js = html.escape(json.dumps(d.merchant))
                 temp_badge = f'<span class="px-2 py-0.5 rounded bg-orange-500/15 text-orange-600 dark:text-orange-300 text-xs font-bold">🔥 {html.escape(d.temperature)}</span>' if d.temperature else ""
+                ship_note_html = f'<div class="text-xs text-amber-600 dark:text-amber-400 mt-0.5 font-medium">{html.escape(d.shipping_note)}</div>' if d.shipping_note else ""
                 discovered_cards_html.append(f"""
                 <div data-offer-url="{d_url_escaped}" class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between gap-4 shadow-sm transition-colors">
                     <div>
@@ -293,6 +296,7 @@ self.addEventListener('notificationclick', (event) => {
                             {temp_badge}
                         </div>
                         <div class="text-sm font-semibold text-slate-900 dark:text-white mt-1">{html.escape(d.title or w.name)}</div>
+                        {ship_note_html}
                     </div>
                     <div class="flex items-center gap-2.5 shrink-0">
                         <div class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{d.price:.2f} €</div>

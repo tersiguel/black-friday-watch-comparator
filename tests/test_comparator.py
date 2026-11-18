@@ -6,8 +6,8 @@ import tempfile
 import unittest
 
 from src.models import WatchConfig, OfferResult
-from src.scraper import parse_price_string, extract_from_html
-from src.discovery import parse_dealabs_html_or_rss
+from src.scraper import parse_price_string, extract_from_html, compute_catawiki_price_with_fees
+from src.discovery import parse_dealabs_html_or_rss, parse_catawiki_html
 from src.analyzer import (
     detect_fake_promo,
     compute_bf_score_and_verdict,
@@ -121,6 +121,32 @@ class TestBlackFridayWatchComparator(unittest.TestCase):
         self.assertEqual(len(deals), 1)
         self.assertEqual(deals[0].price, 89.99)
         self.assertTrue(deals[0].is_discovered)
+
+    def test_catawiki_discovery_and_buyer_fees(self):
+        self.assertEqual(compute_catawiki_price_with_fees(400.0), 439.0)
+        watch = WatchConfig(
+            id="junghans-max-bill-mega-solar",
+            name="Junghans Max Bill MEGA Solar",
+            brand="Junghans",
+            reference="059/2020.04",
+            features="Titane Saphir",
+            target_price=799.0,
+            reference_price=1090.0,
+        )
+        sample_catawiki = """
+        <div>
+          <article class="c-lot-card">
+            <a href="/fr/l/106104294-junghans-max-bill-mega-solar">
+              <h3 class="c-lot-card__title">Junghans - Max Bill MEGA Solar - 059.2021.02</h3>
+              <div class="c-lot-card__price">400 €</div>
+            </a>
+          </article>
+        </div>
+        """
+        lots = parse_catawiki_html(sample_catawiki, watch)
+        self.assertEqual(len(lots), 1)
+        self.assertEqual(lots[0].price, 439.0)
+        self.assertIn("9% + 3€", lots[0].shipping_note or "")
 
     def test_remove_invalid_url_from_config(self):
         with tempfile.TemporaryDirectory() as tmpdir:

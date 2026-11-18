@@ -66,6 +66,7 @@ def infer_merchant_name(url: str, fallback: str = "") -> str:
             "galerieslafayette.com": "Galeries Lafayette",
             "dealabs.com": "Dealabs",
             "idealo.fr": "Idealo",
+            "catawiki.com": "Catawiki (Enchères)",
         }
         for domain, label in known.items():
             if hostname == domain or hostname.endswith("." + domain):
@@ -74,6 +75,11 @@ def infer_merchant_name(url: str, fallback: str = "") -> str:
         return parts[0].capitalize() if parts else "Marchand"
     except Exception:
         return fallback or "Marchand"
+
+
+def compute_catawiki_price_with_fees(raw_bid: float) -> float:
+    """Compute true Catawiki price including mandatory 9% + 3€ buyer protection fee."""
+    return round(raw_bid * 1.09 + 3.0, 2)
 
 
 def parse_price_string(raw: Any) -> Optional[float]:
@@ -276,6 +282,11 @@ def extract_from_selectors(doc: lxml_html.HtmlElement, url: str = "") -> Optiona
         "//*[contains(@class, 'current-price-value')]",
         "//*[contains(@class, 'product-price')]//*[contains(@class, 'price')]",
         "//*[@id='our_price_display']",
+        # Catawiki auction lot pages
+        "//*[@data-testid='lot-bid-status-section']//*[contains(text(), '€')]",
+        "//*[@data-testid='bid-amount']",
+        "//*[contains(@class, 'be-lot-details-bidding-panel')]//*[contains(text(), '€')]",
+        "//*[contains(@class, 'c-lot-card__price')]",
         # Generic e-commerce
         "//*[@data-testid='product-price']",
         "//*[contains(@class, 'f-priceBox-price')]",
@@ -427,17 +438,25 @@ def scrape_offer(
                 extracted["method"] = f"playwright+{extracted.get('method', 'dom')}"
 
     if extracted and extracted.get("price"):
+        final_price = extracted["price"]
+        shipping_note = None
+        if "catawiki." in url.lower():
+            raw_bid = final_price
+            final_price = compute_catawiki_price_with_fees(raw_bid)
+            shipping_note = f"🔨 Enchère {raw_bid:.0f} € + 9% + 3€ frais Catawiki inclus (hors port)"
+
         return OfferResult(
             watch_id=watch_id,
             merchant=merchant_name,
             url=url,
-            price=extracted["price"],
+            price=final_price,
             original_price=extracted.get("original_price"),
             currency=extracted.get("currency", "EUR"),
             in_stock=extracted.get("in_stock", True),
             title=extracted.get("title", ""),
             extraction_method=extracted.get("method", "hybrid"),
             promo_code=extracted.get("promo_code"),
+            shipping_note=shipping_note,
             timestamp=now_iso,
         )
 
