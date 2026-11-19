@@ -344,13 +344,6 @@ watches:
         shipping_fee: 12
         site_fee: 0
         customs_fee: 0
-      - url: "https://www.casio.com/fr/watches/casio/product.LCW-M100TSE-1A/"
-        merchant: "Casio Officiel FR"
-        condition: "new"
-        manual_price: 299
-        shipping_fee: 0
-        site_fee: 0
-        customs_fee: 0
     suggested_urls:
       - url: "https://www.chrono24.fr/casio/lcw-m100tse-1aer-wave-ceptor-herrenuhr-40mm-5atm--id48759229.htm"
         merchant: "Chrono24 (Allemagne)"
