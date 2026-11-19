@@ -1,7 +1,4 @@
-# ==============================================================================
-# Suivi Prix Montres (Style Keepa) — Neuf & Occasion • Tout Frais Compris
-# ==============================================================================
-
+# Configuration KeepaWatch — Générée depuis l'interface
 settings:
   currency: EUR
   ntfy_topic: bf-montres-solaires-2026
@@ -9,518 +6,448 @@ settings:
   request_timeout: 15
   use_playwright_fallback: true
   japan_import:
-    shipping_eur: 24.0
-    vat_rate: 0.20
-    customs_duty_eur: 0.80
-    carrier_fee_eur: 18.0
+    shipping_eur: 24
+    vat_rate: 0.2
+    customs_duty_eur: 0.8
+    carrier_fee_eur: 18
 
 watches:
-  - id: citizen-cb1160-55e
-    name: Citizen Collection Super Titanium CB1160-55E
-    brand: Citizen
-    reference: CB1160-55E
+  - id: "citizen-cb1160-55e"
+    name: "Citizen Collection Super Titanium CB1160-55E"
+    brand: "Citizen"
+    reference: "CB1160-55E"
     ean: "4974374356321"
-    asin: B0HNNJ6FDW
-    image_url: https://www.sakurawatches.com/image/cache/catalog/watches/c/CB1160-55E/%21CB1160-55E1-1000x1000.png
-    features: Montre habillée ultra-légère (81 g) en Super Titanium™ Duratect avec cadran noir épuré, verre saphir antireflet, mouvement solaire Eco-Drive radio-piloté 4 zones (calibre H149) et calendrier perpétuel.
+    asin: "B0HNNJ6FDW"
+    image_url: "https://www.sakurawatches.com/image/cache/catalog/watches/c/CB1160-55E/%21CB1160-55E1-1000x1000.png"
+    features: "Montre habillée ultra-légère (81 g) en Super Titanium™ Duratect avec cadran noir épuré, verre saphir antireflet, mouvement solaire Eco-Drive radio-piloté 4 zones (calibre H149) et calendrier perpétuel."
     specs:
-      Boîtier: Super Titanium™ 37,5 mm (ép. 9,3 mm)
-      Mouvement: Eco-Drive H149 Solaire Radio-piloté
-      Verre: Saphir traité antireflet
-      Étanchéité: 10 ATM (100 m)
-    target_price_new: 425.0
-    target_price_used: 330.0
-    reference_price: 549.0
+      "Boîtier": "Super Titanium™ 37,5 mm (ép. 9,3 mm)"
+      "Mouvement": "Eco-Drive H149 Solaire Radio-piloté"
+      "Verre": "Saphir traité antireflet"
+      "Étanchéité": "10 ATM (100 m)"
+    target_price_new: 425
+    target_price_used: 330
+    reference_price: 549
     urls:
-      - url: https://www.sakurawatches.com/citizen-collection-cb1160-55e-15415
-        merchant: Sakura Watches (Tokyo)
-        condition: new
-        manual_price: 312.00
-        shipping_fee: 24.00
-        site_fee: 0.00
+      - url: "https://www.sakurawatches.com/citizen-collection-cb1160-55e-15415"
+        merchant: "Sakura Watches (Tokyo)"
+        condition: "new"
+        manual_price: 312
+        shipping_fee: 24
+        site_fee: 0
         customs_fee: 86.16
-      - url: https://www.zeitlounge.com/fr/citizen-eco-drive-cb1160-55e-montre-radio-pilotee-pour-hommes-eco-drive-montre-radio/a-169883
-        merchant: Zeitlounge
-        condition: new
+      - url: "https://www.zeitlounge.com/fr/citizen-eco-drive-cb1160-55e-montre-radio-pilotee-pour-hommes-eco-drive-montre-radio/a-169883"
+        merchant: "Zeitlounge"
+        condition: "new"
         manual_price: 435.89
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-      - url: https://citizenwatch.eu/en/p/cb1160-55e/
-        merchant: Citizen Store EU
-        condition: new
-        manual_price: 479.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-      - url: https://www.chrono24.fr/search/index.htm?query=CB1160-55E&usedOrNew=used
-        merchant: Chrono24 (UE)
-        condition: used
-        manual_price: 325.00
-        shipping_fee: 14.00
-        site_fee: 0.00
-        customs_fee: 0.00
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+      - url: "https://citizenwatch.eu/en/p/cb1160-55e/"
+        merchant: "Citizen Store EU"
+        condition: "new"
+        manual_price: 479
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+      - url: "https://www.chrono24.fr/search/index.htm?query=CB1160-55E&usedOrNew=used"
+        merchant: "Chrono24 (UE)"
+        condition: "used"
+        manual_price: 325
+        shipping_fee: 14
+        site_fee: 0
+        customs_fee: 0
     suggested_urls:
-      - url: https://www.luna-time.fr/Citizen-CB1160-55E-Montre-Bracelet-Hommes-Solaire-Eco-Drive
-        merchant: Luna-Time FR
-        title: Citizen CB1160-55E Super Titanium Eco-Drive (Boutique UE)
-        condition: new
-        estimated_base_price: 479.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-        fee_hint: Livraison gratuite UE • TVA incluse
-      - url: https://rm-time.com/Citizen-Eco-Drive-Radio-Controlled-Super-Titanium-Black-Men-s-Watch-CB1160-55E/CB1160-55E
-        merchant: RM-Time (Allemagne)
-        title: Citizen Eco-Drive Radio Controlled Super Titanium CB1160-55E
-        condition: new
-        estimated_base_price: 459.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-        fee_hint: Expédition UE sans douane
-      - url: https://www.mastersintime.com/citizen-radio-controlled-radio-controlled-solar-powered-titanium-watch-cb1160-55e.htm
-        merchant: Masters In Time
-        title: Citizen Super Titanium CB1160-55E (Garantie 3 ans)
-        condition: new
-        estimated_base_price: 479.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-        fee_hint: Boutique Pays-Bas (UE) • 0 € douane
-      - url: https://www.catawiki.com/fr/s?q=Citizen+CB1160
-        merchant: Catawiki
-        title: Enchères Montres Citizen Super Titanium CB1160
-        condition: used
-        estimated_base_price: 280.00
-        shipping_fee: 18.00
-        site_fee: 28.20
-        customs_fee: 0.00
-        fee_hint: Frais acheteur Catawiki (9 % + 3 €) pré-calculés
-
-  - id: citizen-cb1160-55a
-    name: Citizen Collection Super Titanium CB1160-55A
-    brand: Citizen
-    reference: CB1160-55A
-    image_url: https://www.sakurawatches.com/image/cache/catalog/watches/c/CB1160-55A/%21CB1160-55A1-1000x1000.png
-    features: Variante à cadran blanc lumineux en Super Titanium™ Duratect (81 g), verre saphir antireflet, calibre solaire H149 radio-piloté multi-zones, heure universelle 26 villes et calendrier perpétuel.
+      - url: "https://www.luna-time.fr/Citizen-CB1160-55E-Montre-Bracelet-Hommes-Solaire-Eco-Drive"
+        merchant: "Luna-Time FR"
+        title: "Citizen CB1160-55E Super Titanium Eco-Drive (Boutique UE)"
+        condition: "new"
+        estimated_base_price: 479
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Livraison gratuite UE • TVA incluse"
+      - url: "https://rm-time.com/Citizen-Eco-Drive-Radio-Controlled-Super-Titanium-Black-Men-s-Watch-CB1160-55E/CB1160-55E"
+        merchant: "RM-Time (Allemagne)"
+        title: "Citizen Eco-Drive Radio Controlled Super Titanium CB1160-55E"
+        condition: "new"
+        estimated_base_price: 459
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Expédition UE sans douane"
+      - url: "https://www.mastersintime.com/citizen-radio-controlled-radio-controlled-solar-powered-titanium-watch-cb1160-55e.htm"
+        merchant: "Masters In Time"
+        title: "Citizen Super Titanium CB1160-55E (Garantie 3 ans)"
+        condition: "new"
+        estimated_base_price: 479
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Boutique Pays-Bas (UE) • 0 € douane"
+      - url: "https://www.catawiki.com/fr/s?q=Citizen+CB1160"
+        merchant: "Catawiki"
+        title: "Enchères Montres Citizen Super Titanium CB1160"
+        condition: "used"
+        estimated_base_price: 280
+        shipping_fee: 18
+        site_fee: 28.2
+        customs_fee: 0
+        fee_hint: "Frais acheteur Catawiki (9 % + 3 €) pré-calculés"
+  - id: "citizen-cb1160-55a"
+    name: "Citizen Collection Super Titanium CB1160-55A"
+    brand: "Citizen"
+    reference: "CB1160-55A"
+    image_url: "https://www.sakurawatches.com/image/cache/catalog/watches/c/CB1160-55A/%21CB1160-55A1-1000x1000.png"
+    features: "Variante à cadran blanc lumineux en Super Titanium™ Duratect (81 g), verre saphir antireflet, calibre solaire H149 radio-piloté multi-zones, heure universelle 26 villes et calendrier perpétuel."
     specs:
-      Boîtier: Super Titanium™ 37,5 mm (ép. 9,3 mm)
-      Mouvement: Eco-Drive H149 Solaire Radio-piloté
-      Verre: Saphir traité antireflet
-      Étanchéité: 10 ATM (100 m)
-    target_price_new: 420.0
-    target_price_used: 335.0
-    reference_price: 549.0
+      "Boîtier": "Super Titanium™ 37,5 mm (ép. 9,3 mm)"
+      "Mouvement": "Eco-Drive H149 Solaire Radio-piloté"
+      "Verre": "Saphir traité antireflet"
+      "Étanchéité": "10 ATM (100 m)"
+    target_price_new: 420
+    target_price_used: 335
+    reference_price: 549
     urls:
-      - url: https://www.sakurawatches.com/citizen-collection-cb1160-55a
-        merchant: Sakura Watches (Tokyo)
-        condition: new
-        manual_price: 315.00
-        shipping_fee: 24.00
-        site_fee: 0.00
+      - url: "https://www.sakurawatches.com/citizen-collection-cb1160-55a"
+        merchant: "Sakura Watches (Tokyo)"
+        condition: "new"
+        manual_price: 315
+        shipping_fee: 24
+        site_fee: 0
         customs_fee: 85.96
-      - url: https://www.idealo.fr/prix/214792613/citizen-watch-cb1160.html
-        merchant: Idealo.fr (Marchands UE)
-        condition: new
-        manual_price: 499.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-      - url: https://www.chrono24.fr/search/index.htm?query=CB1160-55A&usedOrNew=used
-        merchant: Chrono24 (UE)
-        condition: used
-        manual_price: 330.00
-        shipping_fee: 15.00
-        site_fee: 0.00
-        customs_fee: 0.00
+      - url: "https://www.idealo.fr/prix/214792613/citizen-watch-cb1160.html"
+        merchant: "Idealo.fr (Marchands UE)"
+        condition: "new"
+        manual_price: 499
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+      - url: "https://www.chrono24.fr/search/index.htm?query=CB1160-55A&usedOrNew=used"
+        merchant: "Chrono24 (UE)"
+        condition: "used"
+        manual_price: 330
+        shipping_fee: 15
+        site_fee: 0
+        customs_fee: 0
     suggested_urls:
-      - url: https://www.chrono24.fr/search/index.htm?query=CB1160-55A&usedOrNew=new
-        merchant: Chrono24 (Neuf)
-        title: Offres neuves Citizen CB1160-55A sur Chrono24
-        condition: new
-        estimated_base_price: 465.00
-        shipping_fee: 12.00
-        site_fee: 0.00
-        customs_fee: 0.00
-        fee_hint: Protection acheteur Chrono24 incluse (0 €)
-      - url: https://www.catawiki.com/fr/s?q=Citizen+CB1160-55A
-        merchant: Catawiki
-        title: Lots d'occasion Citizen CB1160-55A aux enchères
-        condition: used
-        estimated_base_price: 285.00
-        shipping_fee: 18.00
+      - url: "https://www.chrono24.fr/search/index.htm?query=CB1160-55A&usedOrNew=new"
+        merchant: "Chrono24 (Neuf)"
+        title: "Offres neuves Citizen CB1160-55A sur Chrono24"
+        condition: "new"
+        estimated_base_price: 465
+        shipping_fee: 12
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Protection acheteur Chrono24 incluse (0 €)"
+      - url: "https://www.catawiki.com/fr/s?q=Citizen+CB1160-55A"
+        merchant: "Catawiki"
+        title: "Lots d'occasion Citizen CB1160-55A aux enchères"
+        condition: "used"
+        estimated_base_price: 285
+        shipping_fee: 18
         site_fee: 28.65
-        customs_fee: 0.00
-        fee_hint: Frais acheteur 9 % + 3 € pré-remplis
-
-  - id: citizen-cb1160-55l
-    name: Citizen Collection Super Titanium CB1160-55L
-    brand: Citizen
-    reference: CB1160-55L
-    image_url: https://www.sakurawatches.com/image/cache/catalog/watches/c/CB1160-55L/%21CB1160-55L1-1000x1000.png
-    features: Version cadran bleu marine soleillé en Super Titanium™ Duratect ultra-résistant aux rayures, verre saphir antireflet, synchronisation radio quotidienne et réserve de marche solaire de 2 ans en mode économie.
+        customs_fee: 0
+        fee_hint: "Frais acheteur 9 % + 3 € pré-remplis"
+  - id: "citizen-cb1160-55l"
+    name: "Citizen Collection Super Titanium CB1160-55L"
+    brand: "Citizen"
+    reference: "CB1160-55L"
+    image_url: "https://www.sakurawatches.com/image/cache/catalog/watches/c/CB1160-55L/%21CB1160-55L1-1000x1000.png"
+    features: "Version cadran bleu marine soleillé en Super Titanium™ Duratect ultra-résistant aux rayures, verre saphir antireflet, synchronisation radio quotidienne et réserve de marche solaire de 2 ans en mode économie."
     specs:
-      Boîtier: Super Titanium™ 37,5 mm (ép. 9,3 mm)
-      Mouvement: Eco-Drive H149 Solaire Radio-piloté
-      Verre: Saphir traité antireflet
-      Étanchéité: 10 ATM (100 m)
-    target_price_new: 425.0
-    target_price_used: 335.0
-    reference_price: 549.0
+      "Boîtier": "Super Titanium™ 37,5 mm (ép. 9,3 mm)"
+      "Mouvement": "Eco-Drive H149 Solaire Radio-piloté"
+      "Verre": "Saphir traité antireflet"
+      "Étanchéité": "10 ATM (100 m)"
+    target_price_new: 425
+    target_price_used: 335
+    reference_price: 549
     urls:
-      - url: https://www.sakurawatches.com/citizen-collection-cb1160-55l
-        merchant: Sakura Watches (Tokyo)
-        condition: new
-        manual_price: 312.00
-        shipping_fee: 24.00
-        site_fee: 0.00
+      - url: "https://www.sakurawatches.com/citizen-collection-cb1160-55l"
+        merchant: "Sakura Watches (Tokyo)"
+        condition: "new"
+        manual_price: 312
+        shipping_fee: 24
+        site_fee: 0
         customs_fee: 86.16
-      - url: https://www.chrono24.fr/citizen/eco-drive-super-titanium-cb1160-55l--id49411070.htm
-        merchant: Chrono24 (UE)
-        condition: new
-        manual_price: 483.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-      - url: https://www.chrono24.fr/search/index.htm?query=CB1160-55L&usedOrNew=used
-        merchant: Chrono24 (Occasion)
-        condition: used
-        manual_price: 329.00
-        shipping_fee: 14.00
-        site_fee: 0.00
-        customs_fee: 0.00
+      - url: "https://www.chrono24.fr/citizen/eco-drive-super-titanium-cb1160-55l--id49411070.htm"
+        merchant: "Chrono24 (UE)"
+        condition: "new"
+        manual_price: 483
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+      - url: "https://www.chrono24.fr/search/index.htm?query=CB1160-55L&usedOrNew=used"
+        merchant: "Chrono24 (Occasion)"
+        condition: "used"
+        manual_price: 329
+        shipping_fee: 14
+        site_fee: 0
+        customs_fee: 0
     suggested_urls:
-      - url: https://www.chrono24.fr/citizen/cb1160-55l-eco-drive-solar-funkarmbanduhr-unisex-titan-blau--id49391729.htm
-        merchant: Chrono24 (Allemagne)
-        title: Citizen CB1160-55L Eco-Drive Solar Titan Blau (Neuve)
-        condition: new
-        estimated_base_price: 483.00
-        shipping_fee: 10.00
-        site_fee: 0.00
-        customs_fee: 0.00
-        fee_hint: Vendeur professionnel UE • 0 € douane
-      - url: https://www.idealo.fr/prix/214792613/citizen-watch-cb1160.html
-        merchant: Idealo.fr
-        title: Comparatif marchands UE Citizen CB1160-55L
-        condition: new
-        estimated_base_price: 479.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-        fee_hint: Marchands européens TTC
-
-  - id: seiko-solar-radio-sbtm323
-    name: Seiko Selection S Series Solar Radio SBTM323
-    brand: Seiko
-    reference: SBTM323
-    image_url: https://www.sakurawatches.com/image/cache/catalog/watches/seiko/UPLOAD/SBTM323-1000x1000.jpg
-    features: Montre JDM (marché japonais) à cadran noir profond et aiguilles facettées haute lisibilité. Verre saphir à traitement « Super-Clear » quasi invisible, calibre solaire 7B72 radio-piloté (Europe DCF77/MSF inclus).
+      - url: "https://www.chrono24.fr/citizen/cb1160-55l-eco-drive-solar-funkarmbanduhr-unisex-titan-blau--id49391729.htm"
+        merchant: "Chrono24 (Allemagne)"
+        title: "Citizen CB1160-55L Eco-Drive Solar Titan Blau (Neuve)"
+        condition: "new"
+        estimated_base_price: 483
+        shipping_fee: 10
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Vendeur professionnel UE • 0 € douane"
+      - url: "https://www.idealo.fr/prix/214792613/citizen-watch-cb1160.html"
+        merchant: "Idealo.fr"
+        title: "Comparatif marchands UE Citizen CB1160-55L"
+        condition: "new"
+        estimated_base_price: 479
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Marchands européens TTC"
+  - id: "seiko-solar-radio-sbtm323"
+    name: "Seiko Selection S Series Solar Radio SBTM323"
+    brand: "Seiko"
+    reference: "SBTM323"
+    image_url: "https://www.sakurawatches.com/image/cache/catalog/watches/seiko/UPLOAD/SBTM323-1000x1000.jpg"
+    features: "Montre JDM (marché japonais) à cadran noir profond et aiguilles facettées haute lisibilité. Verre saphir à traitement « Super-Clear » quasi invisible, calibre solaire 7B72 radio-piloté (Europe DCF77/MSF inclus)."
     specs:
-      Boîtier: Acier 39,5 mm (ép. 9,5 mm)
-      Mouvement: Seiko 7B72 Solaire Radio-piloté
-      Verre: Saphir Super-Clear Coating
-      Étanchéité: 10 ATM (100 m)
-    target_price_new: 385.0
-    target_price_used: 270.0
-    reference_price: 430.0
+      "Boîtier": "Acier 39,5 mm (ép. 9,5 mm)"
+      "Mouvement": "Seiko 7B72 Solaire Radio-piloté"
+      "Verre": "Saphir Super-Clear Coating"
+      "Étanchéité": "10 ATM (100 m)"
+    target_price_new: 385
+    target_price_used: 270
+    reference_price: 430
     urls:
-      - url: https://www.chrono24.fr/seiko/ref-sbtm323.htm
-        merchant: Chrono24 (Import JP)
-        condition: new
-        manual_price: 278.00
-        shipping_fee: 34.00
-        site_fee: 0.00
+      - url: "https://www.chrono24.fr/seiko/ref-sbtm323.htm"
+        merchant: "Chrono24 (Import JP)"
+        condition: "new"
+        manual_price: 278
+        shipping_fee: 34
+        site_fee: 0
         customs_fee: 81.36
-      - url: https://www.sakurawatches.com/seiko-selection-sbtm323
-        merchant: Sakura Watches (Tokyo)
-        condition: new
-        manual_price: 297.00
-        shipping_fee: 24.00
-        site_fee: 0.00
+      - url: "https://www.sakurawatches.com/seiko-selection-sbtm323"
+        merchant: "Sakura Watches (Tokyo)"
+        condition: "new"
+        manual_price: 297
+        shipping_fee: 24
+        site_fee: 0
         customs_fee: 82.36
-      - url: https://www.catawiki.com/en/a/th/8977-seiko-watches-auction
-        merchant: Catawiki
-        condition: used
-        manual_price: 220.00
-        shipping_fee: 18.00
-        site_fee: 22.80
-        customs_fee: 0.00
+      - url: "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction"
+        merchant: "Catawiki"
+        condition: "used"
+        manual_price: 220
+        shipping_fee: 18
+        site_fee: 22.8
+        customs_fee: 0
     suggested_urls:
-      - url: https://www.chrono24.fr/search/index.htm?query=SBTM323&usedOrNew=used
-        merchant: Chrono24 (Occasion)
-        title: Seiko Selection SBTM323 d'occasion
-        condition: used
-        estimated_base_price: 245.00
-        shipping_fee: 18.00
-        site_fee: 0.00
-        customs_fee: 0.00
+      - url: "https://www.chrono24.fr/search/index.htm?query=SBTM323&usedOrNew=used"
+        merchant: "Chrono24 (Occasion)"
+        title: "Seiko Selection SBTM323 d'occasion"
+        condition: "used"
+        estimated_base_price: 245
+        shipping_fee: 18
+        site_fee: 0
+        customs_fee: 0
         fee_hint: "Frais Chrono24 acheteur : 0 €"
-
-  - id: seiko-solar-radio-sbtm317
-    name: Seiko Selection S Series Solar Radio SBTM317
-    brand: Seiko
-    reference: SBTM317
-    image_url: https://www.sakurawatches.com/image/cache/catalog/watches/seiko/UPLOAD/SBTM317-1000x1000.jpg
-    features: Déclinaison habillée à cadran blanc pur de la Seiko S Series JDM. Calibre solaire 7B72 radio-piloté multi-émetteurs (dont Francfort DCF77), verre saphir Super-Clear et calendrier perpétuel jusqu'en 2099.
+  - id: "seiko-solar-radio-sbtm317"
+    name: "Seiko Selection S Series Solar Radio SBTM317"
+    brand: "Seiko"
+    reference: "SBTM317"
+    image_url: "https://www.sakurawatches.com/image/cache/catalog/watches/seiko/UPLOAD/SBTM317-1000x1000.jpg"
+    features: "Déclinaison habillée à cadran blanc pur de la Seiko S Series JDM. Calibre solaire 7B72 radio-piloté multi-émetteurs (dont Francfort DCF77), verre saphir Super-Clear et calendrier perpétuel jusqu'en 2099."
     specs:
-      Boîtier: Acier 39,5 mm (ép. 9,5 mm)
-      Mouvement: Seiko 7B72 Solaire Radio-piloté
-      Verre: Saphir Super-Clear Coating
-      Étanchéité: 10 ATM (100 m)
-    target_price_new: 375.0
-    target_price_used: 265.0
-    reference_price: 430.0
+      "Boîtier": "Acier 39,5 mm (ép. 9,5 mm)"
+      "Mouvement": "Seiko 7B72 Solaire Radio-piloté"
+      "Verre": "Saphir Super-Clear Coating"
+      "Étanchéité": "10 ATM (100 m)"
+    target_price_new: 375
+    target_price_used: 265
+    reference_price: 430
     urls:
-      - url: https://www.sakurawatches.com/seiko-selection-sbtm317
-        merchant: Sakura Watches (Tokyo)
-        condition: new
-        manual_price: 268.00
-        shipping_fee: 24.00
-        site_fee: 0.00
+      - url: "https://www.sakurawatches.com/seiko-selection-sbtm317"
+        merchant: "Sakura Watches (Tokyo)"
+        condition: "new"
+        manual_price: 268
+        shipping_fee: 24
+        site_fee: 0
         customs_fee: 77.36
-      - url: https://www.chrono24.fr/seiko/ref-sbtm317.htm
-        merchant: Chrono24 (Import JP)
-        condition: new
-        manual_price: 280.00
-        shipping_fee: 34.00
-        site_fee: 0.00
+      - url: "https://www.chrono24.fr/seiko/ref-sbtm317.htm"
+        merchant: "Chrono24 (Import JP)"
+        condition: "new"
+        manual_price: 280
+        shipping_fee: 34
+        site_fee: 0
         customs_fee: 81.76
-      - url: https://www.catawiki.com/en/c/1037-seiko-watches
-        merchant: Catawiki
-        condition: used
-        manual_price: 215.00
-        shipping_fee: 18.00
+      - url: "https://www.catawiki.com/en/c/1037-seiko-watches"
+        merchant: "Catawiki"
+        condition: "used"
+        manual_price: 215
+        shipping_fee: 18
         site_fee: 22.35
-        customs_fee: 0.00
+        customs_fee: 0
     suggested_urls:
-      - url: https://www.chrono24.fr/search/index.htm?query=SBTM317&usedOrNew=used
-        merchant: Chrono24 (Occasion)
-        title: Seiko Selection SBTM317 Seconde Main
-        condition: used
-        estimated_base_price: 235.00
-        shipping_fee: 18.00
-        site_fee: 0.00
-        customs_fee: 0.00
-        fee_hint: Protection acheteur Chrono24 incluse
-
-  - id: junghans-max-bill-mega-solar
-    name: Junghans Max Bill MEGA Solar Titane & Saphir
-    brand: Junghans
-    reference: 59/2020.02
-    image_url: https://img.chrono24.com/images/uhren/48231633-mvo73ogf3iw17p81addy22sc-ExtraLarge.jpg
-    features: Icône Bauhaus dessinée par Max Bill, boîtier plume en titane (24 g sur cuir), verre saphir bombé double antireflet et calibre manufacture allemand J101.85 solaire radio-piloté (3 ans de réserve dans l'obscurité).
+      - url: "https://www.chrono24.fr/search/index.htm?query=SBTM317&usedOrNew=used"
+        merchant: "Chrono24 (Occasion)"
+        title: "Seiko Selection SBTM317 Seconde Main"
+        condition: "used"
+        estimated_base_price: 235
+        shipping_fee: 18
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Protection acheteur Chrono24 incluse"
+  - id: "casio-lineage-titanium"
+    name: "Casio Wave Ceptor / Lineage Titane LCW-M100TSE-1AER"
+    brand: "Casio"
+    reference: "LCW-M100TSE-1AER"
+    image_url: "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/L/LC/LCW/LCW-M100TSE-1A/local-assets/LCW-M100TSE-1A_2000x2000.png.transform/main-visual-sp/image.png"
+    features: "Montre ana-digi ultra-complète (chronographe, compte à rebours, 5 alarmes, heure mondiale, rétroéclairage LED) dans un boîtier et bracelet en titane de 73 g protégé par un verre saphir."
     specs:
-      Boîtier: Titane 38,4 mm (ép. 9,2 mm • 24 g)
-      Mouvement: Manufacture J101.85 Solaire Radio-piloté
-      Verre: Saphir bombé double antireflet
-      Étanchéité: 5 ATM (50 m)
-    target_price_new: 950.0
-    target_price_used: 620.0
-    reference_price: 1315.0
+      "Boîtier": "Titane 40 mm (ép. 9,4 mm • 73 g)"
+      "Mouvement": "Tough Solar Multi-Band 6"
+      "Verre": "Saphir inrayable"
+      "Étanchéité": "5 ATM (50 m)"
+    target_price_new: 225
+    target_price_used: 155
+    reference_price: 299
     urls:
-      - url: https://uhr24.de/junghans/max-bill-mega-solar-59-2020-02
-        merchant: Uhr24.de
-        condition: new
-        manual_price: 989.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-      - url: https://www.helveti.eu/junghans-max-bill-mega-solar-sapphire-59-2020-02
-        merchant: Helveti.eu
-        condition: new
-        manual_price: 1025.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-      - url: https://www.chrono24.fr/junghans/montres-max-bill-d-occasion--mod1282-used.htm
-        merchant: Chrono24 (UE)
-        condition: used
-        manual_price: 637.00
-        shipping_fee: 15.00
-        site_fee: 0.00
-        customs_fee: 0.00
-      - url: https://www.catawiki.com/en/x/1477-junghans-watches
-        merchant: Catawiki
-        condition: used
-        manual_price: 520.00
-        shipping_fee: 22.00
-        site_fee: 49.80
-        customs_fee: 0.00
-    suggested_urls:
-      - url: https://ocarat.com/en/max-bill-mega-solar-59432502-watch-junghans-101856.html
-        merchant: Ocarat
-        title: Junghans Max Bill Mega Solar (Boutique agréée France)
-        condition: new
-        estimated_base_price: 1145.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-        fee_hint: Livraison gratuite France • 0 € douane
-      - url: https://www.chrono24.fr/junghans/mega--imod2821.htm
-        merchant: Chrono24
-        title: Catalogue Junghans MEGA Neuf & Occasion
-        condition: used
-        estimated_base_price: 595.00
-        shipping_fee: 29.00
-        site_fee: 0.00
-        customs_fee: 0.00
-        fee_hint: Vendeurs UE disponibles sans douane
-
-  - id: casio-lineage-titanium
-    name: Casio Wave Ceptor / Lineage Titane LCW-M100TSE-1AER
-    brand: Casio
-    reference: LCW-M100TSE-1AER
-    image_url: https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/L/LC/LCW/LCW-M100TSE-1A/local-assets/LCW-M100TSE-1A_2000x2000.png.transform/main-visual-sp/image.png
-    features: Montre ana-digi ultra-complète (chronographe, compte à rebours, 5 alarmes, heure mondiale, rétroéclairage LED) dans un boîtier et bracelet en titane de 73 g protégé par un verre saphir.
-    specs:
-      Boîtier: Titane 40 mm (ép. 9,4 mm • 73 g)
-      Mouvement: Tough Solar Multi-Band 6
-      Verre: Saphir inrayable
-      Étanchéité: 5 ATM (50 m)
-    target_price_new: 225.0
-    target_price_used: 155.0
-    reference_price: 299.0
-    urls:
-      - url: https://www.idealo.fr/prix/6800906/casio-wave-ceptor-titanium-lcw-m100.html
-        merchant: Idealo.fr (Marchand UE)
-        condition: new
+      - url: "https://www.idealo.fr/prix/6800906/casio-wave-ceptor-titanium-lcw-m100.html"
+        merchant: "Idealo.fr (Marchand UE)"
+        condition: "new"
         manual_price: 227.24
-        shipping_fee: 4.90
-        site_fee: 0.00
-        customs_fee: 0.00
-      - url: https://www.chrono24.fr/casio/lcw-m100tse-1aer-radio-controlled-quartz-mens-watch--id49710336.htm
-        merchant: Chrono24 (UE)
-        condition: new
-        manual_price: 257.00
-        shipping_fee: 12.00
-        site_fee: 0.00
-        customs_fee: 0.00
-      - url: https://www.casio.com/fr/watches/casio/product.LCW-M100TSE-1A/
-        merchant: Casio Officiel FR
-        condition: new
-        manual_price: 299.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-      - url: https://www.chrono24.fr/search/index.htm?query=LCW-M100TSE-1AER&usedOrNew=used
-        merchant: Chrono24 (Occasion)
-        condition: used
-        manual_price: 145.00
-        shipping_fee: 12.00
-        site_fee: 0.00
-        customs_fee: 0.00
+        shipping_fee: 4.9
+        site_fee: 0
+        customs_fee: 0
+      - url: "https://www.chrono24.fr/casio/lcw-m100tse-1aer-radio-controlled-quartz-mens-watch--id49710336.htm"
+        merchant: "Chrono24 (UE)"
+        condition: "new"
+        manual_price: 257
+        shipping_fee: 12
+        site_fee: 0
+        customs_fee: 0
+      - url: "https://www.casio.com/fr/watches/casio/product.LCW-M100TSE-1A/"
+        merchant: "Casio Officiel FR"
+        condition: "new"
+        manual_price: 299
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+      - url: "https://www.chrono24.fr/search/index.htm?query=LCW-M100TSE-1AER&usedOrNew=used"
+        merchant: "Chrono24 (Occasion)"
+        condition: "used"
+        manual_price: 145
+        shipping_fee: 12
+        site_fee: 0
+        customs_fee: 0
     suggested_urls:
-      - url: https://www.chrono24.fr/casio/lcw-m100tse-1aer-wave-ceptor-herrenuhr-40mm-5atm--id48759229.htm
-        merchant: Chrono24 (Allemagne)
-        title: Casio LCW-M100TSE-1AER Titane 40 mm Neuve
-        condition: new
-        estimated_base_price: 265.00
-        shipping_fee: 10.00
-        site_fee: 0.00
-        customs_fee: 0.00
-        fee_hint: Expédition UE sans frais de douane
-
-  - id: citizen-ecodrive-cb0250
-    name: Citizen Radio-Controlled Eco-Drive CB0250-84E
-    brand: Citizen
-    reference: CB0250-84E
+      - url: "https://www.chrono24.fr/casio/lcw-m100tse-1aer-wave-ceptor-herrenuhr-40mm-5atm--id48759229.htm"
+        merchant: "Chrono24 (Allemagne)"
+        title: "Casio LCW-M100TSE-1AER Titane 40 mm Neuve"
+        condition: "new"
+        estimated_base_price: 265
+        shipping_fee: 10
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Expédition UE sans frais de douane"
+  - id: "citizen-ecodrive-cb0250"
+    name: "Citizen Radio-Controlled Eco-Drive CB0250-84E"
+    brand: "Citizen"
+    reference: "CB0250-84E"
     ean: "4974374306050"
-    image_url: https://citizenwatch.eu/media/thumbs/22/68/c7f991511b0b624a345a6ab8581994aa478d/1400x_crop=center;format=webp/managed/dd/fd/ddfd3204ff33109d22f0f321aea0c570/CB0250-84E_3.png.thumb.webp
-    features: Montre voyageur en acier massif (43 mm), calibre Eco-Drive H145 radio-piloté 4 zones avec heure universelle 26 fuseaux, calendrier perpétuel, verre saphir et étanchéité 10 bar.
+    image_url: "https://citizenwatch.eu/media/thumbs/22/68/c7f991511b0b624a345a6ab8581994aa478d/1400x_crop=center;format=webp/managed/dd/fd/ddfd3204ff33109d22f0f321aea0c570/CB0250-84E_3.png.thumb.webp"
+    features: "Montre voyageur en acier massif (43 mm), calibre Eco-Drive H145 radio-piloté 4 zones avec heure universelle 26 fuseaux, calendrier perpétuel, verre saphir et étanchéité 10 bar."
     specs:
-      Boîtier: Acier inoxydable 43 mm (ép. 9,9 mm)
-      Mouvement: Eco-Drive H145 Solaire Radio-piloté
-      Verre: Saphir
-      Étanchéité: 10 ATM (100 m)
-    target_price_new: 330.0
-    target_price_used: 240.0
-    reference_price: 399.0
+      "Boîtier": "Acier inoxydable 43 mm (ép. 9,9 mm)"
+      "Mouvement": "Eco-Drive H145 Solaire Radio-piloté"
+      "Verre": "Saphir"
+      "Étanchéité": "10 ATM (100 m)"
+    target_price_new: 330
+    target_price_used: 240
+    reference_price: 399
     urls:
-      - url: https://www.luna-time.fr/Citizen-Montre-bracelet-Hommes-Chronographe-Montre-radio-pilotee-Eco-Drive-CB0250-84E
-        merchant: Luna-Time FR
-        condition: new
-        manual_price: 349.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-      - url: https://citizenwatch.eu/en/p/cb0250-84e/
-        merchant: Citizen Store EU
-        condition: new
-        manual_price: 399.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-      - url: https://www.chrono24.fr/search/index.htm?query=CB0250-84E&usedOrNew=used
-        merchant: Chrono24 (Occasion)
-        condition: used
-        manual_price: 235.00
-        shipping_fee: 14.00
-        site_fee: 0.00
-        customs_fee: 0.00
+      - url: "https://www.luna-time.fr/Citizen-Montre-bracelet-Hommes-Chronographe-Montre-radio-pilotee-Eco-Drive-CB0250-84E"
+        merchant: "Luna-Time FR"
+        condition: "new"
+        manual_price: 349
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+      - url: "https://citizenwatch.eu/en/p/cb0250-84e/"
+        merchant: "Citizen Store EU"
+        condition: "new"
+        manual_price: 399
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+      - url: "https://www.chrono24.fr/search/index.htm?query=CB0250-84E&usedOrNew=used"
+        merchant: "Chrono24 (Occasion)"
+        condition: "used"
+        manual_price: 235
+        shipping_fee: 14
+        site_fee: 0
+        customs_fee: 0
     suggested_urls:
-      - url: https://watchhouse.de/En/Citizen/CB0250-84E
-        merchant: Watchhouse.de
-        title: Citizen CB0250-84E World Time Perpetual Calendar
-        condition: new
-        estimated_base_price: 359.00
-        shipping_fee: 9.90
-        site_fee: 0.00
-        customs_fee: 0.00
-        fee_hint: Boutique Allemagne (UE) • 0 € douane
-      - url: https://www.idealo.fr/prix/201663924/citizen-men-s-watch-cb0250.html
-        merchant: Idealo.fr
-        title: Comparatif offres neuves Citizen CB0250-84E
-        condition: new
-        estimated_base_price: 345.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-        fee_hint: Marchands UE TTC
-
-  - id: citizen-promaster-as4020
-    name: Citizen Radio-Controlled Chronographe AT8110-61E
-    brand: Citizen
-    reference: AT8110-61E
-    image_url: https://www.irisimo.com/files/product/12208/image_158876_19_v1.gif
-    features: Chronographe solaire Eco-Drive radio-piloté (calibre H800) au1/20e de seconde, indication du niveau de réserve de marche, verre saphir, calendrier perpétuel et heure mondiale 26 villes.
+      - url: "https://watchhouse.de/En/Citizen/CB0250-84E"
+        merchant: "Watchhouse.de"
+        title: "Citizen CB0250-84E World Time Perpetual Calendar"
+        condition: "new"
+        estimated_base_price: 359
+        shipping_fee: 9.9
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Boutique Allemagne (UE) • 0 € douane"
+      - url: "https://www.idealo.fr/prix/201663924/citizen-men-s-watch-cb0250.html"
+        merchant: "Idealo.fr"
+        title: "Comparatif offres neuves Citizen CB0250-84E"
+        condition: "new"
+        estimated_base_price: 345
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Marchands UE TTC"
+  - id: "citizen-promaster-as4020"
+    name: "Citizen Radio-Controlled Chronographe AT8110-61E"
+    brand: "Citizen"
+    reference: "AT8110-61E"
+    image_url: "https://www.irisimo.com/files/product/12208/image_158876_19_v1.gif"
+    features: "Chronographe solaire Eco-Drive radio-piloté (calibre H800) au1/20e de seconde, indication du niveau de réserve de marche, verre saphir, calendrier perpétuel et heure mondiale 26 villes."
     specs:
-      Boîtier: Acier inoxydable 43 mm
-      Mouvement: Eco-Drive H800 Chronographe Radio-piloté
-      Verre: Saphir
-      Étanchéité: 10 ATM (100 m)
-    target_price_new: 390.0
-    target_price_used: 270.0
-    reference_price: 486.0
+      "Boîtier": "Acier inoxydable 43 mm"
+      "Mouvement": "Eco-Drive H800 Chronographe Radio-piloté"
+      "Verre": "Saphir"
+      "Étanchéité": "10 ATM (100 m)"
+    target_price_new: 390
+    target_price_used: 270
+    reference_price: 486
     urls:
-      - url: https://www.chrono24.fr/search/index.htm?query=AT8110-61E&usedOrNew=new
-        merchant: Chrono24 (UE)
-        condition: new
-        manual_price: 389.00
-        shipping_fee: 15.00
-        site_fee: 0.00
-        customs_fee: 0.00
-      - url: https://www.irisimo.com/fr/citizen-at8110-61e
-        merchant: Irisimo FR
-        condition: new
-        manual_price: 486.00
-        shipping_fee: 0.00
-        site_fee: 0.00
-        customs_fee: 0.00
-      - url: https://www.chrono24.fr/search/index.htm?query=AT8110-61E&usedOrNew=used
-        merchant: Chrono24 (Occasion)
-        condition: used
-        manual_price: 265.00
-        shipping_fee: 14.00
-        site_fee: 0.00
-        customs_fee: 0.00
+      - url: "https://www.chrono24.fr/search/index.htm?query=AT8110-61E&usedOrNew=new"
+        merchant: "Chrono24 (UE)"
+        condition: "new"
+        manual_price: 389
+        shipping_fee: 15
+        site_fee: 0
+        customs_fee: 0
+      - url: "https://www.irisimo.com/fr/citizen-at8110-61e"
+        merchant: "Irisimo FR"
+        condition: "new"
+        manual_price: 486
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+      - url: "https://www.chrono24.fr/search/index.htm?query=AT8110-61E&usedOrNew=used"
+        merchant: "Chrono24 (Occasion)"
+        condition: "used"
+        manual_price: 265
+        shipping_fee: 14
+        site_fee: 0
+        customs_fee: 0
     suggested_urls:
-      - url: https://www.catawiki.com/fr/s?q=Citizen+AT8110
-        merchant: Catawiki
-        title: Enchères Chronographe Citizen AT8110 Eco-Drive
-        condition: used
-        estimated_base_price: 230.00
-        shipping_fee: 18.00
-        site_fee: 23.70
-        customs_fee: 0.00
-        fee_hint: Frais Catawiki 9 % + 3 € pré-calculés
+      - url: "https://www.catawiki.com/fr/s?q=Citizen+AT8110"
+        merchant: "Catawiki"
+        title: "Enchères Chronographe Citizen AT8110 Eco-Drive"
+        condition: "used"
+        estimated_base_price: 230
+        shipping_fee: 18
+        site_fee: 23.7
+        customs_fee: 0
+        fee_hint: "Frais Catawiki 9 % + 3 € pré-calculés"
