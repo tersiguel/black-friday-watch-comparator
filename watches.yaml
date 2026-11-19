@@ -218,38 +218,6 @@ watches:
         site_fee: 0
         customs_fee: 0
         fee_hint: "Frais Chrono24 acheteur : 0 €"
-  - id: "seiko-solar-radio-sbtm317"
-    name: "Seiko Selection S Series Solar Radio SBTM317"
-    brand: "Seiko"
-    reference: "SBTM317"
-    image_url: "https://www.sakurawatches.com/image/cache/catalog/watches/seiko/UPLOAD/SBTM317-1000x1000.jpg"
-    features: "Déclinaison habillée à cadran blanc pur de la Seiko S Series JDM. Calibre solaire 7B72 radio-piloté multi-émetteurs (dont Francfort DCF77), verre saphir Super-Clear et calendrier perpétuel jusqu'en 2099."
-    specs:
-      "Boîtier": "Acier 39,5 mm (ép. 9,5 mm)"
-      "Mouvement": "Seiko 7B72 Solaire Radio-piloté"
-      "Verre": "Saphir Super-Clear Coating"
-      "Étanchéité": "10 ATM (100 m)"
-    target_price_new: 375
-    target_price_used: 265
-    reference_price: 430
-    urls:
-      - url: "https://www.sakurawatches.com/seiko-selection-sbtm317"
-        merchant: "Sakura Watches (Tokyo)"
-        condition: "new"
-        manual_price: 268
-        shipping_fee: 24
-        site_fee: 0
-        customs_fee: 77.36
-    suggested_urls:
-      - url: "https://www.chrono24.fr/search/index.htm?query=SBTM317&usedOrNew=used"
-        merchant: "Chrono24 (Occasion)"
-        title: "Seiko Selection SBTM317 Seconde Main"
-        condition: "used"
-        estimated_base_price: 235
-        shipping_fee: 18
-        site_fee: 0
-        customs_fee: 0
-        fee_hint: "Protection acheteur Chrono24 incluse"
   - id: "casio-lineage-titanium"
     name: "Casio Wave Ceptor / Lineage Titane LCW-M100TSE-1AER"
     brand: "Casio"
