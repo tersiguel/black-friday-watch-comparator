@@ -273,13 +273,6 @@ watches:
         shipping_fee: 24
         site_fee: 0
         customs_fee: 82.36
-      - url: "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction"
-        merchant: "Catawiki"
-        condition: "used"
-        manual_price: 220
-        shipping_fee: 18
-        site_fee: 22.8
-        customs_fee: 0
     suggested_urls:
       - url: "https://www.chrono24.fr/search/index.htm?query=SBTM323&usedOrNew=used"
         merchant: "Chrono24 (Occasion)"
