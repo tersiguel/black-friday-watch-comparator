@@ -167,6 +167,13 @@ watches:
         shipping_fee: 0
         site_fee: 0
         customs_fee: 0
+      - url: "https://www.zeitlounge.com/fr/citizen-eco-drive-cb1160-55l-funkuhr-eco-drive-funkuhr/a-169884/"
+        merchant: "Zeitlounge"
+        condition: "new"
+        manual_price: 479
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
     suggested_urls:
       - url: "https://www.chrono24.fr/citizen/cb1160-55l-eco-drive-solar-funkarmbanduhr-unisex-titan-blau--id49391729.htm"
         merchant: "Chrono24 (Allemagne)"
