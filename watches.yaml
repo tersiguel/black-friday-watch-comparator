@@ -218,38 +218,6 @@ watches:
         site_fee: 0
         customs_fee: 0
         fee_hint: "Frais Chrono24 acheteur : 0 €"
-  - id: "casio-lineage-titanium"
-    name: "Casio Wave Ceptor / Lineage Titane LCW-M100TSE-1AER"
-    brand: "Casio"
-    reference: "LCW-M100TSE-1AER"
-    image_url: "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/L/LC/LCW/LCW-M100TSE-1A/local-assets/LCW-M100TSE-1A_2000x2000.png.transform/main-visual-sp/image.png"
-    features: "Montre ana-digi ultra-complète (chronographe, compte à rebours, 5 alarmes, heure mondiale, rétroéclairage LED) dans un boîtier et bracelet en titane de 73 g protégé par un verre saphir."
-    specs:
-      "Boîtier": "Titane 40 mm (ép. 9,4 mm • 73 g)"
-      "Mouvement": "Tough Solar Multi-Band 6"
-      "Verre": "Saphir inrayable"
-      "Étanchéité": "5 ATM (50 m)"
-    target_price_new: 225
-    target_price_used: 155
-    reference_price: 299
-    urls:
-      - url: "https://www.idealo.fr/prix/6800906/casio-wave-ceptor-titanium-lcw-m100.html"
-        merchant: "Idealo.fr (Marchand UE)"
-        condition: "new"
-        manual_price: 227.24
-        shipping_fee: 4.9
-        site_fee: 0
-        customs_fee: 0
-    suggested_urls:
-      - url: "https://www.chrono24.fr/casio/lcw-m100tse-1aer-wave-ceptor-herrenuhr-40mm-5atm--id48759229.htm"
-        merchant: "Chrono24 (Allemagne)"
-        title: "Casio LCW-M100TSE-1AER Titane 40 mm Neuve"
-        condition: "new"
-        estimated_base_price: 265
-        shipping_fee: 10
-        site_fee: 0
-        customs_fee: 0
-        fee_hint: "Expédition UE sans frais de douane"
   - id: "citizen-ecodrive-cb0250"
     name: "Citizen Radio-Controlled Eco-Drive CB0250-84E"
     brand: "Citizen"
