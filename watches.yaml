@@ -305,13 +305,6 @@ watches:
         shipping_fee: 24
         site_fee: 0
         customs_fee: 77.36
-      - url: "https://www.chrono24.fr/seiko/ref-sbtm317.htm"
-        merchant: "Chrono24 (Import JP)"
-        condition: "new"
-        manual_price: 280
-        shipping_fee: 34
-        site_fee: 0
-        customs_fee: 81.76
     suggested_urls:
       - url: "https://www.chrono24.fr/search/index.htm?query=SBTM317&usedOrNew=used"
         merchant: "Chrono24 (Occasion)"
