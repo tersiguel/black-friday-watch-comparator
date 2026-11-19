@@ -94,13 +94,6 @@ watches:
         shipping_fee: 0
         site_fee: 0
         customs_fee: 0
-      - url: "https://citizenwatch.eu/en/p/cb1160-55e/"
-        merchant: "Citizen Store EU"
-        condition: "new"
-        manual_price: 479
-        shipping_fee: 0
-        site_fee: 0
-        customs_fee: 0
       - url: "https://www.chrono24.fr/search/index.htm?query=CB1160-55E&usedOrNew=used"
         merchant: "Chrono24 (UE)"
         condition: "used"
