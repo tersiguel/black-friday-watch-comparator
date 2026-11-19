@@ -53,6 +53,13 @@ def _opt_float(val: Any) -> Optional[float]:
         return None
 
 
+def _opt_positive_price(val: Any) -> Optional[float]:
+    parsed = _opt_float(val)
+    if parsed is None or parsed <= 0:
+        return None
+    return parsed
+
+
 def load_config(config_path: str) -> Tuple[Dict[str, Any], List[WatchConfig]]:
     """Load settings and user-configured watches from watches.yaml."""
     with open(config_path, "r", encoding="utf-8") as f:
@@ -75,7 +82,7 @@ def load_config(config_path: str) -> Tuple[Dict[str, Any], List[WatchConfig]]:
                         shipping_fee=_opt_float(u.get("shipping_fee")),
                         site_fee=_opt_float(u.get("site_fee")),
                         customs_fee=_opt_float(u.get("customs_fee")),
-                        manual_price=_opt_float(u.get("manual_price")),
+                        manual_price=_opt_positive_price(u.get("manual_price")),
                         note=str(u.get("note", "")),
                     )
                 )
@@ -208,18 +215,18 @@ def build_demo_offers_and_seed_keepa_history(
     for w in watches:
         w_offers: List[OfferResult] = []
         for u in w.urls:
-            base_p = u.manual_price if u.manual_price is not None else (w.target_price_new or 300.0)
+            base_p = u.manual_price
             ship_f = u.shipping_fee if u.shipping_fee is not None else 0.0
             site_f = u.site_fee if u.site_fee is not None else 0.0
             cust_f = u.customs_fee if u.customs_fee is not None else 0.0
-            total_p = round(base_p + ship_f + site_f + cust_f, 2)
+            total_p = round(base_p + ship_f + site_f + cust_f, 2) if base_p is not None else None
             w_offers.append(
                 OfferResult(
                     watch_id=w.id,
                     merchant=u.merchant or infer_merchant_name(u.url),
                     url=u.url,
                     price=total_p,
-                    base_price=round(base_p, 2),
+                    base_price=round(base_p, 2) if base_p is not None else None,
                     condition=u.condition or "new",
                     shipping_fee=round(ship_f, 2),
                     site_fee=round(site_f, 2),
@@ -227,7 +234,7 @@ def build_demo_offers_and_seed_keepa_history(
                     shipping_detected=True,
                     site_fee_detected=True,
                     customs_detected=True,
-                    in_stock=True,
+                    in_stock=(base_p is not None),
                     title=w.name,
                     extraction_method="configured",
                     timestamp=now_iso,
@@ -557,7 +564,7 @@ def serve_interactive_app(
                             shipping_fee=_opt_float(u.get("shipping_fee")),
                             site_fee=_opt_float(u.get("site_fee")),
                             customs_fee=_opt_float(u.get("customs_fee")),
-                            manual_price=_opt_float(u.get("base_price")),
+                            manual_price=_opt_positive_price(u.get("base_price")),
                         )
                         for u in w.get("urls", [])
                         if u.get("url")

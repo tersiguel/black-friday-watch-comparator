@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-19T09:37:47.180505+00:00",
+  "updated_at": "2026-11-19T17:26:29.663029+00:00",
   "watches": {
     "citizen-cb1160-55e": {
       "name": "Citizen Collection Super Titanium CB1160-55E",
@@ -110,6 +110,15 @@
         {
           "timestamp": "2026-11-19T09:37:47.180239+00:00",
           "new_price": 419.28,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "new_url": "https://www.sakurawatches.com/citizen-collection-cb1160-55e-15415",
+          "used_price": 339.0,
+          "used_merchant": "Chrono24 (UE)",
+          "used_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55E&usedOrNew=used"
+        },
+        {
+          "timestamp": "2026-11-19T17:26:29.662916+00:00",
+          "new_price": 422.16,
           "new_merchant": "Sakura Watches (Tokyo)",
           "new_url": "https://www.sakurawatches.com/citizen-collection-cb1160-55e-15415",
           "used_price": 339.0,
@@ -349,6 +358,15 @@
           "used_price": 343.0,
           "used_merchant": "Chrono24 (Occasion)",
           "used_url": "https://www.chrono24.fr/search/index.htm?query=CB1160-55L&usedOrNew=used"
+        },
+        {
+          "timestamp": "2026-11-19T17:26:29.662930+00:00",
+          "new_price": 422.16,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "new_url": "https://www.sakurawatches.com/citizen-collection-cb1160-55l",
+          "used_price": null,
+          "used_merchant": "",
+          "used_url": ""
         }
       ]
     },
@@ -466,6 +484,15 @@
           "used_price": 260.8,
           "used_merchant": "Catawiki",
           "used_url": "https://www.catawiki.com/en/a/th/8977-seiko-watches-auction"
+        },
+        {
+          "timestamp": "2026-11-19T17:26:29.662941+00:00",
+          "new_price": 403.36,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "new_url": "https://www.sakurawatches.com/seiko-selection-sbtm323",
+          "used_price": null,
+          "used_merchant": "",
+          "used_url": ""
         }
       ]
     },
@@ -1051,6 +1078,249 @@
           "used_price": 279.0,
           "used_merchant": "Chrono24 (Occasion)",
           "used_url": "https://www.chrono24.fr/search/index.htm?query=AT8110-61E&usedOrNew=used"
+        }
+      ]
+    },
+    "citizen-cb3046-76e": {
+      "name": "Citizen Attesa ACT Line Blue Universe Collection Limited Edition CB3046-76E",
+      "reference": "CB3046-76E",
+      "target_price_new": 856.0,
+      "target_price_used": null,
+      "reference_price": 930.96,
+      "entries": [
+        {
+          "timestamp": "2026-10-05T17:26:29.662676+00:00",
+          "new_price": 1014.75,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-10-12T17:26:29.662676+00:00",
+          "new_price": 1014.75,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-10-19T17:26:29.662676+00:00",
+          "new_price": 986.82,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-10-26T17:26:29.662676+00:00",
+          "new_price": 986.82,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-01T17:26:29.662676+00:00",
+          "new_price": 968.2,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-07T17:26:29.662676+00:00",
+          "new_price": 977.51,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-12T17:26:29.662676+00:00",
+          "new_price": 949.58,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-16T17:26:29.662676+00:00",
+          "new_price": 949.58,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-18T17:26:29.662676+00:00",
+          "new_price": 940.27,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-19T17:26:29.662859+00:00",
+          "new_price": 930.96,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "new_url": "https://www.sakurawatches.com/citizen-attesa-act-line-blue-universe-collection-limited-edition-cb3046-76e",
+          "used_price": null,
+          "used_merchant": "",
+          "used_url": ""
+        }
+      ]
+    },
+    "citizen-cb3045-61e": {
+      "name": "Citizen Attesa ACT Line/Black Titanium™ Series CB3045-61E",
+      "reference": "CB3045-61E",
+      "target_price_new": 613.0,
+      "target_price_used": null,
+      "reference_price": 667.1,
+      "entries": [
+        {
+          "timestamp": "2026-10-05T17:26:29.662676+00:00",
+          "new_price": 727.14,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-10-12T17:26:29.662676+00:00",
+          "new_price": 727.14,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-10-19T17:26:29.662676+00:00",
+          "new_price": 707.13,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-10-26T17:26:29.662676+00:00",
+          "new_price": 707.13,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-01T17:26:29.662676+00:00",
+          "new_price": 693.78,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-07T17:26:29.662676+00:00",
+          "new_price": 700.46,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-12T17:26:29.662676+00:00",
+          "new_price": 680.44,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-16T17:26:29.662676+00:00",
+          "new_price": 680.44,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-18T17:26:29.662676+00:00",
+          "new_price": 673.77,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-19T17:26:29.662873+00:00",
+          "new_price": 667.1,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "new_url": "https://www.sakurawatches.com/citizen-attesa-act-line-black-titanium%E2%84%A2-series-cb3045-61e",
+          "used_price": null,
+          "used_merchant": "",
+          "used_url": ""
+        }
+      ]
+    },
+    "citizen-cb3015-53e": {
+      "name": "CITIZEN ATTESA CB3015-53E",
+      "reference": "CB3015-53E",
+      "target_price_new": 539.0,
+      "target_price_used": null,
+      "reference_price": 586.51,
+      "entries": [
+        {
+          "timestamp": "2026-10-05T17:26:29.662676+00:00",
+          "new_price": 639.3,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-10-12T17:26:29.662676+00:00",
+          "new_price": 639.3,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-10-19T17:26:29.662676+00:00",
+          "new_price": 621.7,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-10-26T17:26:29.662676+00:00",
+          "new_price": 621.7,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-01T17:26:29.662676+00:00",
+          "new_price": 609.97,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-07T17:26:29.662676+00:00",
+          "new_price": 615.84,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-12T17:26:29.662676+00:00",
+          "new_price": 598.24,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-16T17:26:29.662676+00:00",
+          "new_price": 598.24,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-18T17:26:29.662676+00:00",
+          "new_price": 592.38,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "used_price": null,
+          "used_merchant": ""
+        },
+        {
+          "timestamp": "2026-11-19T17:26:29.662882+00:00",
+          "new_price": 586.51,
+          "new_merchant": "Sakura Watches (Tokyo)",
+          "new_url": "https://www.sakurawatches.com/citizen-attesa-cb3015-53e",
+          "used_price": null,
+          "used_merchant": "",
+          "used_url": ""
         }
       ]
     }

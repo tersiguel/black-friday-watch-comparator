@@ -25,7 +25,7 @@ def _serialize_app_payload(
         offer_by_url = {o.url: o for o in a.offers}
         for u in w.urls:
             o = offer_by_url.get(u.url)
-            base_p = o.base_price if (o and o.base_price is not None) else u.manual_price
+            base_p = o.base_price if o is not None else u.manual_price
             ship_f = o.shipping_fee if o else (u.shipping_fee or 0.0)
             site_f = o.site_fee if o else (u.site_fee or 0.0)
             cust_f = o.customs_fee if o else (u.customs_fee or 0.0)
@@ -48,7 +48,7 @@ def _serialize_app_payload(
                     "site_fee_detected": bool(o.site_fee_detected) if o else (u.site_fee is not None),
                     "customs_detected": bool(o.customs_detected) if o else (u.customs_fee is not None),
                     "title": (o.title if o else "") or "",
-                    "in_stock": bool(o.in_stock) if o else True,
+                    "in_stock": (bool(o.in_stock) if o else True) and (base_p is not None),
                     "error": o.error if o else None,
                 }
             )
@@ -1642,10 +1642,11 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           const ship = Number(yu.shipping_fee ?? 0);
           const site = Number(yu.site_fee ?? 0);
           const cust = Number(yu.customs_fee ?? 0);
-          const base = yu.manual_price !== undefined && yu.manual_price !== null
+          const rawManual = (yu.manual_price !== undefined && yu.manual_price !== null && yu.manual_price !== '')
             ? Number(yu.manual_price)
-            : (ru.base_price !== undefined ? ru.base_price : null);
-          const total = base !== null && !isNaN(base) ? Number((base + ship + site + cust).toFixed(2)) : (ru.total_price ?? null);
+            : (ru.base_price !== undefined && ru.base_price !== null ? Number(ru.base_price) : null);
+          const base = (rawManual !== null && !isNaN(rawManual) && rawManual > 0) ? rawManual : null;
+          const total = base !== null ? Number((base + ship + site + cust).toFixed(2)) : null;
           return {
             url: yu.url,
             merchant: yu.merchant || ru.merchant || getHostnameLabel(yu.url),
@@ -1659,7 +1660,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             site_fee_detected: ru.site_fee_detected || false,
             customs_detected: ru.customs_detected || false,
             title: ru.title || '',
-            in_stock: ru.in_stock !== undefined ? ru.in_stock : true,
+            in_stock: (base !== null && !isNaN(base)) && (ru.in_stock !== false),
             error: ru.error || null
           };
         });
@@ -1913,7 +1914,11 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
       (watch.urls || []).forEach((u) => {
         const base = (u.base_price !== null && u.base_price !== undefined && u.base_price !== '') ? Number(u.base_price) : null;
-        if (base === null || isNaN(base)) return;
+        if (base === null || isNaN(base) || base <= 0) {
+          u.base_price = null;
+          u.total_price = null;
+          return;
+        }
         const ship = Number(u.shipping_fee || 0);
         const site = Number(u.site_fee || 0);
         const cust = Number(u.customs_fee || 0);
@@ -2031,9 +2036,16 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       ).join('');
 
       const rowsHtml = (w.urls || []).map((u, idx) => {
-        const isBestNew = sum.bestNew && sum.bestNew.url === u.url && u.condition !== 'used';
-        const isBestUsed = sum.bestUsed && sum.bestUsed.url === u.url && u.condition === 'used';
+        const hasPrice = u.base_price !== null && u.base_price !== undefined && !isNaN(Number(u.base_price)) && Number(u.base_price) > 0;
+        const isBestNew = hasPrice && sum.bestNew && sum.bestNew.url === u.url && u.condition !== 'used';
+        const isBestUsed = hasPrice && sum.bestUsed && sum.bestUsed.url === u.url && u.condition === 'used';
         const totalClass = isBestNew ? 'is-best-new' : (isBestUsed ? 'is-best-used' : '');
+        const baseCellHtml = hasPrice
+          ? fmtEur(u.base_price)
+          : '<span style="color:var(--text-muted); font-size:12px;">Indisponible</span>';
+        const totalCellHtml = hasPrice
+          ? fmtEur(u.total_price)
+          : '<span style="color:var(--text-muted); font-weight:500; font-size:12px;">—</span>';
         return `
           <tr>
             <td>
@@ -2048,11 +2060,11 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
                 ${u.condition === 'used' ? 'Occasion' : 'Neuf'}
               </span>
             </td>
-            <td class="mono-num">${fmtEur(u.base_price)}</td>
+            <td class="mono-num">${baseCellHtml}</td>
             <td class="mono-num">${Number(u.shipping_fee || 0) > 0 ? '+ ' + fmtEur(u.shipping_fee) : '0,00 €'}</td>
             <td class="mono-num">${Number(u.site_fee || 0) > 0 ? '+ ' + fmtEur(u.site_fee) : '0,00 €'}</td>
             <td class="mono-num">${Number(u.customs_fee || 0) > 0 ? '+ ' + fmtEur(u.customs_fee) : '0,00 €'}</td>
-            <td class="total-cell ${totalClass}">${fmtEur(u.total_price)}</td>
+            <td class="total-cell ${totalClass}">${totalCellHtml}</td>
             <td style="text-align:right; white-space:nowrap;">
               <button class="btn btn-outline btn-sm" onclick="refreshSingleTrackedUrl('${escapeHtml(w.id)}', ${idx}, this)" title="Récupérer automatiquement le prix actuel sur la page">🔄</button>
               <button class="btn btn-outline btn-sm" onclick="openEditUrlDrawer('${escapeHtml(w.id)}', ${idx})" title="Modifier le prix ou les frais">✏️ Frais</button>
@@ -2061,6 +2073,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           </tr>
         `;
       }).join('');
+
+      const hasNewUrls = (w.urls || []).some(u => u.condition !== 'used');
+      const hasUsedUrls = (w.urls || []).some(u => u.condition === 'used');
 
       const emptyUrlsHtml = `
         <tr>
@@ -2123,7 +2138,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
                 ${sum.alertNew ? '<span class="alert-hit-badge">🔔 Seuil atteint</span>' : ''}
               </div>
               <div class="price-kpi-val">${sum.bestNew ? fmtEur(sum.bestNew.total_price) : '—'}</div>
-              <div class="price-kpi-sub">${sum.bestNew ? 'Chez ' + escapeHtml(sum.bestNew.merchant) + ' (frais inclus)' : 'Aucune URL Neuf suivie'}</div>
+              <div class="price-kpi-sub">${sum.bestNew ? 'Chez ' + escapeHtml(sum.bestNew.merchant) + ' (frais inclus)' : (hasNewUrls ? 'Indisponible (sans prix affiché)' : 'Aucune URL Neuf suivie')}</div>
             </div>
 
             <div class="price-kpi kpi-used">
@@ -2132,7 +2147,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
                 ${sum.alertUsed ? '<span class="alert-hit-badge">🔔 Seuil atteint</span>' : ''}
               </div>
               <div class="price-kpi-val">${sum.bestUsed ? fmtEur(sum.bestUsed.total_price) : '—'}</div>
-              <div class="price-kpi-sub">${sum.bestUsed ? 'Chez ' + escapeHtml(sum.bestUsed.merchant) + ' (frais inclus)' : 'Aucune URL Occasion suivie'}</div>
+              <div class="price-kpi-sub">${sum.bestUsed ? 'Chez ' + escapeHtml(sum.bestUsed.merchant) + ' (frais inclus)' : (hasUsedUrls ? 'Indisponible (sans prix affiché)' : 'Aucune URL Occasion suivie')}</div>
             </div>
           </div>
         </div>
@@ -2290,8 +2305,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
                 </div>
 
                 <div class="field-group">
-                  <label>Prix affiché sur le site (€) *</label>
-                  <input type="number" step="0.01" min="0" required id="uf-base-${escapeHtml(w.id)}" placeholder="ex: 369.00" oninput="onBasePriceInput('${escapeHtml(w.id)}')" />
+                  <label>Prix affiché sur le site (€)</label>
+                  <input type="number" step="0.01" min="0" id="uf-base-${escapeHtml(w.id)}" placeholder="Optionnel (vide si indisponible)" oninput="onBasePriceInput('${escapeHtml(w.id)}')" />
                   <span class="fee-status-hint" id="uf-base-hint-${escapeHtml(w.id)}"></span>
                 </div>
 
@@ -3533,7 +3548,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           : '';
         setHint(`uf-base-hint-${watchId}`, `✓ Prix récupéré sur la page${currNote}`, 'auto-ok');
       } else if (!document.getElementById(`uf-base-${watchId}`).value) {
-        setHint(`uf-base-hint-${watchId}`, '✍️ Prix protégé sur ce site — saisissez-le', 'manual-needed');
+        setHint(`uf-base-hint-${watchId}`, 'Optionnel — laissez vide si indisponible', '');
       }
 
       const shipVal = (inspected && inspected.shipping_detected && inspected.shipping_fee !== null && inspected.shipping_fee !== undefined)
@@ -3588,7 +3603,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       } else {
         setLiveBanner(
           `uf-live-banner-${watchId}`,
-          `<span>⚠️ Marchand (<strong>${escapeHtml(rules.merchant)}</strong>) et barème de frais pré-remplis, mais ce site bloque la lecture directe du prix — saisissez uniquement le prix affiché.</span>`,
+          `<span>ℹ️ Marchand (<strong>${escapeHtml(rules.merchant)}</strong>) et barème de frais pré-remplis. Aucun prix détecté (produit indisponible ou masqué) : vous pouvez enregistrer la page telle quelle ou saisir un prix.</span>`,
           'is-warn'
         );
       }
@@ -3612,6 +3627,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
       if (inspected && inspected.base_price !== null && inspected.base_price !== undefined) {
         u.base_price = inspected.base_price;
+        u.in_stock = true;
         const rules = clientSideSiteRules(u.url, u.base_price);
         if (rules.ruleType === 'catawiki' && rules.site !== null) u.site_fee = rules.site;
         if (rules.ruleType === 'vinted' && rules.site !== null) u.site_fee = rules.site;
@@ -3623,7 +3639,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         await persistState(`Prix mis à jour chez ${u.merchant} : ${fmtEur(u.total_price)} TTC`);
         renderAllCards();
       } else {
-        showToast(`Impossible de lire automatiquement le prix sur ${u.merchant} — cliquez sur ✏️ Frais pour l'ajuster.`);
+        showToast(`Aucun prix affiché actuellement sur ${u.merchant} (produit indisponible ou protégé).`);
       }
     }
 
@@ -3652,14 +3668,15 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     }
 
     function recalcUrlPreview(watchId) {
-      const base = parseFloat(document.getElementById(`uf-base-${watchId}`).value);
+      const rawBase = document.getElementById(`uf-base-${watchId}`).value.trim();
+      const base = rawBase !== '' ? parseFloat(rawBase) : NaN;
       const ship = parseFloat(document.getElementById(`uf-ship-${watchId}`).value) || 0;
       const site = parseFloat(document.getElementById(`uf-site-${watchId}`).value) || 0;
       const cust = parseFloat(document.getElementById(`uf-cust-${watchId}`).value) || 0;
       const formulaEl = document.getElementById(`uf-formula-${watchId}`);
       if (!formulaEl) return;
-      if (isNaN(base)) {
-        formulaEl.innerHTML = 'Prix total calculé : <strong>—</strong>';
+      if (isNaN(base) || base <= 0) {
+        formulaEl.innerHTML = 'Prix total calculé : <strong>Indisponible (sans prix affiché)</strong>';
         return;
       }
       const total = Math.round((base + ship + site + cust) * 100) / 100;
@@ -3675,11 +3692,16 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       const url = document.getElementById(`uf-url-${watchId}`).value.trim();
       const merchant = document.getElementById(`uf-merchant-${watchId}`).value.trim() || getHostnameLabel(url);
       const condition = document.getElementById(`uf-cond-${watchId}`).value;
-      const base_price = parseFloat(document.getElementById(`uf-base-${watchId}`).value);
+      const rawBase = document.getElementById(`uf-base-${watchId}`).value.trim();
+      const parsedBase = rawBase !== '' ? parseFloat(rawBase) : NaN;
+      const hasPrice = !isNaN(parsedBase) && parsedBase > 0;
+      const base_price = hasPrice ? parsedBase : null;
       const shipping_fee = parseFloat(document.getElementById(`uf-ship-${watchId}`).value) || 0;
       const site_fee = parseFloat(document.getElementById(`uf-site-${watchId}`).value) || 0;
       const customs_fee = parseFloat(document.getElementById(`uf-cust-${watchId}`).value) || 0;
-      const total_price = Math.round((base_price + shipping_fee + site_fee + customs_fee) * 100) / 100;
+      const total_price = hasPrice
+        ? Math.round((base_price + shipping_fee + site_fee + customs_fee) * 100) / 100
+        : null;
 
       const meta = (urlFeeAutoState[watchId] && urlFeeAutoState[watchId].pendingMeta) || null;
       if (meta) {
@@ -3698,7 +3720,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         customs_fee,
         total_price,
         title: (meta && meta.title) || '',
-        in_stock: true
+        in_stock: hasPrice
       };
 
       if (!Array.isArray(w.urls)) w.urls = [];
@@ -3709,22 +3731,25 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       }
 
       closeUrlDrawer(watchId);
-      await persistState(`Page ${merchant} (${condition === 'used' ? 'Occasion' : 'Neuf'} : ${fmtEur(total_price)}) enregistrée`);
+      const priceLabel = hasPrice ? fmtEur(total_price) : 'sans prix / indisponible';
+      await persistState(`Page ${merchant} (${condition === 'used' ? 'Occasion' : 'Neuf'} : ${priceLabel}) enregistrée`);
       renderAllCards();
 
-      const sum = computeWatchSummary(w);
-      if (condition !== 'used' && sum.alertNew && total_price <= w.target_price_new) {
-        dispatchAlertNotification(
-          `🔔 Seuil NEUF atteint : ${w.brand} ${w.reference}`,
-          `${fmtEur(total_price)} tout compris chez ${merchant} !`,
-          url
-        );
-      } else if (condition === 'used' && sum.alertUsed && total_price <= w.target_price_used) {
-        dispatchAlertNotification(
-          `🔔 Seuil OCCASION atteint : ${w.brand} ${w.reference}`,
-          `${fmtEur(total_price)} tout compris chez ${merchant} !`,
-          url
-        );
+      if (hasPrice) {
+        const sum = computeWatchSummary(w);
+        if (condition !== 'used' && sum.alertNew && total_price <= w.target_price_new) {
+          dispatchAlertNotification(
+            `🔔 Seuil NEUF atteint : ${w.brand} ${w.reference}`,
+            `${fmtEur(total_price)} tout compris chez ${merchant} !`,
+            url
+          );
+        } else if (condition === 'used' && sum.alertUsed && total_price <= w.target_price_used) {
+          dispatchAlertNotification(
+            `🔔 Seuil OCCASION atteint : ${w.brand} ${w.reference}`,
+            `${fmtEur(total_price)} tout compris chez ${merchant} !`,
+            url
+          );
+        }
       }
     }
 
@@ -3792,25 +3817,26 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         document.getElementById('npFeatures').value = inspected.title;
       }
 
-      if (inspected.base_price !== null && inspected.base_price !== undefined) {
-        const ship = inspected.shipping_fee ?? 0;
-        const site = inspected.site_fee ?? 0;
-        const cust = inspected.customs_fee ?? 0;
-        const total = Math.round((inspected.base_price + ship + site + cust) * 100) / 100;
+      const ship = inspected.shipping_fee ?? 0;
+      const site = inspected.site_fee ?? 0;
+      const cust = inspected.customs_fee ?? 0;
+      const hasPrice = inspected.base_price !== null && inspected.base_price !== undefined;
+      const total = hasPrice ? Math.round((inspected.base_price + ship + site + cust) * 100) / 100 : null;
 
-        npFetchedInitialOffer = {
-          url,
-          merchant: inspected.merchant || getHostnameLabel(url),
-          condition: inspected.condition || 'new',
-          base_price: inspected.base_price,
-          shipping_fee: ship,
-          site_fee: site,
-          customs_fee: cust,
-          total_price: total,
-          asin: inspected.asin || '',
-          title: inspected.title || ''
-        };
+      npFetchedInitialOffer = {
+        url,
+        merchant: inspected.merchant || getHostnameLabel(url),
+        condition: inspected.condition || 'new',
+        base_price: hasPrice ? inspected.base_price : null,
+        shipping_fee: ship,
+        site_fee: site,
+        customs_fee: cust,
+        total_price: total,
+        asin: inspected.asin || '',
+        title: inspected.title || ''
+      };
 
+      if (hasPrice) {
         if (npFetchedInitialOffer.condition === 'used' && !document.getElementById('npTargetUsed').value) {
           document.getElementById('npTargetUsed').value = Math.floor(total * 0.92);
         } else if (npFetchedInitialOffer.condition !== 'used' && !document.getElementById('npTargetNew').value) {
@@ -3823,10 +3849,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           'is-ok'
         );
       } else {
-        npFetchedInitialOffer = null;
         setLiveBanner(
           'npLiveBanner',
-          `<span>⚠️ Infos disponibles pré-remplies depuis <strong>${escapeHtml(inspected.merchant || getHostnameLabel(url))}</strong> — vérifiez les champs obligatoires ci-dessous.</span>`,
+          `<span>ℹ️ Infos pré-remplies depuis <strong>${escapeHtml(npFetchedInitialOffer.merchant)}</strong> (aucun prix affiché actuellement). Cette page sera tout de même ajoutée au suivi !</span>`,
           'is-warn'
         );
       }
@@ -3864,21 +3889,40 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
       const initialUrls = [];
       let initialAsin = '';
-      if (npFetchedInitialOffer && srcUrl && npFetchedInitialOffer.url === srcUrl) {
-        initialAsin = npFetchedInitialOffer.asin || '';
-        initialUrls.push({
-          url: npFetchedInitialOffer.url,
-          merchant: npFetchedInitialOffer.merchant,
-          condition: npFetchedInitialOffer.condition,
-          base_price: npFetchedInitialOffer.base_price,
-          shipping_fee: npFetchedInitialOffer.shipping_fee,
-          site_fee: npFetchedInitialOffer.site_fee,
-          customs_fee: npFetchedInitialOffer.customs_fee,
-          total_price: npFetchedInitialOffer.total_price,
-          title: npFetchedInitialOffer.title || name,
-          in_stock: true
-        });
+      if (srcUrl && isValidHttpUrl(srcUrl)) {
+        if (npFetchedInitialOffer && npFetchedInitialOffer.url === srcUrl) {
+          initialAsin = npFetchedInitialOffer.asin || '';
+          const hasPrice = npFetchedInitialOffer.base_price !== null && npFetchedInitialOffer.base_price !== undefined;
+          initialUrls.push({
+            url: npFetchedInitialOffer.url,
+            merchant: npFetchedInitialOffer.merchant,
+            condition: npFetchedInitialOffer.condition,
+            base_price: npFetchedInitialOffer.base_price,
+            shipping_fee: npFetchedInitialOffer.shipping_fee,
+            site_fee: npFetchedInitialOffer.site_fee,
+            customs_fee: npFetchedInitialOffer.customs_fee,
+            total_price: npFetchedInitialOffer.total_price,
+            title: npFetchedInitialOffer.title || name,
+            in_stock: hasPrice
+          });
+        } else {
+          const rules = clientSideSiteRules(srcUrl, 0);
+          initialUrls.push({
+            url: srcUrl,
+            merchant: rules.merchant || getHostnameLabel(srcUrl),
+            condition: rules.condition || 'new',
+            base_price: null,
+            shipping_fee: rules.ship ?? 0,
+            site_fee: rules.site ?? 0,
+            customs_fee: rules.cust ?? 0,
+            total_price: null,
+            title: name,
+            in_stock: false
+          });
+        }
       }
+
+      const firstWithPrice = initialUrls.find(u => u.total_price !== null && u.total_price !== undefined);
 
       const newWatch = {
         id,
@@ -3892,7 +3936,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         specs: { Référence: reference },
         target_price_new: tNew !== '' ? Number(tNew) : null,
         target_price_used: tUsed !== '' ? Number(tUsed) : null,
-        reference_price: initialUrls.length ? initialUrls[0].total_price : 0,
+        reference_price: firstWithPrice ? firstWithPrice.total_price : 0,
         urls: initialUrls,
         suggested_urls: [
           {
@@ -3936,10 +3980,10 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             fee_hint: 'Frais Catawiki 9 % + 3 € pré-calculés'
           }
         ],
-        history: initialUrls.length ? [{
+        history: firstWithPrice ? [{
           timestamp: new Date().toISOString(),
-          new_price: initialUrls[0].condition !== 'used' ? initialUrls[0].total_price : null,
-          used_price: initialUrls[0].condition === 'used' ? initialUrls[0].total_price : null
+          new_price: firstWithPrice.condition !== 'used' ? firstWithPrice.total_price : null,
+          used_price: firstWithPrice.condition === 'used' ? firstWithPrice.total_price : null
         }] : []
       };
 
@@ -3948,9 +3992,11 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       closeModal('addProductModal');
       ev.target.reset();
       await persistState(
-        initialUrls.length
-          ? `Fiche ${brand} ${reference} créée avec son prix ${fmtEur(initialUrls[0].total_price)} TTC !`
-          : `Référence ${brand} ${reference} ajoutée !`
+        firstWithPrice
+          ? `Fiche ${brand} ${reference} créée avec son prix ${fmtEur(firstWithPrice.total_price)} TTC !`
+          : (initialUrls.length
+              ? `Fiche ${brand} ${reference} créée avec la page ${initialUrls[0].merchant} (sans prix affiché) !`
+              : `Référence ${brand} ${reference} ajoutée !`)
       );
       renderAllCards();
     }
@@ -4070,7 +4116,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           lines.push(`      - url: ${JSON.stringify(u.url)}`);
           lines.push(`        merchant: ${JSON.stringify(u.merchant || '')}`);
           lines.push(`        condition: ${JSON.stringify(u.condition || 'new')}`);
-          if (u.base_price !== null && u.base_price !== undefined) lines.push(`        manual_price: ${Number(u.base_price)}`);
+          if (u.base_price !== null && u.base_price !== undefined && Number(u.base_price) > 0) {
+            lines.push(`        manual_price: ${Number(u.base_price)}`);
+          }
           lines.push(`        shipping_fee: ${Number(u.shipping_fee || 0)}`);
           lines.push(`        site_fee: ${Number(u.site_fee || 0)}`);
           lines.push(`        customs_fee: ${Number(u.customs_fee || 0)}`);

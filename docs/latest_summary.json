@@ -1,19 +1,33 @@
 {
-  "updated_at": "2026-11-19T13:25:21.121723+00:00",
-  "watches_count": 9,
+  "updated_at": "2026-11-19T17:26:29.666494+00:00",
+  "watches_count": 6,
   "watches": [
+    {
+      "id": "citizen-cb3046-76e",
+      "reference": "CB3046-76E",
+      "target_price_new": 856.0,
+      "target_price_used": null,
+      "urls_count": 2
+    },
+    {
+      "id": "citizen-cb3045-61e",
+      "reference": "CB3045-61E",
+      "target_price_new": 613.0,
+      "target_price_used": null,
+      "urls_count": 1
+    },
+    {
+      "id": "citizen-cb3015-53e",
+      "reference": "CB3015-53E",
+      "target_price_new": 539.0,
+      "target_price_used": null,
+      "urls_count": 1
+    },
     {
       "id": "citizen-cb1160-55e",
       "reference": "CB1160-55E",
       "target_price_new": 425.0,
       "target_price_used": 330.0,
-      "urls_count": 4
-    },
-    {
-      "id": "citizen-cb1160-55a",
-      "reference": "CB1160-55A",
-      "target_price_new": 420.0,
-      "target_price_used": 335.0,
       "urls_count": 3
     },
     {
@@ -28,42 +42,7 @@
       "reference": "SBTM323",
       "target_price_new": 385.0,
       "target_price_used": 270.0,
-      "urls_count": 3
-    },
-    {
-      "id": "seiko-solar-radio-sbtm317",
-      "reference": "SBTM317",
-      "target_price_new": 375.0,
-      "target_price_used": 265.0,
-      "urls_count": 3
-    },
-    {
-      "id": "junghans-max-bill-mega-solar",
-      "reference": "59/2020.02",
-      "target_price_new": 950.0,
-      "target_price_used": 620.0,
-      "urls_count": 4
-    },
-    {
-      "id": "casio-lineage-titanium",
-      "reference": "LCW-M100TSE-1AER",
-      "target_price_new": 225.0,
-      "target_price_used": 155.0,
-      "urls_count": 4
-    },
-    {
-      "id": "citizen-ecodrive-cb0250",
-      "reference": "CB0250-84E",
-      "target_price_new": 330.0,
-      "target_price_used": 240.0,
-      "urls_count": 3
-    },
-    {
-      "id": "citizen-promaster-as4020",
-      "reference": "AT8110-61E",
-      "target_price_new": 390.0,
-      "target_price_used": 270.0,
-      "urls_count": 3
+      "urls_count": 1
     }
   ]
 }

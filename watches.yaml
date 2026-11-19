@@ -34,7 +34,6 @@ watches:
       - url: "https://www.amazon.fr/Citizen-CB3046-76E-Montre-multifonction-homme/dp/B0F5BS88Y4"
         merchant: "Amazon.fr"
         condition: "new"
-        manual_price: 0
         shipping_fee: 0
         site_fee: 0
         customs_fee: 0

@@ -245,6 +245,7 @@ class TestKeepaWatchComparator(unittest.TestCase):
             self.assertTrue(remove_watch_from_config(cfg_copy, new_id))
 
             # Full pipeline run
+            _, expected_watches = load_config(cfg_copy)
             analyses = run_comparator(
                 config_path=cfg_copy,
                 history_path=hist_path,
@@ -252,7 +253,7 @@ class TestKeepaWatchComparator(unittest.TestCase):
                 demo_mode=True,
                 no_notify=True,
             )
-            self.assertEqual(len(analyses), 9)
+            self.assertEqual(len(analyses), len(expected_watches))
             index_html = os.path.join(docs_dir, "index.html")
             self.assertTrue(os.path.exists(index_html))
             with open(index_html, "r", encoding="utf-8") as f:
@@ -261,6 +262,60 @@ class TestKeepaWatchComparator(unittest.TestCase):
             self.assertIn("CB1160-55E", html)
             self.assertIn("Proposer des pages produit", html)
             self.assertIn("Frais de douane", html)
+
+    def test_add_unavailable_url_without_price(self):
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        src_cfg = os.path.join(base_dir, "watches.yaml")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cfg_copy = os.path.join(tmpdir, "watches.yaml")
+            shutil.copyfile(src_cfg, cfg_copy)
+            hist_path = os.path.join(tmpdir, "data", "history.json")
+            docs_dir = os.path.join(tmpdir, "docs")
+
+            new_id = add_watch_to_config(
+                config_path=cfg_copy,
+                brand="Seiko",
+                name="Seiko Prospex Speedtimer SSC813P1",
+                reference="SSC813P1",
+                target_price_new=520.0,
+            )
+            add_url_to_config(
+                config_path=cfg_copy,
+                watch_id=new_id,
+                url="https://ocarat.com/montre-seiko-prospex-speedtimer-ssc813p1",
+                condition="new",
+                manual_price=None,
+                shipping_fee=0.0,
+                site_fee=0.0,
+                customs_fee=0.0,
+                auto_inspect=False,
+            )
+
+            _, watches = load_config(cfg_copy)
+            added_w = next(w for w in watches if w.id == new_id)
+            self.assertEqual(len(added_w.urls), 1)
+            self.assertIsNone(added_w.urls[0].manual_price)
+
+            analyses = run_comparator(
+                config_path=cfg_copy,
+                history_path=hist_path,
+                docs_dir=docs_dir,
+                demo_mode=True,
+                no_notify=True,
+            )
+            target_analysis = next(a for a in analyses if a.watch.id == new_id)
+            self.assertEqual(len(target_analysis.offers), 1)
+            self.assertIsNone(target_analysis.offers[0].price)
+            self.assertIsNone(target_analysis.offers[0].base_price)
+            self.assertFalse(target_analysis.offers[0].in_stock)
+            self.assertIsNone(target_analysis.best_new_offer)
+
+            index_html = os.path.join(docs_dir, "index.html")
+            with open(index_html, "r", encoding="utf-8") as f:
+                html = f.read()
+            self.assertNotIn('required id="uf-base-', html)
+            self.assertIn("Optionnel (vide si indisponible)", html)
 
 
 if __name__ == "__main__":
