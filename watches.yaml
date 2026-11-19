@@ -351,13 +351,6 @@ watches:
         shipping_fee: 0
         site_fee: 0
         customs_fee: 0
-      - url: "https://www.chrono24.fr/search/index.htm?query=LCW-M100TSE-1AER&usedOrNew=used"
-        merchant: "Chrono24 (Occasion)"
-        condition: "used"
-        manual_price: 145
-        shipping_fee: 12
-        site_fee: 0
-        customs_fee: 0
     suggested_urls:
       - url: "https://www.chrono24.fr/casio/lcw-m100tse-1aer-wave-ceptor-herrenuhr-40mm-5atm--id48759229.htm"
         merchant: "Chrono24 (Allemagne)"
