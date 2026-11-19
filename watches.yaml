@@ -16,6 +16,7 @@ watches:
     name: "Citizen Attesa ACT Line Blue Universe Collection Limited Edition CB3046-76E"
     brand: "Citizen"
     reference: "CB3046-76E"
+    asin: "B0F5BS88Y4"
     image_url: "https://www.sakurawatches.com/image/cache/webp/catalog/CB3046-76E-1000x1000.webp"
     features: "Citizen Attesa ACT Line Blue Universe Collection Limited Edition CB3046-76E"
     specs:
@@ -30,6 +31,13 @@ watches:
         shipping_fee: 24
         site_fee: 0
         customs_fee: 170.96
+      - url: "https://www.amazon.fr/Citizen-CB3046-76E-Montre-multifonction-homme/dp/B0F5BS88Y4"
+        merchant: "Amazon.fr"
+        condition: "new"
+        manual_price: 0
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
     suggested_urls:
       - url: "https://www.amazon.fr/s?k=Citizen%20CB3046-76E"
         merchant: "Amazon.fr"
