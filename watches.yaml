@@ -266,13 +266,6 @@ watches:
     target_price_used: 270
     reference_price: 430
     urls:
-      - url: "https://www.chrono24.fr/seiko/ref-sbtm323.htm"
-        merchant: "Chrono24 (Import JP)"
-        condition: "new"
-        manual_price: 278
-        shipping_fee: 34
-        site_fee: 0
-        customs_fee: 81.36
       - url: "https://www.sakurawatches.com/seiko-selection-sbtm323"
         merchant: "Sakura Watches (Tokyo)"
         condition: "new"
