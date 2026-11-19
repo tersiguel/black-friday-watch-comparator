@@ -1521,6 +1521,25 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       return 'tersiguel/black-friday-watch-comparator';
     }
 
+    async function resolveGithubDefaultBranch(cfg) {
+      const headers = { 'Accept': 'application/vnd.github+json' };
+      if (cfg.token) headers['Authorization'] = `Bearer ${cfg.token}`;
+      try {
+        const resp = await fetch(`https://api.github.com/repos/${cfg.repo}`, { headers, cache: 'no-store' });
+        if (resp.ok) {
+          const info = await resp.json();
+          if (info && info.default_branch) {
+            cfg.branch = info.default_branch;
+            saveGithubConfig(cfg);
+            const branchEl = document.getElementById('ghBranchInput');
+            if (branchEl) branchEl.value = cfg.branch;
+            return cfg.branch;
+          }
+        }
+      } catch (e) {}
+      return cfg.branch;
+    }
+
     function loadGithubConfig() {
       try {
         const raw = localStorage.getItem(GITHUB_CFG_KEY);
@@ -1528,12 +1547,12 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           const parsed = JSON.parse(raw);
           return {
             repo: parsed.repo || getDefaultGithubRepo(),
-            branch: parsed.branch || 'main',
+            branch: parsed.branch || 'feat/black-friday-watch-comparator',
             token: parsed.token || ''
           };
         }
       } catch (e) {}
-      return { repo: getDefaultGithubRepo(), branch: 'main', token: '' };
+      return { repo: getDefaultGithubRepo(), branch: 'feat/black-friday-watch-comparator', token: '' };
     }
 
     function saveGithubConfig(cfg) {
@@ -1676,8 +1695,16 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       const headers = { 'Accept': 'application/vnd.github.raw+json' };
       if (cfg.token) headers['Authorization'] = `Bearer ${cfg.token}`;
       try {
-        const url = `https://api.github.com/repos/${cfg.repo}/contents/watches.yaml?ref=${encodeURIComponent(cfg.branch)}&_=${Date.now()}`;
-        const resp = await fetch(url, { headers, cache: 'no-store' });
+        let url = `https://api.github.com/repos/${cfg.repo}/contents/watches.yaml?ref=${encodeURIComponent(cfg.branch)}&_=${Date.now()}`;
+        let resp = await fetch(url, { headers, cache: 'no-store' });
+        if (resp.status === 404) {
+          const oldBranch = cfg.branch;
+          const resolved = await resolveGithubDefaultBranch(cfg);
+          if (resolved && resolved !== oldBranch) {
+            url = `https://api.github.com/repos/${cfg.repo}/contents/watches.yaml?ref=${encodeURIComponent(resolved)}&_=${Date.now()}`;
+            resp = await fetch(url, { headers, cache: 'no-store' });
+          }
+        }
         if (!resp.ok) {
           if (showFeedback) showToast(`Erreur GitHub (${resp.status}) lors de la lecture`);
           return false;
@@ -1730,6 +1757,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         };
 
         let putResp = await putOnce();
+        if (putResp.status === 404) {
+          const oldBranch = cfg.branch;
+          const resolved = await resolveGithubDefaultBranch(cfg);
+          if (resolved && resolved !== oldBranch) {
+            putResp = await putOnce();
+          }
+        }
         if (putResp.status === 409) {
           putResp = await putOnce();
         }
@@ -1751,7 +1785,10 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
     async function saveAndSyncGithub() {
       const repo = (document.getElementById('ghRepoInput')?.value || '').trim() || getDefaultGithubRepo();
-      const branch = (document.getElementById('ghBranchInput')?.value || '').trim() || 'main';
+      let branch = (document.getElementById('ghBranchInput')?.value || '').trim();
+      if (!branch || branch.toLowerCase() === 'default') {
+        branch = 'feat/black-friday-watch-comparator';
+      }
       const token = (document.getElementById('ghTokenInput')?.value || '').trim();
       saveGithubConfig({ repo, branch, token });
       populateGithubModal();
