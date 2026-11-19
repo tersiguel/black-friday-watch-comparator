@@ -312,13 +312,6 @@ watches:
         shipping_fee: 34
         site_fee: 0
         customs_fee: 81.76
-      - url: "https://www.catawiki.com/en/c/1037-seiko-watches"
-        merchant: "Catawiki"
-        condition: "used"
-        manual_price: 215
-        shipping_fee: 18
-        site_fee: 22.35
-        customs_fee: 0
     suggested_urls:
       - url: "https://www.chrono24.fr/search/index.htm?query=SBTM317&usedOrNew=used"
         merchant: "Chrono24 (Occasion)"
