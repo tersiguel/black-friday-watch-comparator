@@ -12,6 +12,57 @@ settings:
     carrier_fee_eur: 18
 
 watches:
+  - id: "citizen-cb3046-76e"
+    name: "Citizen Attesa ACT Line Blue Universe Collection Limited Edition CB3046-76E"
+    brand: "Citizen"
+    reference: "CB3046-76E"
+    image_url: "https://www.sakurawatches.com/image/cache/webp/catalog/CB3046-76E-1000x1000.webp"
+    features: "Citizen Attesa ACT Line Blue Universe Collection Limited Edition CB3046-76E"
+    specs:
+      "Référence": "CB3046-76E"
+    target_price_new: 856
+    reference_price: 930.96
+    urls:
+      - url: "https://www.sakurawatches.com/citizen-attesa-act-line-blue-universe-collection-limited-edition-cb3046-76e"
+        merchant: "Sakura Watches (Tokyo)"
+        condition: "new"
+        manual_price: 736
+        shipping_fee: 24
+        site_fee: 0
+        customs_fee: 170.96
+    suggested_urls:
+      - url: "https://www.amazon.fr/s?k=Citizen%20CB3046-76E"
+        merchant: "Amazon.fr"
+        title: "Rechercher Citizen CB3046-76E sur Amazon.fr"
+        condition: "new"
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Livraison UE • 0 € douane"
+      - url: "https://ocarat.com/recherche?controller=search&s=Citizen%20CB3046-76E"
+        merchant: "Ocarat"
+        title: "Citizen CB3046-76E chez Ocarat France"
+        condition: "new"
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Boutique agréée France • 0 € douane"
+      - url: "https://www.chrono24.fr/search/index.htm?query=CB3046-76E&usedOrNew=used"
+        merchant: "Chrono24 (Occasion)"
+        title: "Annonces Occasion Citizen CB3046-76E"
+        condition: "used"
+        shipping_fee: 15
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Protection acheteur Chrono24 incluse"
+      - url: "https://www.catawiki.com/fr/s?q=Citizen%20CB3046-76E"
+        merchant: "Catawiki"
+        title: "Enchères Citizen CB3046-76E"
+        condition: "used"
+        shipping_fee: 18
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Frais Catawiki 9 % + 3 € pré-calculés"
   - id: "citizen-cb3045-61e"
     name: "Citizen Attesa ACT Line/Black Titanium™ Series CB3045-61E"
     brand: "Citizen"
