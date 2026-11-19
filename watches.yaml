@@ -337,13 +337,6 @@ watches:
         shipping_fee: 4.9
         site_fee: 0
         customs_fee: 0
-      - url: "https://www.chrono24.fr/casio/lcw-m100tse-1aer-radio-controlled-quartz-mens-watch--id49710336.htm"
-        merchant: "Chrono24 (UE)"
-        condition: "new"
-        manual_price: 257
-        shipping_fee: 12
-        site_fee: 0
-        customs_fee: 0
     suggested_urls:
       - url: "https://www.chrono24.fr/casio/lcw-m100tse-1aer-wave-ceptor-herrenuhr-40mm-5atm--id48759229.htm"
         merchant: "Chrono24 (Allemagne)"
