@@ -12,57 +12,6 @@ settings:
     carrier_fee_eur: 18
 
 watches:
-  - id: "citizen-cb3045-61e"
-    name: "Citizen Attesa ACT Line/Black Titanium™ Series CB3045-61E"
-    brand: "Citizen"
-    reference: "CB3045-61E"
-    image_url: "https://www.sakurawatches.com/image/cache/webp/catalog/watches/6/ages-amazon-com-images-I-91CR6dPNIhL-_UL1500_-jpg-90x90.webp"
-    features: "Citizen Attesa ACT Line/Black Titanium™ Series CB3045-61E - men's watch manufactured by Citizen. It has Japanese solar quartz movement and H128 calibre. Super titanium, duratect dlc case of round shape. Case dimensions are 39 mm. in diameter and 9.7 mm. in thi"
-    specs:
-      "Référence": "CB3045-61E"
-    target_price_new: 613
-    reference_price: 667.1
-    urls:
-      - url: "https://www.sakurawatches.com/citizen-attesa-act-line-black-titanium%E2%84%A2-series-cb3045-61e"
-        merchant: "Sakura Watches (Tokyo)"
-        condition: "new"
-        manual_price: 516.12
-        shipping_fee: 24
-        site_fee: 0
-        customs_fee: 126.98
-    suggested_urls:
-      - url: "https://www.amazon.fr/s?k=Citizen%20CB3045-61E"
-        merchant: "Amazon.fr"
-        title: "Rechercher Citizen CB3045-61E sur Amazon.fr"
-        condition: "new"
-        shipping_fee: 0
-        site_fee: 0
-        customs_fee: 0
-        fee_hint: "Livraison UE • 0 € douane"
-      - url: "https://ocarat.com/recherche?controller=search&s=Citizen%20CB3045-61E"
-        merchant: "Ocarat"
-        title: "Citizen CB3045-61E chez Ocarat France"
-        condition: "new"
-        shipping_fee: 0
-        site_fee: 0
-        customs_fee: 0
-        fee_hint: "Boutique agréée France • 0 € douane"
-      - url: "https://www.chrono24.fr/search/index.htm?query=CB3045-61E&usedOrNew=used"
-        merchant: "Chrono24 (Occasion)"
-        title: "Annonces Occasion Citizen CB3045-61E"
-        condition: "used"
-        shipping_fee: 15
-        site_fee: 0
-        customs_fee: 0
-        fee_hint: "Protection acheteur Chrono24 incluse"
-      - url: "https://www.catawiki.com/fr/s?q=Citizen%20CB3045-61E"
-        merchant: "Catawiki"
-        title: "Enchères Citizen CB3045-61E"
-        condition: "used"
-        shipping_fee: 18
-        site_fee: 0
-        customs_fee: 0
-        fee_hint: "Frais Catawiki 9 % + 3 € pré-calculés"
   - id: "citizen-cb3015-53e"
     name: "CITIZEN ATTESA CB3015-53E"
     brand: "Citizen"
