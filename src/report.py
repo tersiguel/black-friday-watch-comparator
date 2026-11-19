@@ -162,6 +162,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
   <style>
     :root {
       --bg-page: #f2f4f8;
@@ -1348,7 +1349,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <!-- Brand & Alert Filters -->
   <div class="filter-strip">
     <div class="brand-pills" id="brandFilterBar"></div>
-    <div class="server-status" id="persistenceStatus">
+    <div class="server-status" id="persistenceStatus" onclick="openYamlModal()" style="cursor:pointer;" title="Configurer la synchronisation GitHub (watches.yaml)">
       <span class="status-dot"></span>
       <span>Sauvegarde locale active</span>
     </div>
@@ -1446,7 +1447,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     </div>
   </div>
 
-  <!-- Modal: Export / Import / Reset YAML -->
+  <!-- Modal: Export / Import / Reset YAML + GitHub Sync -->
   <div class="modal-backdrop" id="yamlModal">
     <div class="modal-card">
       <div class="drawer-title-row">
@@ -1454,11 +1455,41 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         <button class="icon-btn" onclick="closeModal('yamlModal')">✕</button>
       </div>
       <p style="font-size:13.5px; color:var(--text-secondary); margin-top:0;">
-        Vos produits, URLs, frais (port, site, douane) et seuils d'alerte sont enregistrés instantanément dans votre navigateur (et directement dans <code>watches.yaml</code> si vous lancez <code>python3 tracker.py serve</code>). Vous pouvez aussi télécharger le fichier <code>watches.yaml</code> mis à jour pour votre dépôt GitHub.
+        Synchronisez directement <code>watches.yaml</code> avec votre dépôt GitHub pour retrouver exactement les mêmes montres, URLs et seuils sur tous vos ordinateurs.
       </p>
-      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
-        <button class="btn btn-primary" onclick="downloadYamlConfig()">⬇️ Télécharger watches.yaml</button>
-        <button class="btn btn-outline" onclick="resetLocalChanges()">↺ Réinitialiser les données par défaut</button>
+
+      <div style="border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:16px; background:var(--bg-subtle, rgba(128,128,128,0.04));">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <strong style="font-size:13.5px;">☁️ Synchronisation GitHub (API)</strong>
+          <span id="ghSyncStatus" style="font-size:12px; color:var(--text-secondary);">Non configurée</span>
+        </div>
+        <div class="url-form-grid">
+          <div class="field-group">
+            <label>Dépôt GitHub (owner/repo)</label>
+            <input type="text" id="ghRepoInput" placeholder="tersiguel/black-friday-watch-comparator" />
+          </div>
+          <div class="field-group">
+            <label>Branche</label>
+            <input type="text" id="ghBranchInput" placeholder="main" />
+          </div>
+        </div>
+        <div class="field-group" style="margin-top:10px;">
+          <label>GitHub Personal Access Token (PAT)</label>
+          <input type="password" id="ghTokenInput" placeholder="github_pat_... ou ghp_..." autocomplete="off" />
+          <small style="display:block; margin-top:4px; font-size:11.5px; color:var(--text-secondary);">
+            Stocké uniquement dans ce navigateur. Permission requise : <code>Contents: Read &amp; Write</code> (et <code>Actions: Write</code> pour lancer le scraping à distance).
+          </small>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
+          <button class="btn btn-primary" onclick="saveAndSyncGithub()">☁️ Enregistrer &amp; Synchroniser</button>
+          <button class="btn btn-outline" onclick="triggerGithubWorkflow()">🔄 Lancer le scraping GitHub</button>
+          <button class="btn btn-outline" onclick="clearGithubConfig()">Déconnecter</button>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+        <button class="btn btn-outline" onclick="downloadYamlConfig()">⬇️ Télécharger watches.yaml</button>
+        <button class="btn btn-outline" onclick="resetLocalChanges()">↺ Réinitialiser depuis le serveur</button>
       </div>
     </div>
   </div>
@@ -1468,6 +1499,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <script id="initialDataScript" type="application/json">__INITIAL_APP_DATA__</script>
   <script>
     const STORAGE_KEY = 'keepawatch_state_v2';
+    const GITHUB_CFG_KEY = 'keepawatch_github_v1';
     const THEME_KEY = 'keepawatch_theme';
 
     const DEFAULT_STATE = JSON.parse(document.getElementById('initialDataScript').textContent);
@@ -1477,6 +1509,89 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     let cardRanges = {}; // watchId -> days ('7', '30', '90', 'all')
     let cardVisibility = {}; // watchId -> { new: true, used: true, thresholds: true }
     let localApiAvailable = false;
+    let githubSyncInFlight = false;
+
+    function getDefaultGithubRepo() {
+      const host = location.hostname || '';
+      if (host.endsWith('.github.io')) {
+        const owner = host.split('.')[0];
+        const parts = location.pathname.split('/').filter(Boolean);
+        if (owner && parts.length > 0) return `${owner}/${parts[0]}`;
+      }
+      return 'tersiguel/black-friday-watch-comparator';
+    }
+
+    function loadGithubConfig() {
+      try {
+        const raw = localStorage.getItem(GITHUB_CFG_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          return {
+            repo: parsed.repo || getDefaultGithubRepo(),
+            branch: parsed.branch || 'main',
+            token: parsed.token || ''
+          };
+        }
+      } catch (e) {}
+      return { repo: getDefaultGithubRepo(), branch: 'main', token: '' };
+    }
+
+    function saveGithubConfig(cfg) {
+      try {
+        localStorage.setItem(GITHUB_CFG_KEY, JSON.stringify(cfg));
+      } catch (e) {}
+    }
+
+    function populateGithubModal() {
+      const cfg = loadGithubConfig();
+      const repoEl = document.getElementById('ghRepoInput');
+      const branchEl = document.getElementById('ghBranchInput');
+      const tokenEl = document.getElementById('ghTokenInput');
+      const statusEl = document.getElementById('ghSyncStatus');
+      if (repoEl) repoEl.value = cfg.repo;
+      if (branchEl) branchEl.value = cfg.branch;
+      if (tokenEl) tokenEl.value = cfg.token;
+      if (statusEl) {
+        statusEl.textContent = cfg.token ? `Connecté à ${cfg.repo} (${cfg.branch})` : 'Lecture seule (sans token)';
+      }
+    }
+
+    function updatePersistenceBadge(text) {
+      const el = document.getElementById('persistenceStatus');
+      if (el) {
+        el.innerHTML = `<span class="status-dot"></span><span>${escapeHtml(text)}</span>`;
+      }
+    }
+
+    function mergeFreshPricesFromDefault(state) {
+      if (!state || !Array.isArray(state.watches)) return JSON.parse(JSON.stringify(DEFAULT_STATE));
+      const defMap = new Map((DEFAULT_STATE.watches || []).map(w => [w.id, w]));
+      state.generated_at = DEFAULT_STATE.generated_at || state.generated_at;
+      state.watches = state.watches.map(w => {
+        const defW = defMap.get(w.id);
+        if (!defW) return w;
+        const defUrlMap = new Map((defW.urls || []).map(u => [u.url, u]));
+        const mergedUrls = (w.urls || []).map(u => {
+          const defU = defUrlMap.get(u.url);
+          if (!defU) return u;
+          return {
+            ...u,
+            base_price: defU.base_price !== undefined ? defU.base_price : u.base_price,
+            total_price: defU.total_price !== undefined ? defU.total_price : u.total_price,
+            title: defU.title || u.title,
+            in_stock: defU.in_stock !== undefined ? defU.in_stock : u.in_stock,
+            error: defU.error !== undefined ? defU.error : u.error
+          };
+        });
+        return {
+          ...w,
+          history: (defW.history && defW.history.length >= (w.history || []).length) ? JSON.parse(JSON.stringify(defW.history)) : w.history,
+          suggested_urls: w.suggested_urls && w.suggested_urls.length ? w.suggested_urls : defW.suggested_urls,
+          urls: mergedUrls
+        };
+      });
+      return state;
+    }
 
     function loadAppState() {
       try {
@@ -1484,11 +1599,201 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && Array.isArray(parsed.watches)) {
-            return parsed;
+            return mergeFreshPricesFromDefault(parsed);
           }
         }
       } catch (e) {}
       return JSON.parse(JSON.stringify(DEFAULT_STATE));
+    }
+
+    function applyRemoteYamlToState(yamlObj) {
+      if (!yamlObj || !Array.isArray(yamlObj.watches)) return false;
+      const curMap = new Map((appState.watches || []).map(w => [w.id, w]));
+      const defMap = new Map((DEFAULT_STATE.watches || []).map(w => [w.id, w]));
+
+      if (yamlObj.settings) {
+        appState.settings = { ...(appState.settings || {}), ...yamlObj.settings };
+      }
+
+      appState.watches = yamlObj.watches.map(yw => {
+        const refW = defMap.get(yw.id) || curMap.get(yw.id) || {};
+        const refUrlMap = new Map(((refW.urls) || []).map(u => [u.url, u]));
+        const urls = (yw.urls || []).map(yu => {
+          const ru = refUrlMap.get(yu.url) || {};
+          const ship = Number(yu.shipping_fee ?? 0);
+          const site = Number(yu.site_fee ?? 0);
+          const cust = Number(yu.customs_fee ?? 0);
+          const base = yu.manual_price !== undefined && yu.manual_price !== null
+            ? Number(yu.manual_price)
+            : (ru.base_price !== undefined ? ru.base_price : null);
+          const total = base !== null && !isNaN(base) ? Number((base + ship + site + cust).toFixed(2)) : (ru.total_price ?? null);
+          return {
+            url: yu.url,
+            merchant: yu.merchant || ru.merchant || getHostnameLabel(yu.url),
+            condition: yu.condition || ru.condition || 'new',
+            base_price: base,
+            shipping_fee: ship,
+            site_fee: site,
+            customs_fee: cust,
+            total_price: total,
+            shipping_detected: ru.shipping_detected || false,
+            site_fee_detected: ru.site_fee_detected || false,
+            customs_detected: ru.customs_detected || false,
+            title: ru.title || '',
+            in_stock: ru.in_stock !== undefined ? ru.in_stock : true,
+            error: ru.error || null
+          };
+        });
+        return {
+          id: yw.id,
+          name: yw.name || refW.name || yw.id,
+          brand: yw.brand || refW.brand || '',
+          reference: yw.reference || refW.reference || '',
+          ean: yw.ean || '',
+          asin: yw.asin || '',
+          image_url: yw.image_url || refW.image_url || '',
+          features: yw.features || refW.features || '',
+          specs: yw.specs || refW.specs || {},
+          target_price_new: yw.target_price_new !== undefined ? Number(yw.target_price_new) : null,
+          target_price_used: yw.target_price_used !== undefined ? Number(yw.target_price_used) : null,
+          reference_price: yw.reference_price !== undefined ? Number(yw.reference_price) : (refW.reference_price || null),
+          urls,
+          suggested_urls: yw.suggested_urls || refW.suggested_urls || [],
+          history: refW.history || []
+        };
+      });
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {}
+      return true;
+    }
+
+    async function syncFromGitHub(showFeedback = false) {
+      if (localApiAvailable || typeof jsyaml === 'undefined') return false;
+      const cfg = loadGithubConfig();
+      if (!cfg.repo) return false;
+      const headers = { 'Accept': 'application/vnd.github.raw+json' };
+      if (cfg.token) headers['Authorization'] = `Bearer ${cfg.token}`;
+      try {
+        const url = `https://api.github.com/repos/${cfg.repo}/contents/watches.yaml?ref=${encodeURIComponent(cfg.branch)}&_=${Date.now()}`;
+        const resp = await fetch(url, { headers, cache: 'no-store' });
+        if (!resp.ok) {
+          if (showFeedback) showToast(`Erreur GitHub (${resp.status}) lors de la lecture`);
+          return false;
+        }
+        const yamlText = await resp.text();
+        const parsed = jsyaml.load(yamlText);
+        if (applyRemoteYamlToState(parsed)) {
+          renderAllCards();
+          updatePersistenceBadge(cfg.token ? `Synchronisé GitHub (${cfg.repo})` : `GitHub lecture seule (${cfg.repo})`);
+          if (showFeedback) showToast('Données synchronisées depuis GitHub (watches.yaml)');
+          return true;
+        }
+      } catch (e) {
+        if (showFeedback) showToast('Impossible de joindre GitHub pour la synchronisation');
+      }
+      return false;
+    }
+
+    async function pushYamlToGitHub(silent = false) {
+      const cfg = loadGithubConfig();
+      if (!cfg.token || !cfg.repo || githubSyncInFlight) return false;
+      githubSyncInFlight = true;
+      const apiBase = `https://api.github.com/repos/${cfg.repo}/contents/watches.yaml`;
+      const headers = {
+        'Authorization': `Bearer ${cfg.token}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      };
+      try {
+        const yamlContent = buildYamlConfig();
+        const contentB64 = btoa(unescape(encodeURIComponent(yamlContent)));
+
+        const putOnce = async () => {
+          const getResp = await fetch(`${apiBase}?ref=${encodeURIComponent(cfg.branch)}&_=${Date.now()}`, { headers, cache: 'no-store' });
+          let sha = undefined;
+          if (getResp.ok) {
+            const meta = await getResp.json();
+            sha = meta.sha;
+          }
+          return fetch(apiBase, {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify({
+              message: 'chore(config): update watches.yaml from KeepaWatch UI',
+              content: contentB64,
+              branch: cfg.branch,
+              ...(sha ? { sha } : {})
+            })
+          });
+        };
+
+        let putResp = await putOnce();
+        if (putResp.status === 409) {
+          putResp = await putOnce();
+        }
+        if (!putResp.ok) {
+          const errData = await putResp.json().catch(() => ({}));
+          showToast(`Échec sync GitHub (${putResp.status}) : ${errData.message || 'vérifiez le token'}`);
+          return false;
+        }
+        updatePersistenceBadge(`Synchronisé GitHub (${cfg.repo})`);
+        if (!silent) showToast('watches.yaml enregistré sur GitHub');
+        return true;
+      } catch (e) {
+        showToast('Erreur réseau lors de la sauvegarde GitHub');
+        return false;
+      } finally {
+        githubSyncInFlight = false;
+      }
+    }
+
+    async function saveAndSyncGithub() {
+      const repo = (document.getElementById('ghRepoInput')?.value || '').trim() || getDefaultGithubRepo();
+      const branch = (document.getElementById('ghBranchInput')?.value || '').trim() || 'main';
+      const token = (document.getElementById('ghTokenInput')?.value || '').trim();
+      saveGithubConfig({ repo, branch, token });
+      populateGithubModal();
+      const pulled = await syncFromGitHub(true);
+      if (token && !pulled) {
+        await pushYamlToGitHub(false);
+      }
+      closeModal('yamlModal');
+    }
+
+    async function triggerGithubWorkflow() {
+      const cfg = loadGithubConfig();
+      if (!cfg.token || !cfg.repo) {
+        showToast('Configurez d\'abord votre Token GitHub (avec permission Actions: Write)');
+        return;
+      }
+      try {
+        const resp = await fetch(`https://api.github.com/repos/${cfg.repo}/actions/workflows/price-tracker.yml/dispatches`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${cfg.token}`,
+            'Accept': 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ ref: cfg.branch })
+        });
+        if (resp.status === 204 || resp.ok) {
+          showToast('Scraping GitHub Actions lancé ! Les prix seront mis à jour dans ~2 min.');
+        } else {
+          const err = await resp.json().catch(() => ({}));
+          showToast(`Impossible de lancer le workflow (${resp.status}) : ${err.message || ''}`);
+        }
+      } catch (e) {
+        showToast('Erreur réseau lors du déclenchement GitHub Actions');
+      }
+    }
+
+    function clearGithubConfig() {
+      localStorage.removeItem(GITHUB_CFG_KEY);
+      populateGithubModal();
+      updatePersistenceBadge('Sauvegarde locale navigateur');
+      showToast('Synchronisation GitHub déconnectée');
     }
 
     async function persistState(toastMsg) {
@@ -1503,22 +1808,27 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             body: JSON.stringify(appState)
           });
         } catch (e) {}
+      } else {
+        const cfg = loadGithubConfig();
+        if (cfg.token) {
+          pushYamlToGitHub(true);
+        }
       }
       if (toastMsg) showToast(toastMsg);
     }
 
     async function checkLocalApi() {
-      if (location.protocol === 'file:') return;
-      try {
-        const resp = await fetch('/api/ping', { method: 'GET' });
-        if (resp.ok) {
-          localApiAvailable = true;
-          const el = document.getElementById('persistenceStatus');
-          if (el) {
-            el.innerHTML = '<span class="status-dot"></span><span>Connecté à watches.yaml (serveur local actif)</span>';
+      if (location.protocol !== 'file:') {
+        try {
+          const resp = await fetch('/api/ping', { method: 'GET' });
+          if (resp.ok) {
+            localApiAvailable = true;
+            updatePersistenceBadge('Connecté à watches.yaml (serveur local actif)');
+            return;
           }
-        }
-      } catch (e) {}
+        } catch (e) {}
+      }
+      await syncFromGitHub(false);
     }
 
     function escapeHtml(str) {
@@ -3491,6 +3801,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     }
 
     function openYamlModal() {
+      populateGithubModal();
       document.getElementById('yamlModal').classList.add('open');
     }
 
@@ -3674,18 +3985,26 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     }
 
     /* Export YAML */
-    function downloadYamlConfig() {
+    function buildYamlConfig() {
+      const s = appState.settings || {};
       const lines = [
         '# Configuration KeepaWatch — Générée depuis l\'interface',
         'settings:',
-        `  currency: ${(appState.settings && appState.settings.currency) || 'EUR'}`,
-        `  ntfy_topic: ${(appState.settings && appState.settings.ntfy_topic) || 'bf-montres-solaires-2026'}`,
-        `  ntfy_server: ${(appState.settings && appState.settings.ntfy_server) || 'https://ntfy.sh'}`,
-        '  request_timeout: 15',
-        '  use_playwright_fallback: true',
-        '',
-        'watches:'
+        `  currency: ${s.currency || 'EUR'}`,
+        `  ntfy_topic: ${s.ntfy_topic || 'bf-montres-solaires-2026'}`,
+        `  ntfy_server: ${s.ntfy_server || 'https://ntfy.sh'}`,
+        `  request_timeout: ${Number(s.request_timeout || 15)}`,
+        `  use_playwright_fallback: ${s.use_playwright_fallback === false ? 'false' : 'true'}`
       ];
+      if (s.japan_import) {
+        lines.push('  japan_import:');
+        lines.push(`    shipping_eur: ${Number(s.japan_import.shipping_eur ?? 24.0)}`);
+        lines.push(`    vat_rate: ${Number(s.japan_import.vat_rate ?? 0.2)}`);
+        lines.push(`    customs_duty_eur: ${Number(s.japan_import.customs_duty_eur ?? 0.8)}`);
+        lines.push(`    carrier_fee_eur: ${Number(s.japan_import.carrier_fee_eur ?? 18.0)}`);
+      }
+      lines.push('');
+      lines.push('watches:');
 
       appState.watches.forEach(w => {
         lines.push(`  - id: ${JSON.stringify(w.id)}`);
@@ -3696,6 +4015,12 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         if (w.asin) lines.push(`    asin: ${JSON.stringify(w.asin)}`);
         if (w.image_url) lines.push(`    image_url: ${JSON.stringify(w.image_url)}`);
         lines.push(`    features: ${JSON.stringify(w.features || '')}`);
+        if (w.specs && Object.keys(w.specs).length > 0) {
+          lines.push('    specs:');
+          Object.entries(w.specs).forEach(([k, v]) => {
+            lines.push(`      ${JSON.stringify(k)}: ${JSON.stringify(String(v))}`);
+          });
+        }
         if (w.target_price_new !== null && w.target_price_new !== undefined) {
           lines.push(`    target_price_new: ${Number(w.target_price_new)}`);
         }
@@ -3713,9 +4038,29 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           lines.push(`        site_fee: ${Number(u.site_fee || 0)}`);
           lines.push(`        customs_fee: ${Number(u.customs_fee || 0)}`);
         });
+        if (w.suggested_urls && w.suggested_urls.length > 0) {
+          lines.push('    suggested_urls:');
+          w.suggested_urls.forEach(su => {
+            lines.push(`      - url: ${JSON.stringify(su.url)}`);
+            lines.push(`        merchant: ${JSON.stringify(su.merchant || '')}`);
+            lines.push(`        title: ${JSON.stringify(su.title || '')}`);
+            lines.push(`        condition: ${JSON.stringify(su.condition || 'new')}`);
+            if (su.estimated_base_price !== null && su.estimated_base_price !== undefined) {
+              lines.push(`        estimated_base_price: ${Number(su.estimated_base_price)}`);
+            }
+            lines.push(`        shipping_fee: ${Number(su.shipping_fee || 0)}`);
+            lines.push(`        site_fee: ${Number(su.site_fee || 0)}`);
+            lines.push(`        customs_fee: ${Number(su.customs_fee || 0)}`);
+            if (su.fee_hint) lines.push(`        fee_hint: ${JSON.stringify(su.fee_hint)}`);
+          });
+        }
       });
 
-      const blob = new Blob([lines.join('\n') + '\n'], { type: 'text/yaml;charset=utf-8' });
+      return lines.join('\n') + '\n';
+    }
+
+    function downloadYamlConfig() {
+      const blob = new Blob([buildYamlConfig()], { type: 'text/yaml;charset=utf-8' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'watches.yaml';
@@ -3724,13 +4069,14 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       showToast('Fichier watches.yaml téléchargé');
     }
 
-    function resetLocalChanges() {
-      if (!confirm('Réinitialiser toutes vos modifications locales avec la configuration par défaut ?')) return;
+    async function resetLocalChanges() {
+      if (!confirm('Réinitialiser vos modifications locales et recharger depuis le serveur / GitHub ?')) return;
       localStorage.removeItem(STORAGE_KEY);
       appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
       closeModal('yamlModal');
       renderAllCards();
-      showToast('Configuration par défaut restaurée');
+      await syncFromGitHub(false);
+      showToast('Configuration rechargée depuis le serveur');
     }
 
     function copyText(txt) {
