@@ -12,57 +12,6 @@ settings:
     carrier_fee_eur: 18
 
 watches:
-  - id: "citizen-cb3015-53w"
-    name: "Citizen Attesa LIGHT in BLACK 2022 GREEN Limited Edition CB3015-53W"
-    brand: "Citizen"
-    reference: "CB3015-53W"
-    image_url: "https://www.sakurawatches.com/image/cache/webp/catalog/watches/6/ages-amazon-com-images-I-91CR6dPNIhL-_UL1500_-jpg-90x90.webp"
-    features: "Citizen Attesa LIGHT in BLACK 2022 GREEN Limited Edition CB3015-53W"
-    specs:
-      "Référence": "CB3015-53W"
-    target_price_new: 510
-    reference_price: 554.5
-    urls:
-      - url: "https://www.sakurawatches.com/citizen-attesa-light-in-black-2022-green-limited-edition-cb3015-53w"
-        merchant: "Sakura Watches (Tokyo)"
-        condition: "new"
-        manual_price: 422.28
-        shipping_fee: 24
-        site_fee: 0
-        customs_fee: 108.22
-    suggested_urls:
-      - url: "https://www.amazon.fr/s?k=Citizen%20CB3015-53W"
-        merchant: "Amazon.fr"
-        title: "Rechercher Citizen CB3015-53W sur Amazon.fr"
-        condition: "new"
-        shipping_fee: 0
-        site_fee: 0
-        customs_fee: 0
-        fee_hint: "Livraison UE • 0 € douane"
-      - url: "https://ocarat.com/recherche?controller=search&s=Citizen%20CB3015-53W"
-        merchant: "Ocarat"
-        title: "Citizen CB3015-53W chez Ocarat France"
-        condition: "new"
-        shipping_fee: 0
-        site_fee: 0
-        customs_fee: 0
-        fee_hint: "Boutique agréée France • 0 € douane"
-      - url: "https://www.chrono24.fr/search/index.htm?query=CB3015-53W&usedOrNew=used"
-        merchant: "Chrono24 (Occasion)"
-        title: "Annonces Occasion Citizen CB3015-53W"
-        condition: "used"
-        shipping_fee: 15
-        site_fee: 0
-        customs_fee: 0
-        fee_hint: "Protection acheteur Chrono24 incluse"
-      - url: "https://www.catawiki.com/fr/s?q=Citizen%20CB3015-53W"
-        merchant: "Catawiki"
-        title: "Enchères Citizen CB3015-53W"
-        condition: "used"
-        shipping_fee: 18
-        site_fee: 0
-        customs_fee: 0
-        fee_hint: "Frais Catawiki 9 % + 3 € pré-calculés"
   - id: "citizen-cb3015-53e"
     name: "CITIZEN ATTESA CB3015-53E"
     brand: "Citizen"
