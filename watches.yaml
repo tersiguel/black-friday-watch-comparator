@@ -30,6 +30,13 @@ watches:
         shipping_fee: 24
         site_fee: 0
         customs_fee: 64.98
+      - url: "https://www.chrono24.fr/citizen/citizen-mens-solar-radio-controlled-watch-citizen-collection-as1085-61e-jdm-38mm--sapphire-50m--id40905602.htm"
+        merchant: "Chrono24"
+        condition: "new"
+        manual_price: 303
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
     suggested_urls:
       - url: "https://www.amazon.fr/s?k=Citizen%2013713-"
         merchant: "Amazon.fr"
