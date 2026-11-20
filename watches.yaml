@@ -319,6 +319,13 @@ watches:
         shipping_fee: 9.5
         site_fee: 0
         customs_fee: 0
+      - url: "https://www.chrono24.fr/citizen/citizen-citizen-cb1160-55e-jdm-375-mm-radio-controlled-watch-super-titanium-solar--worldwide--id44975296.htm"
+        merchant: "Chrono24"
+        condition: "new"
+        manual_price: 357
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
     suggested_urls:
       - url: "https://www.luna-time.fr/Citizen-CB1160-55E-Montre-Bracelet-Hommes-Solaire-Eco-Drive"
         merchant: "Luna-Time FR"
