@@ -1,7 +1,21 @@
 {
-  "updated_at": "2026-11-19T21:54:53.468825+00:00",
-  "watches_count": 6,
+  "updated_at": "2026-11-20T09:20:11.558711+00:00",
+  "watches_count": 8,
   "watches": [
+    {
+      "id": "citizen-cb3035-72e",
+      "reference": "CB3035-72E",
+      "target_price_new": 884.0,
+      "target_price_used": null,
+      "urls_count": 1
+    },
+    {
+      "id": "citizen-15594",
+      "reference": "15594-",
+      "target_price_new": 488.0,
+      "target_price_used": null,
+      "urls_count": 1
+    },
     {
       "id": "citizen-cb3046-76e",
       "reference": "CB3046-76E",
