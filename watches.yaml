@@ -12,6 +12,57 @@ settings:
     carrier_fee_eur: 18
 
 watches:
+  - id: "citizen-15594"
+    name: "Citizen Attesa ACT Line CB3040-56H"
+    brand: "Citizen"
+    reference: "15594-"
+    image_url: "http://www.sakurawatches.com/image/catalog/watches/c/CB3040-56H/!CB3040-56H1.png"
+    features: "Citizen Attesa ACT Line CB3040-56H - men's watch made by Citizen. It is equipped with Japanese solar quartz movement and H128 calibre. Super titanium, duratect treatment case of round shape. Case dimensions are 39 mm. in diameter and 9.7 mm. in thickness. The dial of this Citizen"
+    specs:
+      "Référence": "15594-"
+    target_price_new: 488
+    reference_price: 531.31
+    urls:
+      - url: "https://www.sakurawatches.com/citizen-attesa-act-line-cb3040-56h"
+        merchant: "Sakura Watches (Tokyo)"
+        condition: "new"
+        manual_price: 402.96
+        shipping_fee: 24
+        site_fee: 0
+        customs_fee: 104.35
+    suggested_urls:
+      - url: "https://www.amazon.fr/s?k=Citizen%2015594-"
+        merchant: "Amazon.fr"
+        title: "Rechercher Citizen 15594- sur Amazon.fr"
+        condition: "new"
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Livraison UE • 0 € douane"
+      - url: "https://ocarat.com/recherche?controller=search&s=Citizen%2015594-"
+        merchant: "Ocarat"
+        title: "Citizen 15594- chez Ocarat France"
+        condition: "new"
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Boutique agréée France • 0 € douane"
+      - url: "https://www.chrono24.fr/search/index.htm?query=15594-&usedOrNew=used"
+        merchant: "Chrono24 (Occasion)"
+        title: "Annonces Occasion Citizen 15594-"
+        condition: "used"
+        shipping_fee: 15
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Protection acheteur Chrono24 incluse"
+      - url: "https://www.catawiki.com/fr/s?q=Citizen%2015594-"
+        merchant: "Catawiki"
+        title: "Enchères Citizen 15594-"
+        condition: "used"
+        shipping_fee: 18
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Frais Catawiki 9 % + 3 € pré-calculés"
   - id: "citizen-cb3046-76e"
     name: "Citizen Attesa ACT Line Blue Universe Collection Limited Edition CB3046-76E"
     brand: "Citizen"
@@ -40,6 +91,7 @@ watches:
       - url: "https://www.grimoldiwatches.com/en/citizen-spaceship-h128-dlc-blue-watch-cb3046-76e.html"
         merchant: "Grimoldiwatches"
         condition: "new"
+        manual_price: 647.54
         shipping_fee: 0
         site_fee: 0
         customs_fee: 0
