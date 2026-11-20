@@ -319,6 +319,13 @@ watches:
         shipping_fee: 14
         site_fee: 0
         customs_fee: 0
+      - url: "https://www.horlogerie4you.fr/products/citizen-cb1160-55e"
+        merchant: "Horlogerie4you"
+        condition: "new"
+        manual_price: 479
+        shipping_fee: 9.5
+        site_fee: 0
+        customs_fee: 0
     suggested_urls:
       - url: "https://www.luna-time.fr/Citizen-CB1160-55E-Montre-Bracelet-Hommes-Solaire-Eco-Drive"
         merchant: "Luna-Time FR"
