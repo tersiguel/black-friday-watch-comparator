@@ -43,6 +43,8 @@ watches:
         merchant: "Catawiki"
         condition: "used"
         manual_price: 130
+        promo_value: 30
+        promo_type: "eur"
         shipping_fee: 40
         site_fee: 14.7
         has_customs: false
