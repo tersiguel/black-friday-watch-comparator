@@ -5,7 +5,13 @@ import shutil
 import tempfile
 import unittest
 
-from src.models import WatchConfig, WatchURL, OfferResult
+from src.models import (
+    WatchConfig,
+    WatchURL,
+    OfferResult,
+    compute_promo_amount,
+    compute_total_price,
+)
 from src.scraper import (
     parse_price_string,
     extract_from_html,
@@ -388,6 +394,101 @@ class TestKeepaWatchComparator(unittest.TestCase):
             self.assertIn("uf-has-cust-", html)
             self.assertIn("onHasCustomsChange", html)
             self.assertIn("computeCustomsFee", html)
+
+    def test_promo_eur_and_percent_calculation_and_pipeline(self):
+        # Unit checks for helper calculations
+        self.assertEqual(compute_promo_amount(500.0, 25.0, "eur"), 25.0)
+        self.assertEqual(compute_promo_amount(500.0, 10.0, "pct"), 50.0)
+        self.assertEqual(compute_promo_amount(500.0, 120.0, "pct"), 500.0)
+        self.assertEqual(compute_promo_amount(None, 20.0, "eur"), 0.0)
+        self.assertEqual(
+            compute_total_price(500.0, shipping_fee=10.0, promo_value=25.0, promo_type="eur"),
+            485.0,
+        )
+        self.assertEqual(
+            compute_total_price(500.0, shipping_fee=10.0, promo_value=10.0, promo_type="pct"),
+            460.0,
+        )
+        self.assertEqual(
+            compute_total_price(50.0, shipping_fee=0.0, promo_value=80.0, promo_type="eur"),
+            0.0,
+        )
+
+        # End-to-end persistence & report generation with both EUR and % promos
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        src_cfg = os.path.join(base_dir, "watches.yaml")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cfg_copy = os.path.join(tmpdir, "watches.yaml")
+            shutil.copyfile(src_cfg, cfg_copy)
+            hist_path = os.path.join(tmpdir, "data", "history.json")
+            docs_dir = os.path.join(tmpdir, "docs")
+
+            new_id = add_watch_to_config(
+                config_path=cfg_copy,
+                brand="Tissot",
+                name="Tissot PRX Powermatic 80",
+                reference="T137.407.11.041.00",
+                target_price_new=600.0,
+            )
+            add_url_to_config(
+                config_path=cfg_copy,
+                watch_id=new_id,
+                url="https://ocarat.com/tissot-prx-eur",
+                merchant="Ocarat (EUR)",
+                condition="new",
+                manual_price=650.0,
+                promo_value=40.0,
+                promo_type="eur",
+                shipping_fee=0.0,
+                site_fee=0.0,
+                customs_fee=0.0,
+                auto_inspect=False,
+            )
+            add_url_to_config(
+                config_path=cfg_copy,
+                watch_id=new_id,
+                url="https://ocarat.com/tissot-prx-pct",
+                merchant="Ocarat (PCT)",
+                condition="new",
+                manual_price=650.0,
+                promo_value=10.0,
+                promo_type="pct",
+                shipping_fee=0.0,
+                site_fee=0.0,
+                customs_fee=0.0,
+                auto_inspect=False,
+            )
+
+            _, watches = load_config(cfg_copy)
+            added_w = next(w for w in watches if w.id == new_id)
+            self.assertEqual(added_w.urls[0].promo_value, 40.0)
+            self.assertEqual(added_w.urls[0].promo_type, "eur")
+            self.assertEqual(added_w.urls[1].promo_value, 10.0)
+            self.assertEqual(added_w.urls[1].promo_type, "pct")
+
+            analyses = run_comparator(
+                config_path=cfg_copy,
+                history_path=hist_path,
+                docs_dir=docs_dir,
+                demo_mode=True,
+                no_notify=True,
+            )
+            target_analysis = next(a for a in analyses if a.watch.id == new_id)
+            self.assertEqual(target_analysis.offers[0].price, 610.0)
+            self.assertEqual(target_analysis.offers[0].promo_amount, 40.0)
+            self.assertEqual(target_analysis.offers[1].price, 585.0)
+            self.assertEqual(target_analysis.offers[1].promo_amount, 65.0)
+            self.assertEqual(target_analysis.best_new_offer.price, 585.0)
+            self.assertTrue(target_analysis.alert_new_triggered)
+
+            index_html = os.path.join(docs_dir, "index.html")
+            with open(index_html, "r", encoding="utf-8") as f:
+                html = f.read()
+            self.assertIn("Promotion (€ ou %)", html)
+            self.assertIn('id="uf-promo-', html)
+            self.assertIn('id="uf-promo-type-', html)
+            self.assertIn("<th>Promo</th>", html)
 
 
 if __name__ == "__main__":

@@ -9,7 +9,12 @@ from urllib.request import Request, urlopen
 
 from lxml import html as lxml_html
 
-from src.models import OfferResult
+from src.models import (
+    OfferResult,
+    compute_promo_amount,
+    compute_total_price,
+    normalize_promo_type,
+)
 
 
 DEFAULT_HEADERS = {
@@ -1007,6 +1012,8 @@ def scrape_offer(
     customs_fee: Optional[float] = None,
     has_customs: Optional[bool] = None,
     manual_price: Optional[float] = None,
+    promo_value: Optional[float] = None,
+    promo_type: str = "eur",
     timeout: int = 15,
     use_playwright_fallback: bool = True,
     import_settings: Optional[Dict[str, Any]] = None,
@@ -1014,6 +1021,8 @@ def scrape_offer(
     """Scrape a user-configured product URL and apply explicit or auto-detected fees."""
     merchant_name = infer_merchant_name(url, merchant)
     now_iso = datetime.now(timezone.utc).isoformat()
+    norm_promo_type = normalize_promo_type(promo_type)
+    eff_promo_val = round(float(promo_value), 2) if (promo_value is not None and promo_value > 0) else 0.0
 
     html_str = None
     http_error = None
@@ -1050,7 +1059,6 @@ def scrape_offer(
         eff_condition = condition or detected["condition"] or "new"
         eff_ship = shipping_fee if shipping_fee is not None else (detected["shipping_fee"] or 0.0)
         eff_site = site_fee if site_fee is not None else (detected["site_fee"] or 0.0)
-
         imp = import_settings or {}
         if has_customs is True:
             eff_cust = compute_japan_customs_only(
@@ -1068,7 +1076,15 @@ def scrape_offer(
             eff_cust = customs_fee if customs_fee is not None else (detected["customs_fee"] or 0.0)
             eff_has_customs = eff_cust > 0
 
-        total_price = round(base_price + eff_ship + eff_site + eff_cust, 2)
+        promo_amount = compute_promo_amount(base_price, eff_promo_val, norm_promo_type)
+        total_price = compute_total_price(
+            base_price=base_price,
+            shipping_fee=eff_ship,
+            site_fee=eff_site,
+            customs_fee=eff_cust,
+            promo_value=eff_promo_val,
+            promo_type=norm_promo_type,
+        )
 
         fee_notes = []
         if detected["shipping_reason"] and shipping_fee is None:
@@ -1091,6 +1107,9 @@ def scrape_offer(
             site_fee=round(eff_site, 2),
             customs_fee=round(eff_cust, 2),
             has_customs=eff_has_customs,
+            promo_value=eff_promo_val,
+            promo_type=norm_promo_type,
+            promo_amount=promo_amount,
             shipping_detected=(shipping_fee is None and detected["shipping_detected"]),
             site_fee_detected=(site_fee is None and detected["site_fee_detected"]),
             customs_detected=(has_customs is None and customs_fee is None and detected["customs_detected"]),
@@ -1114,6 +1133,9 @@ def scrape_offer(
         site_fee=round(site_fee or 0.0, 2),
         customs_fee=0.0 if has_customs is False else round(customs_fee or 0.0, 2),
         has_customs=bool(has_customs) if has_customs is not None else ((customs_fee or 0.0) > 0),
+        promo_value=eff_promo_val,
+        promo_type=norm_promo_type,
+        promo_amount=0.0,
         in_stock=False,
         extraction_method="failed",
         timestamp=now_iso,

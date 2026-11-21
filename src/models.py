@@ -4,6 +4,47 @@ from dataclasses import dataclass, field, asdict
 from typing import List, Optional, Dict, Any
 
 
+def normalize_promo_type(val: Any) -> str:
+    """Normalize promotion type to 'eur' or 'pct'."""
+    s = str(val or "eur").strip().lower()
+    if s in ("pct", "%", "percent", "pourcent", "pourcentage"):
+        return "pct"
+    return "eur"
+
+
+def compute_promo_amount(
+    base_price: Optional[float],
+    promo_value: Optional[float],
+    promo_type: str = "eur",
+) -> float:
+    """Compute effective discount amount in EUR from base price and promo value/type."""
+    if base_price is None or base_price <= 0:
+        return 0.0
+    if promo_value is None or promo_value <= 0:
+        return 0.0
+    ptype = normalize_promo_type(promo_type)
+    if ptype == "pct":
+        pct = min(float(promo_value), 100.0)
+        return round(float(base_price) * pct / 100.0, 2)
+    return round(float(promo_value), 2)
+
+
+def compute_total_price(
+    base_price: Optional[float],
+    shipping_fee: float = 0.0,
+    site_fee: float = 0.0,
+    customs_fee: float = 0.0,
+    promo_value: Optional[float] = None,
+    promo_type: str = "eur",
+) -> Optional[float]:
+    """Compute total price (EUR) including fees and subtracting any promotion."""
+    if base_price is None or base_price <= 0:
+        return None
+    promo_amount = compute_promo_amount(base_price, promo_value, promo_type)
+    total = float(base_price) - promo_amount + float(shipping_fee or 0.0) + float(site_fee or 0.0) + float(customs_fee or 0.0)
+    return round(max(0.0, total), 2)
+
+
 @dataclass
 class WatchURL:
     url: str
@@ -14,6 +55,8 @@ class WatchURL:
     customs_fee: Optional[float] = None   # Frais de douane & TVA import (€)
     has_customs: Optional[bool] = None    # True = appliquer le calcul douane/TVA, False = 0 € (UE), None = auto
     manual_price: Optional[float] = None  # Prix affiché saisi ou mis en cache (€)
+    promo_value: Optional[float] = None   # Valeur de la promotion (€ ou %)
+    promo_type: str = "eur"               # "eur" (€) or "pct" (%)
     note: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
@@ -71,13 +114,16 @@ class OfferResult:
     watch_id: str
     merchant: str
     url: str
-    price: Optional[float]                     # Prix TOTAL tout compris (base + port + site + douane)
+    price: Optional[float]                     # Prix TOTAL tout compris (base - promo + port + site + douane)
     base_price: Optional[float] = None         # Prix affiché hors frais additionnels
     condition: str = "new"                     # "new" | "used"
     shipping_fee: float = 0.0
     site_fee: float = 0.0
     customs_fee: float = 0.0
     has_customs: bool = False
+    promo_value: float = 0.0
+    promo_type: str = "eur"                    # "eur" | "pct"
+    promo_amount: float = 0.0
     shipping_detected: bool = False
     site_fee_detected: bool = False
     customs_detected: bool = False

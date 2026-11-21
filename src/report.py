@@ -5,7 +5,12 @@ import os
 from datetime import datetime, timezone
 from typing import List, Dict, Any
 
-from src.models import WatchAnalysis
+from src.models import (
+    WatchAnalysis,
+    compute_promo_amount,
+    compute_total_price,
+    normalize_promo_type,
+)
 from src.suggest import propose_product_pages
 
 
@@ -34,10 +39,22 @@ def _serialize_app_payload(
                 if u.has_customs is not None
                 else (bool(o.has_customs) if o else (cust_f > 0))
             )
-            tot_p = (
-                round(base_p + ship_f + site_f + cust_f, 2)
-                if base_p is not None
-                else None
+            promo_v = (
+                o.promo_value
+                if (o is not None and o.promo_value)
+                else (u.promo_value or 0.0)
+            )
+            promo_t = normalize_promo_type(
+                o.promo_type if (o is not None and o.promo_value) else u.promo_type
+            )
+            promo_amt = compute_promo_amount(base_p, promo_v, promo_t)
+            tot_p = compute_total_price(
+                base_price=base_p,
+                shipping_fee=ship_f,
+                site_fee=site_f,
+                customs_fee=cust_f,
+                promo_value=promo_v,
+                promo_type=promo_t,
             )
             offers_list.append(
                 {
@@ -45,6 +62,9 @@ def _serialize_app_payload(
                     "merchant": (o.merchant if o and o.merchant else u.merchant) or "Marchand",
                     "condition": (o.condition if o else u.condition) or "new",
                     "base_price": base_p,
+                    "promo_value": round(promo_v, 2) if promo_v > 0 else None,
+                    "promo_type": promo_t,
+                    "promo_amount": promo_amt,
                     "shipping_fee": round(ship_f, 2),
                     "site_fee": round(site_f, 2),
                     "customs_fee": round(cust_f, 2),
@@ -1162,6 +1182,37 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       font-size: 13px;
     }
 
+    .promo-input-group {
+      display: flex;
+      gap: 6px;
+      align-items: stretch;
+    }
+    .promo-input-group input {
+      flex: 1;
+      min-width: 0;
+    }
+    .promo-input-group select {
+      width: 58px;
+      flex-shrink: 0;
+      text-align: center;
+      font-weight: 600;
+      padding: 8px 6px;
+    }
+
+    .promo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid var(--success-border);
+      white-space: nowrap;
+    }
+
     .fee-status-hint {
       font-size: 11px;
       min-height: 15px;
@@ -1663,6 +1714,11 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           const hasCustoms = (yu.has_customs !== undefined && yu.has_customs !== null)
             ? Boolean(yu.has_customs)
             : (Number(yu.customs_fee ?? 0) > 0);
+          const rawPromo = (yu.promo_value !== undefined && yu.promo_value !== null && yu.promo_value !== '')
+            ? Number(yu.promo_value)
+            : null;
+          const promoVal = (rawPromo !== null && !isNaN(rawPromo) && rawPromo > 0) ? rawPromo : null;
+          const promoType = normalizePromoType(yu.promo_type);
           const rawManual = (yu.manual_price !== undefined && yu.manual_price !== null && yu.manual_price !== '')
             ? Number(yu.manual_price)
             : (ru.base_price !== undefined && ru.base_price !== null ? Number(ru.base_price) : null);
@@ -1673,12 +1729,16 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           } else if (!hasCustoms) {
             cust = 0;
           }
-          const total = base !== null ? Number((base + ship + site + cust).toFixed(2)) : null;
+          const promoAmt = computePromoAmount(base, promoVal, promoType);
+          const total = computeTotalPrice(base, ship, site, cust, promoVal, promoType);
           return {
             url: yu.url,
             merchant: yu.merchant || ru.merchant || getHostnameLabel(yu.url),
             condition: yu.condition || ru.condition || 'new',
             base_price: base,
+            promo_value: promoVal,
+            promo_type: promoType,
+            promo_amount: promoAmt,
             shipping_fee: ship,
             site_fee: site,
             customs_fee: cust,
@@ -1936,21 +1996,56 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
     }
 
+    function normalizePromoType(val) {
+      const s = String(val || 'eur').trim().toLowerCase();
+      return (s === 'pct' || s === '%' || s === 'percent') ? 'pct' : 'eur';
+    }
+
+    function computePromoAmount(basePrice, promoValue, promoType = 'eur') {
+      if (basePrice === null || basePrice === undefined || isNaN(Number(basePrice)) || Number(basePrice) <= 0) {
+        return 0;
+      }
+      const pv = Number(promoValue);
+      if (isNaN(pv) || pv <= 0) return 0;
+      if (normalizePromoType(promoType) === 'pct') {
+        const pct = Math.min(pv, 100);
+        return Math.round((Number(basePrice) * pct / 100) * 100) / 100;
+      }
+      return Math.round(pv * 100) / 100;
+    }
+
+    function computeTotalPrice(basePrice, ship = 0, site = 0, cust = 0, promoValue = null, promoType = 'eur') {
+      if (basePrice === null || basePrice === undefined || isNaN(Number(basePrice)) || Number(basePrice) <= 0) {
+        return null;
+      }
+      const promoAmt = computePromoAmount(basePrice, promoValue, promoType);
+      const total = Number(basePrice) - promoAmt + Number(ship || 0) + Number(site || 0) + Number(cust || 0);
+      return Math.round(Math.max(0, total) * 100) / 100;
+    }
+
     function computeWatchSummary(watch) {
       let bestNew = null;
       let bestUsed = null;
 
       (watch.urls || []).forEach((u) => {
         const base = (u.base_price !== null && u.base_price !== undefined && u.base_price !== '') ? Number(u.base_price) : null;
+        const promoVal = (u.promo_value !== null && u.promo_value !== undefined && u.promo_value !== '' && Number(u.promo_value) > 0)
+          ? Number(u.promo_value)
+          : null;
+        const promoType = normalizePromoType(u.promo_type);
+        u.promo_value = promoVal;
+        u.promo_type = promoType;
         if (base === null || isNaN(base) || base <= 0) {
           u.base_price = null;
+          u.promo_amount = 0;
           u.total_price = null;
           return;
         }
         const ship = Number(u.shipping_fee || 0);
         const site = Number(u.site_fee || 0);
         const cust = Number(u.customs_fee || 0);
-        u.total_price = Math.round((base + ship + site + cust) * 100) / 100;
+        u.promo_amount = computePromoAmount(base, promoVal, promoType);
+        u.total_price = computeTotalPrice(base, ship, site, cust, promoVal, promoType);
         if (u.in_stock === false) return;
         if (u.condition === 'used') {
           if (!bestUsed || u.total_price < bestUsed.total_price) bestUsed = u;
@@ -2071,6 +2166,20 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         const baseCellHtml = hasPrice
           ? fmtEur(u.base_price)
           : '<span style="color:var(--text-muted); font-size:12px;">Indisponible</span>';
+        const hasPromo = u.promo_value !== null && u.promo_value !== undefined && Number(u.promo_value) > 0;
+        let promoCellHtml = '<span style="color:var(--text-muted);">—</span>';
+        if (hasPromo) {
+          const pType = normalizePromoType(u.promo_type);
+          const pAmt = computePromoAmount(u.base_price, u.promo_value, pType);
+          if (pType === 'pct') {
+            const pctStr = Number(u.promo_value).toString().replace('.', ',');
+            promoCellHtml = hasPrice
+              ? `<span class="promo-badge" title="Réduction de ${pctStr} %">-${pctStr} % <span style="opacity:0.8; font-weight:500;">(-${fmtEur(pAmt)})</span></span>`
+              : `<span class="promo-badge">-${pctStr} %</span>`;
+          } else {
+            promoCellHtml = `<span class="promo-badge">- ${fmtEur(u.promo_value)}</span>`;
+          }
+        }
         const totalCellHtml = hasPrice
           ? fmtEur(u.total_price)
           : '<span style="color:var(--text-muted); font-weight:500; font-size:12px;">—</span>';
@@ -2089,13 +2198,14 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
               </span>
             </td>
             <td class="mono-num">${baseCellHtml}</td>
+            <td class="mono-num">${promoCellHtml}</td>
             <td class="mono-num">${Number(u.shipping_fee || 0) > 0 ? '+ ' + fmtEur(u.shipping_fee) : '0,00 €'}</td>
             <td class="mono-num">${Number(u.site_fee || 0) > 0 ? '+ ' + fmtEur(u.site_fee) : '0,00 €'}</td>
             <td class="mono-num">${Number(u.customs_fee || 0) > 0 ? '+ ' + fmtEur(u.customs_fee) : (u.has_customs ? '<span style="color:var(--text-muted); font-size:12px;">Oui (auto)</span>' : '0,00 €')}</td>
             <td class="total-cell ${totalClass}">${totalCellHtml}</td>
             <td style="text-align:right; white-space:nowrap;">
               <button class="btn btn-outline btn-sm" onclick="refreshSingleTrackedUrl('${escapeHtml(w.id)}', ${idx}, this)" title="Récupérer automatiquement le prix actuel sur la page">🔄</button>
-              <button class="btn btn-outline btn-sm" onclick="openEditUrlDrawer('${escapeHtml(w.id)}', ${idx})" title="Modifier le prix ou les frais">✏️ Frais</button>
+              <button class="btn btn-outline btn-sm" onclick="openEditUrlDrawer('${escapeHtml(w.id)}', ${idx})" title="Modifier le prix, la promo ou les frais">✏️ Frais</button>
               <button class="icon-btn" onclick="deleteUrlFromWatch('${escapeHtml(w.id)}', ${idx})" title="Supprimer cette page produit">🗑️</button>
             </td>
           </tr>
@@ -2107,7 +2217,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
       const emptyUrlsHtml = `
         <tr>
-          <td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">
+          <td colspan="9" style="text-align:center; padding:20px; color:var(--text-muted);">
             Aucune page produit suivie pour le moment. Cliquez sur <strong>+ Ajouter une URL produit</strong> ou <strong>✨ Proposer des pages produit</strong>.
           </td>
         </tr>`;
@@ -2339,6 +2449,18 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
                 </div>
 
                 <div class="field-group">
+                  <label>Promotion (€ ou %)</label>
+                  <div class="promo-input-group">
+                    <input type="number" step="0.01" min="0" id="uf-promo-${escapeHtml(w.id)}" placeholder="Optionnel (ex: 20 ou 10)" oninput="recalcUrlPreview('${escapeHtml(w.id)}')" />
+                    <select id="uf-promo-type-${escapeHtml(w.id)}" onchange="recalcUrlPreview('${escapeHtml(w.id)}')" aria-label="Unité de promotion">
+                      <option value="eur">€</option>
+                      <option value="pct">%</option>
+                    </select>
+                  </div>
+                  <span class="fee-status-hint" id="uf-promo-hint-${escapeHtml(w.id)}"></span>
+                </div>
+
+                <div class="field-group">
                   <label>Frais de port (€)</label>
                   <input type="number" step="0.01" min="0" id="uf-ship-${escapeHtml(w.id)}" placeholder="À saisir (ex: 0 ou 15)" oninput="onShippingFeeInput('${escapeHtml(w.id)}')" />
                   <span class="fee-status-hint" id="uf-ship-hint-${escapeHtml(w.id)}"></span>
@@ -2386,6 +2508,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
                   <th>Page produit</th>
                   <th>État</th>
                   <th>Prix affiché</th>
+                  <th>Promo</th>
                   <th>Frais de port</th>
                   <th>Frais du site</th>
                   <th>Frais de douane</th>
@@ -2780,11 +2903,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       document.getElementById(`uf-merchant-${watchId}`).value = '';
       document.getElementById(`uf-cond-${watchId}`).value = 'new';
       document.getElementById(`uf-base-${watchId}`).value = '';
+      document.getElementById(`uf-promo-${watchId}`).value = '';
+      document.getElementById(`uf-promo-type-${watchId}`).value = 'eur';
       document.getElementById(`uf-ship-${watchId}`).value = '';
       document.getElementById(`uf-site-${watchId}`).value = '';
       document.getElementById(`uf-has-cust-${watchId}`).value = 'no';
       document.getElementById(`uf-cust-${watchId}`).value = '0';
-      ['merch', 'cond', 'base', 'ship', 'site', 'has-cust', 'cust'].forEach(k => setHint(`uf-${k}-hint-${watchId}`, '', ''));
+      ['merch', 'cond', 'base', 'promo', 'ship', 'site', 'has-cust', 'cust'].forEach(k => setHint(`uf-${k}-hint-${watchId}`, '', ''));
       setLiveBanner(`uf-live-banner-${watchId}`, '<span>Collez une URL produit ci-dessus : le prix, le marchand, l\'état et les frais sont récupérés automatiquement.</span>', '');
       lastInspectedByWatch[watchId] = '';
       urlFeeAutoState[watchId] = { shipMode: 'auto', siteMode: 'auto', custMode: 'auto', ruleType: '', pendingMeta: null };
@@ -2801,17 +2926,19 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       const hasCustoms = (u.has_customs !== undefined && u.has_customs !== null)
         ? Boolean(u.has_customs)
         : (Number(u.customs_fee || 0) > 0);
-      document.getElementById(`url-drawer-title-${watchId}`).textContent = `✏️ Modifier le prix ou les frais — ${u.merchant}`;
+      document.getElementById(`url-drawer-title-${watchId}`).textContent = `✏️ Modifier le prix, la promo ou les frais — ${u.merchant}`;
       document.getElementById(`uf-edit-idx-${watchId}`).value = String(idx);
       document.getElementById(`uf-url-${watchId}`).value = u.url;
       document.getElementById(`uf-merchant-${watchId}`).value = u.merchant || '';
       document.getElementById(`uf-cond-${watchId}`).value = u.condition || 'new';
       document.getElementById(`uf-base-${watchId}`).value = u.base_price ?? '';
+      document.getElementById(`uf-promo-${watchId}`).value = (u.promo_value !== null && u.promo_value !== undefined && Number(u.promo_value) > 0) ? u.promo_value : '';
+      document.getElementById(`uf-promo-type-${watchId}`).value = normalizePromoType(u.promo_type);
       document.getElementById(`uf-ship-${watchId}`).value = u.shipping_fee ?? 0;
       document.getElementById(`uf-site-${watchId}`).value = u.site_fee ?? 0;
       document.getElementById(`uf-has-cust-${watchId}`).value = hasCustoms ? 'yes' : 'no';
       document.getElementById(`uf-cust-${watchId}`).value = u.customs_fee ?? 0;
-      ['merch', 'cond', 'base', 'ship', 'site', 'has-cust', 'cust'].forEach(k => setHint(`uf-${k}-hint-${watchId}`, '', ''));
+      ['merch', 'cond', 'base', 'promo', 'ship', 'site', 'has-cust', 'cust'].forEach(k => setHint(`uf-${k}-hint-${watchId}`, '', ''));
       if (hasCustoms) {
         setHint(`uf-cust-hint-${watchId}`, '✓ Calcul auto actif (TVA 20 % + douane + dossier)', 'auto-ok');
       }
@@ -3696,7 +3823,15 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         } else {
           u.customs_fee = 0;
         }
-        u.total_price = Math.round((u.base_price + (u.shipping_fee || 0) + (u.site_fee || 0) + (u.customs_fee || 0)) * 100) / 100;
+        u.promo_amount = computePromoAmount(u.base_price, u.promo_value, u.promo_type);
+        u.total_price = computeTotalPrice(
+          u.base_price,
+          u.shipping_fee || 0,
+          u.site_fee || 0,
+          u.customs_fee || 0,
+          u.promo_value,
+          u.promo_type
+        );
         await persistState(`Prix mis à jour chez ${u.merchant} : ${fmtEur(u.total_price)} TTC`);
         renderAllCards();
       } else {
@@ -3785,17 +3920,52 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     function recalcUrlPreview(watchId) {
       const rawBase = document.getElementById(`uf-base-${watchId}`).value.trim();
       const base = rawBase !== '' ? parseFloat(rawBase) : NaN;
+      const rawPromo = (document.getElementById(`uf-promo-${watchId}`)?.value || '').trim();
+      const promoVal = rawPromo !== '' ? parseFloat(rawPromo) : NaN;
+      const promoType = normalizePromoType(document.getElementById(`uf-promo-type-${watchId}`)?.value || 'eur');
       const ship = parseFloat(document.getElementById(`uf-ship-${watchId}`).value) || 0;
       const site = parseFloat(document.getElementById(`uf-site-${watchId}`).value) || 0;
       const cust = parseFloat(document.getElementById(`uf-cust-${watchId}`).value) || 0;
       const formulaEl = document.getElementById(`uf-formula-${watchId}`);
       if (!formulaEl) return;
+
+      const hasPromo = !isNaN(promoVal) && promoVal > 0;
       if (isNaN(base) || base <= 0) {
+        if (hasPromo) {
+          const label = promoType === 'pct'
+            ? `-${Math.min(promoVal, 100).toString().replace('.', ',')} %`
+            : `- ${fmtEur(promoVal)}`;
+          setHint(`uf-promo-hint-${watchId}`, `Promo enregistrée (${label})`, 'auto-ok');
+        } else {
+          setHint(`uf-promo-hint-${watchId}`, '', '');
+        }
         formulaEl.innerHTML = 'Prix total calculé : <strong>Indisponible (sans prix affiché)</strong>';
         return;
       }
-      const total = Math.round((base + ship + site + cust) * 100) / 100;
-      formulaEl.innerHTML = `${fmtEur(base)} (prix) + ${fmtEur(ship)} (port) + ${fmtEur(site)} (site) + ${fmtEur(cust)} (douane) = <strong>${fmtEur(total)} TTC</strong>`;
+
+      const promoAmt = computePromoAmount(base, hasPromo ? promoVal : null, promoType);
+      if (hasPromo) {
+        if (promoType === 'pct') {
+          const clampedPct = Math.min(promoVal, 100);
+          setHint(
+            `uf-promo-hint-${watchId}`,
+            `✓ Réduction : -${fmtEur(promoAmt)} (-${clampedPct.toString().replace('.', ',')} %)`,
+            'auto-ok'
+          );
+        } else {
+          setHint(`uf-promo-hint-${watchId}`, `✓ Réduction : -${fmtEur(promoAmt)}`, 'auto-ok');
+        }
+      } else {
+        setHint(`uf-promo-hint-${watchId}`, '', '');
+      }
+
+      const total = computeTotalPrice(base, ship, site, cust, hasPromo ? promoVal : null, promoType);
+      const promoPart = promoAmt > 0
+        ? (promoType === 'pct'
+          ? ` - <span style="color:var(--success); font-weight:600;">${fmtEur(promoAmt)} (promo -${Math.min(promoVal, 100).toString().replace('.', ',')} %)</span>`
+          : ` - <span style="color:var(--success); font-weight:600;">${fmtEur(promoAmt)} (promo)</span>`)
+        : '';
+      formulaEl.innerHTML = `${fmtEur(base)} (prix)${promoPart} + ${fmtEur(ship)} (port) + ${fmtEur(site)} (site) + ${fmtEur(cust)} (douane) = <strong>${fmtEur(total)} TTC</strong>`;
     }
 
     async function submitUrlForm(ev, watchId) {
@@ -3811,6 +3981,12 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       const parsedBase = rawBase !== '' ? parseFloat(rawBase) : NaN;
       const hasPrice = !isNaN(parsedBase) && parsedBase > 0;
       const base_price = hasPrice ? parsedBase : null;
+      const rawPromo = (document.getElementById(`uf-promo-${watchId}`)?.value || '').trim();
+      const parsedPromo = rawPromo !== '' ? parseFloat(rawPromo) : NaN;
+      const promo_type = normalizePromoType(document.getElementById(`uf-promo-type-${watchId}`)?.value || 'eur');
+      const promo_value = (!isNaN(parsedPromo) && parsedPromo > 0)
+        ? (promo_type === 'pct' ? Math.min(parsedPromo, 100) : parsedPromo)
+        : null;
       const shipping_fee = parseFloat(document.getElementById(`uf-ship-${watchId}`).value) || 0;
       const site_fee = parseFloat(document.getElementById(`uf-site-${watchId}`).value) || 0;
       const has_customs = document.getElementById(`uf-has-cust-${watchId}`).value === 'yes';
@@ -3818,9 +3994,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       const customs_fee = has_customs
         ? (rawCust > 0 ? rawCust : (hasPrice ? computeCustomsFee(base_price, shipping_fee) : 0))
         : 0;
-      const total_price = hasPrice
-        ? Math.round((base_price + shipping_fee + site_fee + customs_fee) * 100) / 100
-        : null;
+      const promo_amount = computePromoAmount(base_price, promo_value, promo_type);
+      const total_price = computeTotalPrice(base_price, shipping_fee, site_fee, customs_fee, promo_value, promo_type);
 
       const meta = (urlFeeAutoState[watchId] && urlFeeAutoState[watchId].pendingMeta) || null;
       if (meta) {
@@ -3834,6 +4009,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         merchant,
         condition,
         base_price,
+        promo_value,
+        promo_type,
+        promo_amount,
         shipping_fee,
         site_fee,
         has_customs,
@@ -4242,6 +4420,10 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           lines.push(`        condition: ${JSON.stringify(u.condition || 'new')}`);
           if (u.base_price !== null && u.base_price !== undefined && Number(u.base_price) > 0) {
             lines.push(`        manual_price: ${Number(u.base_price)}`);
+          }
+          if (u.promo_value !== null && u.promo_value !== undefined && Number(u.promo_value) > 0) {
+            lines.push(`        promo_value: ${Number(u.promo_value)}`);
+            lines.push(`        promo_type: ${JSON.stringify(normalizePromoType(u.promo_type))}`);
           }
           lines.push(`        shipping_fee: ${Number(u.shipping_fee || 0)}`);
           lines.push(`        site_fee: ${Number(u.site_fee || 0)}`);

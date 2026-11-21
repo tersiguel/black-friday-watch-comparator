@@ -26,7 +26,16 @@ from typing import Dict, Any, List, Tuple, Optional
 
 import yaml
 
-from src.models import WatchConfig, WatchURL, SuggestedURL, OfferResult, WatchAnalysis
+from src.models import (
+    WatchConfig,
+    WatchURL,
+    SuggestedURL,
+    OfferResult,
+    WatchAnalysis,
+    compute_promo_amount,
+    compute_total_price,
+    normalize_promo_type,
+)
 from src.scraper import scrape_offer, inspect_product_url, infer_merchant_name, compute_japan_customs_only
 from src.suggest import propose_product_pages
 from src.analyzer import load_history, save_history, analyze_watch_and_update_history
@@ -97,6 +106,8 @@ def load_config(config_path: str) -> Tuple[Dict[str, Any], List[WatchConfig]]:
                         customs_fee=_opt_float(u.get("customs_fee")),
                         has_customs=_opt_bool(u.get("has_customs")),
                         manual_price=_opt_positive_price(u.get("manual_price")),
+                        promo_value=_opt_positive_price(u.get("promo_value")),
+                        promo_type=normalize_promo_type(u.get("promo_type")),
                         note=str(u.get("note", "")),
                     )
                 )
@@ -184,6 +195,8 @@ def save_config_from_watches(
                     "merchant": u.merchant,
                     "condition": u.condition,
                     "manual_price": u.manual_price,
+                    "promo_value": u.promo_value if (u.promo_value is not None and u.promo_value > 0) else None,
+                    "promo_type": normalize_promo_type(u.promo_type) if (u.promo_value is not None and u.promo_value > 0) else None,
                     "shipping_fee": u.shipping_fee if u.shipping_fee is not None else 0.0,
                     "site_fee": u.site_fee if u.site_fee is not None else 0.0,
                     "has_customs": u.has_customs if u.has_customs is not None else ((u.customs_fee or 0.0) > 0),
@@ -254,7 +267,17 @@ def build_demo_offers_and_seed_keepa_history(
             else:
                 cust_f = u.customs_fee if u.customs_fee is not None else 0.0
                 eff_has_customs = cust_f > 0
-            total_p = round(base_p + ship_f + site_f + cust_f, 2) if base_p is not None else None
+            p_val = u.promo_value if (u.promo_value is not None and u.promo_value > 0) else 0.0
+            p_type = normalize_promo_type(u.promo_type)
+            p_amt = compute_promo_amount(base_p, p_val, p_type)
+            total_p = compute_total_price(
+                base_price=base_p,
+                shipping_fee=ship_f,
+                site_fee=site_f,
+                customs_fee=cust_f,
+                promo_value=p_val,
+                promo_type=p_type,
+            )
             w_offers.append(
                 OfferResult(
                     watch_id=w.id,
@@ -267,6 +290,9 @@ def build_demo_offers_and_seed_keepa_history(
                     site_fee=round(site_f, 2),
                     customs_fee=round(cust_f, 2),
                     has_customs=eff_has_customs,
+                    promo_value=round(p_val, 2),
+                    promo_type=p_type,
+                    promo_amount=p_amt,
                     shipping_detected=True,
                     site_fee_detected=True,
                     customs_detected=True,
@@ -348,6 +374,8 @@ def run_comparator(
                     customs_fee=u.customs_fee,
                     has_customs=u.has_customs,
                     manual_price=u.manual_price,
+                    promo_value=u.promo_value,
+                    promo_type=u.promo_type,
                     timeout=timeout,
                     use_playwright_fallback=use_pw,
                     import_settings=import_settings,
@@ -464,6 +492,8 @@ def add_url_to_config(
     customs_fee: Optional[float] = None,
     has_customs: Optional[bool] = None,
     manual_price: Optional[float] = None,
+    promo_value: Optional[float] = None,
+    promo_type: str = "eur",
     auto_inspect: bool = True,
 ) -> None:
     settings, watches = load_config(config_path)
@@ -514,6 +544,8 @@ def add_url_to_config(
             customs_fee=customs_fee if customs_fee is not None else 0.0,
             has_customs=has_customs,
             manual_price=manual_price,
+            promo_value=_opt_positive_price(promo_value),
+            promo_type=normalize_promo_type(promo_type),
         )
     )
     save_config_from_watches(config_path, settings, watches)
@@ -626,6 +658,8 @@ def serve_interactive_app(
                             customs_fee=_opt_float(u.get("customs_fee")),
                             has_customs=_opt_bool(u.get("has_customs")),
                             manual_price=_opt_positive_price(u.get("base_price")),
+                            promo_value=_opt_positive_price(u.get("promo_value")),
+                            promo_type=normalize_promo_type(u.get("promo_type")),
                         )
                         for u in w.get("urls", [])
                         if u.get("url")
@@ -720,6 +754,8 @@ def build_cli() -> argparse.ArgumentParser:
     p_add_u.add_argument("--merchant", default="")
     p_add_u.add_argument("--condition", choices=["new", "used"], default="new")
     p_add_u.add_argument("--price", type=float, default=None)
+    p_add_u.add_argument("--promo-value", type=float, default=None)
+    p_add_u.add_argument("--promo-type", choices=["eur", "pct"], default="eur")
     p_add_u.add_argument("--shipping-fee", type=float, default=None)
     p_add_u.add_argument("--site-fee", type=float, default=None)
     p_add_u.add_argument("--customs-fee", type=float, default=None)
@@ -802,6 +838,8 @@ def main() -> int:
             customs_fee=args.customs_fee,
             has_customs=args.has_customs,
             manual_price=args.price,
+            promo_value=args.promo_value,
+            promo_type=args.promo_type,
             auto_inspect=not args.no_inspect,
         )
         return 0
