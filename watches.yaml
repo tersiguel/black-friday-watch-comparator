@@ -32,7 +32,7 @@ watches:
         customs_fee: 106.19
       - url: "https://www.chrono24.fr/citizen/-cb0264-55eh145-a5k0g03--id48767527.htm?searchHash=fddeda0b_UPaDe3&pos=1"
         merchant: "Chrono24"
-        condition: "new"
+        condition: "used"
         manual_price: 276
         shipping_fee: 0
         site_fee: 0
