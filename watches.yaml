@@ -148,11 +148,11 @@ watches:
       - url: "https://www.sakurawatches.com/citizen-attesa-act-line-cb3040-56h"
         merchant: "Sakura Watches (Tokyo)"
         condition: "new"
-        manual_price: 402.96
+        manual_price: 403.88
         shipping_fee: 24
         site_fee: 0
         has_customs: true
-        customs_fee: 104.35
+        customs_fee: 104.54
       - url: "https://www.creationwatches.com/products/fr/citizen-74/citizen-attesa-act-line-super-titanium-silver-dial-eco-drive-cb3040-56h-100m-mens-watch-36425.html"
         merchant: "CreationWatches"
         condition: "new"
