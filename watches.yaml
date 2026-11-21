@@ -149,10 +149,10 @@ watches:
         merchant: "Sakura Watches (Tokyo)"
         condition: "new"
         manual_price: 399
-        shipping_fee: 24
+        shipping_fee: 43
         site_fee: 0
         has_customs: true
-        customs_fee: 103.56
+        customs_fee: 107.36
       - url: "https://www.creationwatches.com/products/fr/citizen-74/citizen-attesa-act-line-super-titanium-silver-dial-eco-drive-cb3040-56h-100m-mens-watch-36425.html"
         merchant: "CreationWatches"
         condition: "new"
