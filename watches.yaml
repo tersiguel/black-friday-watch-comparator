@@ -301,10 +301,10 @@ watches:
       - url: "https://www.sakurawatches.com/citizen-collection-cb1160-55e-15415"
         merchant: "Sakura Watches (Tokyo)"
         condition: "new"
-        manual_price: 312
+        manual_price: 309.12
         shipping_fee: 24
         site_fee: 0
-        customs_fee: 86.16
+        customs_fee: 85.58
       - url: "https://www.zeitlounge.com/fr/citizen-eco-drive-cb1160-55e-montre-radio-pilotee-pour-hommes-eco-drive-montre-radio/a-169883"
         merchant: "Zeitlounge"
         condition: "new"
