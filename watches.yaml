@@ -12,6 +12,57 @@ settings:
     carrier_fee_eur: 18
 
 watches:
+  - id: "citizen-cb0264-55e"
+    name: "Citizen CB0264-55E CITIZEN COLLECTION KIZASHI solar Titanium... à vendre pour 335 € par un Trusted Seller sur Chrono24"
+    brand: "Citizen"
+    reference: "CB0264-55E"
+    image_url: "https://cdn2.chrono24.com/images/product/224827-iyj4drkaq2wrzb9axmg5iveh-Square500.jpg"
+    features: "État:  |  Année de fabrication 2026 (Informations approximatives)  |  Avec boîte d'origine  |  Avec papiers d'origine"
+    specs:
+      "Référence": "CB0264-55E"
+    target_price_new: 308
+    reference_price: 335
+    urls:
+      - url: "https://www.chrono24.fr/citizen/citizen-cb0264-55e-citizen-collection-kizashi-solar-titanium-analog-watch--id44060167.htm?searchHash=3ea7182_7Oys6f&pos=2"
+        merchant: "Chrono24"
+        condition: "new"
+        manual_price: 335
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+    suggested_urls:
+      - url: "https://www.amazon.fr/s?k=Citizen%20CB0264-55E"
+        merchant: "Amazon.fr"
+        title: "Rechercher Citizen CB0264-55E sur Amazon.fr"
+        condition: "new"
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Livraison UE • 0 € douane"
+      - url: "https://ocarat.com/recherche?controller=search&s=Citizen%20CB0264-55E"
+        merchant: "Ocarat"
+        title: "Citizen CB0264-55E chez Ocarat France"
+        condition: "new"
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Boutique agréée France • 0 € douane"
+      - url: "https://www.chrono24.fr/search/index.htm?query=CB0264-55E&usedOrNew=used"
+        merchant: "Chrono24 (Occasion)"
+        title: "Annonces Occasion Citizen CB0264-55E"
+        condition: "used"
+        shipping_fee: 15
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Protection acheteur Chrono24 incluse"
+      - url: "https://www.catawiki.com/fr/s?q=Citizen%20CB0264-55E"
+        merchant: "Catawiki"
+        title: "Enchères Citizen CB0264-55E"
+        condition: "used"
+        shipping_fee: 18
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Frais Catawiki 9 % + 3 € pré-calculés"
   - id: "citizen-cb3035-72e"
     name: "Citizen Attesa ACT Line CB3035-72E"
     brand: "Citizen"
