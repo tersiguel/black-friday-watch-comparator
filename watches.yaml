@@ -42,13 +42,13 @@ watches:
       - url: "https://www.catawiki.com/en/l/108630860-citizen-kizashi-collection-limited-1-200-pieces-super-titanium-new-unworn-no-reserve-price-cb0264-55e-men-2026"
         merchant: "Catawiki"
         condition: "used"
-        manual_price: 130
+        manual_price: 150
         promo_value: 30
         promo_type: "eur"
         shipping_fee: 40
-        site_fee: 14.7
+        site_fee: 16.5
         has_customs: true
-        customs_fee: 52.96
+        customs_fee: 56.96
     suggested_urls:
       - url: "https://www.amazon.fr/s?k=Citizen%20CB0264-55E"
         merchant: "Amazon.fr"
