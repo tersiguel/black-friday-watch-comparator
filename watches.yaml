@@ -47,8 +47,8 @@ watches:
         promo_type: "eur"
         shipping_fee: 40
         site_fee: 14.7
-        has_customs: false
-        customs_fee: 0
+        has_customs: true
+        customs_fee: 52.96
     suggested_urls:
       - url: "https://www.amazon.fr/s?k=Citizen%20CB0264-55E"
         merchant: "Amazon.fr"
