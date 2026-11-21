@@ -27,7 +27,7 @@ from typing import Dict, Any, List, Tuple, Optional
 import yaml
 
 from src.models import WatchConfig, WatchURL, SuggestedURL, OfferResult, WatchAnalysis
-from src.scraper import scrape_offer, inspect_product_url, infer_merchant_name
+from src.scraper import scrape_offer, inspect_product_url, infer_merchant_name, compute_japan_customs_only
 from src.suggest import propose_product_pages
 from src.analyzer import load_history, save_history, analyze_watch_and_update_history
 from src.notifier import (
@@ -51,6 +51,19 @@ def _opt_float(val: Any) -> Optional[float]:
         return round(float(val), 2)
     except (TypeError, ValueError):
         return None
+
+
+def _opt_bool(val: Any) -> Optional[bool]:
+    if val is None or val == "":
+        return None
+    if isinstance(val, bool):
+        return val
+    s = str(val).strip().lower()
+    if s in ("true", "1", "yes", "oui"):
+        return True
+    if s in ("false", "0", "no", "non"):
+        return False
+    return None
 
 
 def _opt_positive_price(val: Any) -> Optional[float]:
@@ -82,6 +95,7 @@ def load_config(config_path: str) -> Tuple[Dict[str, Any], List[WatchConfig]]:
                         shipping_fee=_opt_float(u.get("shipping_fee")),
                         site_fee=_opt_float(u.get("site_fee")),
                         customs_fee=_opt_float(u.get("customs_fee")),
+                        has_customs=_opt_bool(u.get("has_customs")),
                         manual_price=_opt_positive_price(u.get("manual_price")),
                         note=str(u.get("note", "")),
                     )
@@ -172,6 +186,7 @@ def save_config_from_watches(
                     "manual_price": u.manual_price,
                     "shipping_fee": u.shipping_fee if u.shipping_fee is not None else 0.0,
                     "site_fee": u.site_fee if u.site_fee is not None else 0.0,
+                    "has_customs": u.has_customs if u.has_customs is not None else ((u.customs_fee or 0.0) > 0),
                     "customs_fee": u.customs_fee if u.customs_fee is not None else 0.0,
                 }.items()
                 if v is not None
@@ -198,6 +213,7 @@ def save_config_from_watches(
 def build_demo_offers_and_seed_keepa_history(
     watches: List[WatchConfig],
     history: Dict[str, Any],
+    import_settings: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, List[OfferResult]]:
     """
     Build OfferResult objects strictly from the user's configured URLs (no automatic discovery)
@@ -206,6 +222,7 @@ def build_demo_offers_and_seed_keepa_history(
     now = datetime.now(timezone.utc)
     now_iso = now.isoformat()
     offers_by_watch: Dict[str, List[OfferResult]] = {}
+    imp = import_settings or {}
 
     # Stepped multipliers over 45 days to render authentic Keepa step-lines
     step_days = [45, 38, 31, 24, 18, 12, 7, 3, 1]
@@ -218,7 +235,25 @@ def build_demo_offers_and_seed_keepa_history(
             base_p = u.manual_price
             ship_f = u.shipping_fee if u.shipping_fee is not None else 0.0
             site_f = u.site_fee if u.site_fee is not None else 0.0
-            cust_f = u.customs_fee if u.customs_fee is not None else 0.0
+            if u.has_customs is True:
+                cust_f = (
+                    compute_japan_customs_only(
+                        raw_price_ht=base_p,
+                        shipping_eur=ship_f,
+                        vat_rate=float(imp.get("vat_rate", 0.20)),
+                        customs_duty_eur=float(imp.get("customs_duty_eur", 0.80)),
+                        carrier_fee_eur=float(imp.get("carrier_fee_eur", 18.0)),
+                    )
+                    if base_p is not None
+                    else 0.0
+                )
+                eff_has_customs = True
+            elif u.has_customs is False:
+                cust_f = 0.0
+                eff_has_customs = False
+            else:
+                cust_f = u.customs_fee if u.customs_fee is not None else 0.0
+                eff_has_customs = cust_f > 0
             total_p = round(base_p + ship_f + site_f + cust_f, 2) if base_p is not None else None
             w_offers.append(
                 OfferResult(
@@ -231,6 +266,7 @@ def build_demo_offers_and_seed_keepa_history(
                     shipping_fee=round(ship_f, 2),
                     site_fee=round(site_f, 2),
                     customs_fee=round(cust_f, 2),
+                    has_customs=eff_has_customs,
                     shipping_detected=True,
                     site_fee_detected=True,
                     customs_detected=True,
@@ -294,7 +330,9 @@ def run_comparator(
     offers_by_watch: Dict[str, List[OfferResult]] = {}
 
     if demo_mode:
-        offers_by_watch = build_demo_offers_and_seed_keepa_history(watches, history)
+        offers_by_watch = build_demo_offers_and_seed_keepa_history(
+            watches, history, import_settings=import_settings
+        )
     else:
         for w in watches:
             print(f"🔎 Relevé des pages suivies pour {w.brand} {w.reference} ({len(w.urls)} URLs)...")
@@ -308,6 +346,7 @@ def run_comparator(
                     shipping_fee=u.shipping_fee,
                     site_fee=u.site_fee,
                     customs_fee=u.customs_fee,
+                    has_customs=u.has_customs,
                     manual_price=u.manual_price,
                     timeout=timeout,
                     use_playwright_fallback=use_pw,
@@ -423,6 +462,7 @@ def add_url_to_config(
     shipping_fee: Optional[float] = None,
     site_fee: Optional[float] = None,
     customs_fee: Optional[float] = None,
+    has_customs: Optional[bool] = None,
     manual_price: Optional[float] = None,
     auto_inspect: bool = True,
 ) -> None:
@@ -440,19 +480,39 @@ def add_url_to_config(
             shipping_fee = info["shipping_fee"]
         if site_fee is None and info["site_fee_detected"]:
             site_fee = info["site_fee"]
-        if customs_fee is None and info["customs_detected"]:
+        if has_customs is None and customs_fee is None and info["customs_detected"]:
             customs_fee = info["customs_fee"]
+            has_customs = bool((info["customs_fee"] or 0.0) > 0)
         if not condition and info["condition"]:
             condition = info["condition"]
+
+    eff_ship = shipping_fee if shipping_fee is not None else 0.0
+    imp = settings.get("japan_import", {}) or {}
+    if has_customs is True:
+        if manual_price is not None:
+            customs_fee = compute_japan_customs_only(
+                raw_price_ht=manual_price,
+                shipping_eur=eff_ship,
+                vat_rate=float(imp.get("vat_rate", 0.20)),
+                customs_duty_eur=float(imp.get("customs_duty_eur", 0.80)),
+                carrier_fee_eur=float(imp.get("carrier_fee_eur", 18.0)),
+            )
+        else:
+            customs_fee = 0.0
+    elif has_customs is False:
+        customs_fee = 0.0
+    else:
+        has_customs = bool((customs_fee or 0.0) > 0)
 
     target.urls.append(
         WatchURL(
             url=url.strip(),
             merchant=merchant or infer_merchant_name(url),
             condition=condition or "new",
-            shipping_fee=shipping_fee if shipping_fee is not None else 0.0,
+            shipping_fee=eff_ship,
             site_fee=site_fee if site_fee is not None else 0.0,
             customs_fee=customs_fee if customs_fee is not None else 0.0,
+            has_customs=has_customs,
             manual_price=manual_price,
         )
     )
@@ -564,6 +624,7 @@ def serve_interactive_app(
                             shipping_fee=_opt_float(u.get("shipping_fee")),
                             site_fee=_opt_float(u.get("site_fee")),
                             customs_fee=_opt_float(u.get("customs_fee")),
+                            has_customs=_opt_bool(u.get("has_customs")),
                             manual_price=_opt_positive_price(u.get("base_price")),
                         )
                         for u in w.get("urls", [])
@@ -662,6 +723,7 @@ def build_cli() -> argparse.ArgumentParser:
     p_add_u.add_argument("--shipping-fee", type=float, default=None)
     p_add_u.add_argument("--site-fee", type=float, default=None)
     p_add_u.add_argument("--customs-fee", type=float, default=None)
+    p_add_u.add_argument("--has-customs", action=argparse.BooleanOptionalAction, default=None)
     p_add_u.add_argument("--no-inspect", action="store_true")
 
     p_rm_u = sub.add_parser("remove-url", help="Supprimer une URL produit")
@@ -738,6 +800,7 @@ def main() -> int:
             shipping_fee=args.shipping_fee,
             site_fee=args.site_fee,
             customs_fee=args.customs_fee,
+            has_customs=args.has_customs,
             manual_price=args.price,
             auto_inspect=not args.no_inspect,
         )

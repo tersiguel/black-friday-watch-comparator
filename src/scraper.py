@@ -1005,6 +1005,7 @@ def scrape_offer(
     shipping_fee: Optional[float] = None,
     site_fee: Optional[float] = None,
     customs_fee: Optional[float] = None,
+    has_customs: Optional[bool] = None,
     manual_price: Optional[float] = None,
     timeout: int = 15,
     use_playwright_fallback: bool = True,
@@ -1049,7 +1050,24 @@ def scrape_offer(
         eff_condition = condition or detected["condition"] or "new"
         eff_ship = shipping_fee if shipping_fee is not None else (detected["shipping_fee"] or 0.0)
         eff_site = site_fee if site_fee is not None else (detected["site_fee"] or 0.0)
-        eff_cust = customs_fee if customs_fee is not None else (detected["customs_fee"] or 0.0)
+
+        imp = import_settings or {}
+        if has_customs is True:
+            eff_cust = compute_japan_customs_only(
+                raw_price_ht=base_price,
+                shipping_eur=eff_ship,
+                vat_rate=float(imp.get("vat_rate", 0.20)),
+                customs_duty_eur=float(imp.get("customs_duty_eur", 0.80)),
+                carrier_fee_eur=float(imp.get("carrier_fee_eur", 18.0)),
+            )
+            eff_has_customs = True
+        elif has_customs is False:
+            eff_cust = 0.0
+            eff_has_customs = False
+        else:
+            eff_cust = customs_fee if customs_fee is not None else (detected["customs_fee"] or 0.0)
+            eff_has_customs = eff_cust > 0
+
         total_price = round(base_price + eff_ship + eff_site + eff_cust, 2)
 
         fee_notes = []
@@ -1057,7 +1075,9 @@ def scrape_offer(
             fee_notes.append(detected["shipping_reason"])
         if detected["site_fee_reason"] and site_fee is None and eff_site > 0:
             fee_notes.append(detected["site_fee_reason"])
-        if detected["customs_reason"] and customs_fee is None and eff_cust > 0:
+        if has_customs is True:
+            fee_notes.append("Douane activée : TVA 20 % + douane + frais dossier")
+        elif detected["customs_reason"] and customs_fee is None and has_customs is None and eff_cust > 0:
             fee_notes.append(detected["customs_reason"])
 
         return OfferResult(
@@ -1070,9 +1090,10 @@ def scrape_offer(
             shipping_fee=round(eff_ship, 2),
             site_fee=round(eff_site, 2),
             customs_fee=round(eff_cust, 2),
+            has_customs=eff_has_customs,
             shipping_detected=(shipping_fee is None and detected["shipping_detected"]),
             site_fee_detected=(site_fee is None and detected["site_fee_detected"]),
-            customs_detected=(customs_fee is None and detected["customs_detected"]),
+            customs_detected=(has_customs is None and customs_fee is None and detected["customs_detected"]),
             fee_notes=fee_notes,
             original_price=extracted.get("original_price") if extracted else None,
             currency="EUR",
@@ -1091,7 +1112,8 @@ def scrape_offer(
         condition=condition or "new",
         shipping_fee=round(shipping_fee or 0.0, 2),
         site_fee=round(site_fee or 0.0, 2),
-        customs_fee=round(customs_fee or 0.0, 2),
+        customs_fee=0.0 if has_customs is False else round(customs_fee or 0.0, 2),
+        has_customs=bool(has_customs) if has_customs is not None else ((customs_fee or 0.0) > 0),
         in_stock=False,
         extraction_method="failed",
         timestamp=now_iso,

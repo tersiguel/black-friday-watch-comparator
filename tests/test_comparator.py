@@ -317,6 +317,78 @@ class TestKeepaWatchComparator(unittest.TestCase):
             self.assertNotIn('required id="uf-base-', html)
             self.assertIn("Optionnel (vide si indisponible)", html)
 
+    def test_has_customs_boolean_applies_or_zeros_customs_calculation(self):
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        src_cfg = os.path.join(base_dir, "watches.yaml")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cfg_copy = os.path.join(tmpdir, "watches.yaml")
+            shutil.copyfile(src_cfg, cfg_copy)
+            hist_path = os.path.join(tmpdir, "data", "history.json")
+            docs_dir = os.path.join(tmpdir, "docs")
+
+            new_id = add_watch_to_config(
+                config_path=cfg_copy,
+                brand="Citizen",
+                name="Citizen Test Customs",
+                reference="TEST-CUST-01",
+                target_price_new=450.0,
+            )
+            # 1. has_customs=True -> applies formula: ((312 + 24 + 0.80) * 0.20) + 0.80 + 18 = 86.16 €
+            add_url_to_config(
+                config_path=cfg_copy,
+                watch_id=new_id,
+                url="https://example-shop.com/watch-jp",
+                condition="new",
+                manual_price=312.0,
+                shipping_fee=24.0,
+                site_fee=0.0,
+                has_customs=True,
+                auto_inspect=False,
+            )
+            # 2. has_customs=False -> forces 0 € even on non-EU domain
+            add_url_to_config(
+                config_path=cfg_copy,
+                watch_id=new_id,
+                url="https://www.sakurawatches.com/no-customs-test",
+                condition="new",
+                manual_price=312.0,
+                shipping_fee=24.0,
+                site_fee=0.0,
+                has_customs=False,
+                auto_inspect=False,
+            )
+
+            _, watches = load_config(cfg_copy)
+            added_w = next(w for w in watches if w.id == new_id)
+            self.assertTrue(added_w.urls[0].has_customs)
+            self.assertEqual(added_w.urls[0].customs_fee, 86.16)
+            self.assertFalse(added_w.urls[1].has_customs)
+            self.assertEqual(added_w.urls[1].customs_fee, 0.0)
+
+            analyses = run_comparator(
+                config_path=cfg_copy,
+                history_path=hist_path,
+                docs_dir=docs_dir,
+                demo_mode=True,
+                no_notify=True,
+            )
+            target_analysis = next(a for a in analyses if a.watch.id == new_id)
+            self.assertEqual(target_analysis.offers[0].customs_fee, 86.16)
+            self.assertEqual(target_analysis.offers[0].price, 422.16)
+            self.assertTrue(target_analysis.offers[0].has_customs)
+            self.assertEqual(target_analysis.offers[1].customs_fee, 0.0)
+            self.assertEqual(target_analysis.offers[1].price, 336.0)
+            self.assertFalse(target_analysis.offers[1].has_customs)
+
+            index_html = os.path.join(docs_dir, "index.html")
+            with open(index_html, "r", encoding="utf-8") as f:
+                html = f.read()
+            self.assertIn("Frais de douane ?", html)
+            self.assertIn("uf-has-cust-", html)
+            self.assertIn("onHasCustomsChange", html)
+            self.assertIn("computeCustomsFee", html)
+
 
 if __name__ == "__main__":
     unittest.main()

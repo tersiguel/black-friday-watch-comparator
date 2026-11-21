@@ -12,6 +12,7 @@ class WatchURL:
     shipping_fee: Optional[float] = None  # Frais de port (€) - None = auto-detect if stated on site
     site_fee: Optional[float] = None      # Frais du site / protection acheteur (€)
     customs_fee: Optional[float] = None   # Frais de douane & TVA import (€)
+    has_customs: Optional[bool] = None    # True = appliquer le calcul douane/TVA, False = 0 € (UE), None = auto
     manual_price: Optional[float] = None  # Prix affiché saisi ou mis en cache (€)
     note: str = ""
 
@@ -76,6 +77,7 @@ class OfferResult:
     shipping_fee: float = 0.0
     site_fee: float = 0.0
     customs_fee: float = 0.0
+    has_customs: bool = False
     shipping_detected: bool = False
     site_fee_detected: bool = False
     customs_detected: bool = False

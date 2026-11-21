@@ -29,6 +29,11 @@ def _serialize_app_payload(
             ship_f = o.shipping_fee if o else (u.shipping_fee or 0.0)
             site_f = o.site_fee if o else (u.site_fee or 0.0)
             cust_f = o.customs_fee if o else (u.customs_fee or 0.0)
+            has_cust = (
+                u.has_customs
+                if u.has_customs is not None
+                else (bool(o.has_customs) if o else (cust_f > 0))
+            )
             tot_p = (
                 round(base_p + ship_f + site_f + cust_f, 2)
                 if base_p is not None
@@ -43,6 +48,7 @@ def _serialize_app_payload(
                     "shipping_fee": round(ship_f, 2),
                     "site_fee": round(site_f, 2),
                     "customs_fee": round(cust_f, 2),
+                    "has_customs": bool(has_cust),
                     "total_price": tot_p,
                     "shipping_detected": bool(o.shipping_detected) if o else (u.shipping_fee is not None),
                     "site_fee_detected": bool(o.site_fee_detected) if o else (u.site_fee is not None),
@@ -1596,6 +1602,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           return {
             ...u,
             base_price: defU.base_price !== undefined ? defU.base_price : u.base_price,
+            has_customs: u.has_customs !== undefined ? u.has_customs : (defU.has_customs !== undefined ? defU.has_customs : (Number(u.customs_fee || 0) > 0)),
             total_price: defU.total_price !== undefined ? defU.total_price : u.total_price,
             title: defU.title || u.title,
             in_stock: defU.in_stock !== undefined ? defU.in_stock : u.in_stock,
@@ -1610,6 +1617,18 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         };
       });
       return state;
+    }
+
+    function computeCustomsFee(basePrice, shippingFee) {
+      const imp = (appState && appState.settings && appState.settings.japan_import) || {};
+      const vatRate = Number(imp.vat_rate ?? 0.20);
+      const dutyEur = Number(imp.customs_duty_eur ?? 0.80);
+      const carrierEur = Number(imp.carrier_fee_eur ?? 18.0);
+      const base = Number(basePrice || 0);
+      const ship = Number(shippingFee || 0);
+      if (!base || isNaN(base) || base <= 0) return 0;
+      const taxes = (base + ship + dutyEur) * vatRate + dutyEur + carrierEur;
+      return Math.round(taxes * 100) / 100;
     }
 
     function loadAppState() {
@@ -1641,11 +1660,19 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           const ru = refUrlMap.get(yu.url) || {};
           const ship = Number(yu.shipping_fee ?? 0);
           const site = Number(yu.site_fee ?? 0);
-          const cust = Number(yu.customs_fee ?? 0);
+          const hasCustoms = (yu.has_customs !== undefined && yu.has_customs !== null)
+            ? Boolean(yu.has_customs)
+            : (Number(yu.customs_fee ?? 0) > 0);
           const rawManual = (yu.manual_price !== undefined && yu.manual_price !== null && yu.manual_price !== '')
             ? Number(yu.manual_price)
             : (ru.base_price !== undefined && ru.base_price !== null ? Number(ru.base_price) : null);
           const base = (rawManual !== null && !isNaN(rawManual) && rawManual > 0) ? rawManual : null;
+          let cust = Number(yu.customs_fee ?? 0);
+          if (hasCustoms && base !== null && (yu.customs_fee === undefined || yu.customs_fee === null)) {
+            cust = computeCustomsFee(base, ship);
+          } else if (!hasCustoms) {
+            cust = 0;
+          }
           const total = base !== null ? Number((base + ship + site + cust).toFixed(2)) : null;
           return {
             url: yu.url,
@@ -1655,6 +1682,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             shipping_fee: ship,
             site_fee: site,
             customs_fee: cust,
+            has_customs: hasCustoms,
             total_price: total,
             shipping_detected: ru.shipping_detected || false,
             site_fee_detected: ru.site_fee_detected || false,
@@ -2063,7 +2091,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             <td class="mono-num">${baseCellHtml}</td>
             <td class="mono-num">${Number(u.shipping_fee || 0) > 0 ? '+ ' + fmtEur(u.shipping_fee) : '0,00 €'}</td>
             <td class="mono-num">${Number(u.site_fee || 0) > 0 ? '+ ' + fmtEur(u.site_fee) : '0,00 €'}</td>
-            <td class="mono-num">${Number(u.customs_fee || 0) > 0 ? '+ ' + fmtEur(u.customs_fee) : '0,00 €'}</td>
+            <td class="mono-num">${Number(u.customs_fee || 0) > 0 ? '+ ' + fmtEur(u.customs_fee) : (u.has_customs ? '<span style="color:var(--text-muted); font-size:12px;">Oui (auto)</span>' : '0,00 €')}</td>
             <td class="total-cell ${totalClass}">${totalCellHtml}</td>
             <td style="text-align:right; white-space:nowrap;">
               <button class="btn btn-outline btn-sm" onclick="refreshSingleTrackedUrl('${escapeHtml(w.id)}', ${idx}, this)" title="Récupérer automatiquement le prix actuel sur la page">🔄</button>
@@ -2312,7 +2340,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
                 <div class="field-group">
                   <label>Frais de port (€)</label>
-                  <input type="number" step="0.01" min="0" id="uf-ship-${escapeHtml(w.id)}" placeholder="À saisir (ex: 0 ou 15)" oninput="markManualFee('${escapeHtml(w.id)}', 'ship'); recalcUrlPreview('${escapeHtml(w.id)}')" />
+                  <input type="number" step="0.01" min="0" id="uf-ship-${escapeHtml(w.id)}" placeholder="À saisir (ex: 0 ou 15)" oninput="onShippingFeeInput('${escapeHtml(w.id)}')" />
                   <span class="fee-status-hint" id="uf-ship-hint-${escapeHtml(w.id)}"></span>
                 </div>
 
@@ -2323,8 +2351,17 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
                 </div>
 
                 <div class="field-group">
+                  <label>Frais de douane ?</label>
+                  <select id="uf-has-cust-${escapeHtml(w.id)}" onchange="onHasCustomsChange('${escapeHtml(w.id)}')">
+                    <option value="no">Non (0 €)</option>
+                    <option value="yes">Oui (calcul auto)</option>
+                  </select>
+                  <span class="fee-status-hint" id="uf-has-cust-hint-${escapeHtml(w.id)}"></span>
+                </div>
+
+                <div class="field-group">
                   <label>Frais de douane & TVA (€)</label>
-                  <input type="number" step="0.01" min="0" id="uf-cust-${escapeHtml(w.id)}" placeholder="À saisir (0 € en UE)" oninput="markManualFee('${escapeHtml(w.id)}', 'cust'); recalcUrlPreview('${escapeHtml(w.id)}')" />
+                  <input type="number" step="0.01" min="0" id="uf-cust-${escapeHtml(w.id)}" placeholder="0 € si Non" oninput="onCustomsFeeManualInput('${escapeHtml(w.id)}')" />
                   <span class="fee-status-hint" id="uf-cust-hint-${escapeHtml(w.id)}"></span>
                 </div>
               </div>
@@ -2745,8 +2782,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       document.getElementById(`uf-base-${watchId}`).value = '';
       document.getElementById(`uf-ship-${watchId}`).value = '';
       document.getElementById(`uf-site-${watchId}`).value = '';
-      document.getElementById(`uf-cust-${watchId}`).value = '';
-      ['merch', 'cond', 'base', 'ship', 'site', 'cust'].forEach(k => setHint(`uf-${k}-hint-${watchId}`, '', ''));
+      document.getElementById(`uf-has-cust-${watchId}`).value = 'no';
+      document.getElementById(`uf-cust-${watchId}`).value = '0';
+      ['merch', 'cond', 'base', 'ship', 'site', 'has-cust', 'cust'].forEach(k => setHint(`uf-${k}-hint-${watchId}`, '', ''));
       setLiveBanner(`uf-live-banner-${watchId}`, '<span>Collez une URL produit ci-dessus : le prix, le marchand, l\'état et les frais sont récupérés automatiquement.</span>', '');
       lastInspectedByWatch[watchId] = '';
       urlFeeAutoState[watchId] = { shipMode: 'auto', siteMode: 'auto', custMode: 'auto', ruleType: '', pendingMeta: null };
@@ -2760,6 +2798,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       if (!w || !w.urls[idx]) return;
       const u = w.urls[idx];
       const drawer = document.getElementById(`url-drawer-${watchId}`);
+      const hasCustoms = (u.has_customs !== undefined && u.has_customs !== null)
+        ? Boolean(u.has_customs)
+        : (Number(u.customs_fee || 0) > 0);
       document.getElementById(`url-drawer-title-${watchId}`).textContent = `✏️ Modifier le prix ou les frais — ${u.merchant}`;
       document.getElementById(`uf-edit-idx-${watchId}`).value = String(idx);
       document.getElementById(`uf-url-${watchId}`).value = u.url;
@@ -2768,11 +2809,15 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       document.getElementById(`uf-base-${watchId}`).value = u.base_price ?? '';
       document.getElementById(`uf-ship-${watchId}`).value = u.shipping_fee ?? 0;
       document.getElementById(`uf-site-${watchId}`).value = u.site_fee ?? 0;
+      document.getElementById(`uf-has-cust-${watchId}`).value = hasCustoms ? 'yes' : 'no';
       document.getElementById(`uf-cust-${watchId}`).value = u.customs_fee ?? 0;
-      ['merch', 'cond', 'base', 'ship', 'site', 'cust'].forEach(k => setHint(`uf-${k}-hint-${watchId}`, '', ''));
+      ['merch', 'cond', 'base', 'ship', 'site', 'has-cust', 'cust'].forEach(k => setHint(`uf-${k}-hint-${watchId}`, '', ''));
+      if (hasCustoms) {
+        setHint(`uf-cust-hint-${watchId}`, '✓ Calcul auto actif (TVA 20 % + douane + dossier)', 'auto-ok');
+      }
       setLiveBanner(`uf-live-banner-${watchId}`, '<span>Cliquez sur <strong>🔄 Actualiser depuis l\'URL</strong> pour relire le prix en direct sur la page, ou ajustez librement les champs.</span>', '');
       lastInspectedByWatch[watchId] = u.url;
-      urlFeeAutoState[watchId] = { shipMode: 'manual', siteMode: 'manual', custMode: 'manual', ruleType: '', pendingMeta: null };
+      urlFeeAutoState[watchId] = { shipMode: 'manual', siteMode: 'manual', custMode: hasCustoms ? 'auto' : 'manual', ruleType: '', pendingMeta: null };
       recalcUrlPreview(watchId);
       drawer.classList.add('open');
     }
@@ -2814,6 +2859,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         setHint(`uf-site-hint-${watchId}`, '✓ Frais site pré-remplis', 'auto-ok');
       }
       if (s.customs_fee !== null && s.customs_fee !== undefined) {
+        const sHasCust = Number(s.customs_fee) > 0;
+        document.getElementById(`uf-has-cust-${watchId}`).value = sHasCust ? 'yes' : 'no';
         document.getElementById(`uf-cust-${watchId}`).value = s.customs_fee;
         setHint(`uf-cust-hint-${watchId}`, '✓ Douane pré-remplie', 'auto-ok');
       }
@@ -3580,17 +3627,27 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       }
 
       const custVal = (rules.ruleType === 'japan_import' && effectiveBase > 0)
-        ? rules.cust
+        ? computeCustomsFee(effectiveBase, shipVal !== null && shipVal !== undefined ? shipVal : 24.0)
         : ((inspected && inspected.customs_detected && inspected.customs_fee !== null && inspected.customs_fee !== undefined) ? inspected.customs_fee : rules.cust);
       const custWhy = (rules.ruleType === 'japan_import' && effectiveBase > 0)
         ? rules.custReason
         : ((inspected && inspected.customs_detected && inspected.customs_reason) ? ('✓ ' + inspected.customs_reason) : rules.custReason);
+      const detectedHasCustoms = (rules.ruleType === 'japan_import') || (custVal !== null && custVal !== undefined && Number(custVal) > 0);
+      const hasCustEl = document.getElementById(`uf-has-cust-${watchId}`);
+      if (hasCustEl) hasCustEl.value = detectedHasCustoms ? 'yes' : 'no';
+      if (detectedHasCustoms) {
+        setHint(`uf-has-cust-hint-${watchId}`, '✓ Hors-UE détecté', 'auto-ok');
+      } else if (custVal !== null && custVal !== undefined) {
+        setHint(`uf-has-cust-hint-${watchId}`, '✓ UE / TTC (0 €)', 'auto-ok');
+      } else {
+        setHint(`uf-has-cust-hint-${watchId}`, '✍️ Choisissez Oui si hors-UE', 'manual-needed');
+      }
       if (custVal !== null && custVal !== undefined) {
         document.getElementById(`uf-cust-${watchId}`).value = custVal;
         setHint(`uf-cust-hint-${watchId}`, custWhy, 'auto-ok');
       } else {
-        document.getElementById(`uf-cust-${watchId}`).value = '';
-        setHint(`uf-cust-hint-${watchId}`, custWhy || '✍️ Vérifiez pays du vendeur (0 € si UE)', 'manual-needed');
+        document.getElementById(`uf-cust-${watchId}`).value = '0';
+        setHint(`uf-cust-hint-${watchId}`, custWhy || '✍️ Sélectionnez « Oui » si vendeur hors-UE', 'manual-needed');
       }
 
       if (inspected && inspected.base_price !== null && inspected.base_price !== undefined) {
@@ -3631,9 +3688,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         const rules = clientSideSiteRules(u.url, u.base_price);
         if (rules.ruleType === 'catawiki' && rules.site !== null) u.site_fee = rules.site;
         if (rules.ruleType === 'vinted' && rules.site !== null) u.site_fee = rules.site;
-        if (rules.ruleType === 'japan_import') {
-          const taxes = (u.base_price + (u.shipping_fee || 24.0) + 0.80) * 0.20 + 0.80 + 18.0;
-          u.customs_fee = Math.round(taxes * 100) / 100;
+        const applyCustoms = (u.has_customs !== undefined && u.has_customs !== null)
+          ? Boolean(u.has_customs)
+          : (rules.ruleType === 'japan_import');
+        if (applyCustoms) {
+          u.customs_fee = computeCustomsFee(u.base_price, u.shipping_fee || 0);
+        } else {
+          u.customs_fee = 0;
         }
         u.total_price = Math.round((u.base_price + (u.shipping_fee || 0) + (u.site_fee || 0) + (u.customs_fee || 0)) * 100) / 100;
         await persistState(`Prix mis à jour chez ${u.merchant} : ${fmtEur(u.total_price)} TTC`);
@@ -3643,10 +3704,62 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       }
     }
 
+    function onHasCustomsChange(watchId) {
+      if (!urlFeeAutoState[watchId]) {
+        urlFeeAutoState[watchId] = { shipMode: 'manual', siteMode: 'manual', custMode: 'auto', ruleType: '', pendingMeta: null };
+      }
+      const hasCust = document.getElementById(`uf-has-cust-${watchId}`).value === 'yes';
+      const base = parseFloat(document.getElementById(`uf-base-${watchId}`).value) || 0;
+      const ship = parseFloat(document.getElementById(`uf-ship-${watchId}`).value) || 0;
+      if (hasCust) {
+        urlFeeAutoState[watchId].custMode = 'auto';
+        setHint(`uf-has-cust-hint-${watchId}`, '✓ Calcul douane activé', 'auto-ok');
+        if (base > 0) {
+          document.getElementById(`uf-cust-${watchId}`).value = computeCustomsFee(base, ship);
+          setHint(`uf-cust-hint-${watchId}`, '✓ TVA 20 % + douane + dossier calculés', 'auto-ok');
+        } else {
+          document.getElementById(`uf-cust-${watchId}`).value = 0;
+          setHint(`uf-cust-hint-${watchId}`, 'Sera calculé dès le prix saisi', 'auto-ok');
+        }
+      } else {
+        urlFeeAutoState[watchId].custMode = 'manual';
+        setHint(`uf-has-cust-hint-${watchId}`, '✓ Sans douane (0 €)', 'auto-ok');
+        document.getElementById(`uf-cust-${watchId}`).value = 0;
+        setHint(`uf-cust-hint-${watchId}`, '✓ Aucun frais de douane', 'auto-ok');
+      }
+      recalcUrlPreview(watchId);
+    }
+
+    function onShippingFeeInput(watchId) {
+      markManualFee(watchId, 'ship');
+      const st = urlFeeAutoState[watchId] || {};
+      const hasCustEl = document.getElementById(`uf-has-cust-${watchId}`);
+      const hasCust = hasCustEl && hasCustEl.value === 'yes';
+      const base = parseFloat(document.getElementById(`uf-base-${watchId}`).value) || 0;
+      const ship = parseFloat(document.getElementById(`uf-ship-${watchId}`).value) || 0;
+      if (hasCust && st.custMode === 'auto' && base > 0) {
+        document.getElementById(`uf-cust-${watchId}`).value = computeCustomsFee(base, ship);
+        setHint(`uf-cust-hint-${watchId}`, '✓ TVA 20 % + douane + dossier recalculés', 'auto-ok');
+      }
+      recalcUrlPreview(watchId);
+    }
+
+    function onCustomsFeeManualInput(watchId) {
+      markManualFee(watchId, 'cust');
+      const val = parseFloat(document.getElementById(`uf-cust-${watchId}`).value) || 0;
+      const hasCustEl = document.getElementById(`uf-has-cust-${watchId}`);
+      if (hasCustEl) {
+        hasCustEl.value = val > 0 ? 'yes' : 'no';
+      }
+      recalcUrlPreview(watchId);
+    }
+
     function onBasePriceInput(watchId) {
       const st = urlFeeAutoState[watchId] || {};
       const base = parseFloat(document.getElementById(`uf-base-${watchId}`).value) || 0;
       const ship = parseFloat(document.getElementById(`uf-ship-${watchId}`).value) || 0;
+      const hasCustEl = document.getElementById(`uf-has-cust-${watchId}`);
+      const hasCust = hasCustEl && hasCustEl.value === 'yes';
 
       if (base > 0) {
         if (st.siteMode === 'auto' && st.ruleType === 'catawiki') {
@@ -3658,11 +3771,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           document.getElementById(`uf-site-${watchId}`).value = fee;
           setHint(`uf-site-hint-${watchId}`, '✓ Vinted 5 % + 0,70 € calculé', 'auto-ok');
         }
-        if (st.custMode === 'auto' && st.ruleType === 'japan_import') {
-          const taxes = (base + (ship || 24.0) + 0.80) * 0.20 + 0.80 + 18.0;
-          document.getElementById(`uf-cust-${watchId}`).value = Math.round(taxes * 100) / 100;
+        if (hasCust && st.custMode === 'auto') {
+          document.getElementById(`uf-cust-${watchId}`).value = computeCustomsFee(base, ship);
           setHint(`uf-cust-hint-${watchId}`, '✓ TVA 20 % + douane + dossier calculés', 'auto-ok');
         }
+      } else if (hasCust && st.custMode === 'auto') {
+        document.getElementById(`uf-cust-${watchId}`).value = 0;
+        setHint(`uf-cust-hint-${watchId}`, 'Sera calculé dès le prix saisi', 'auto-ok');
       }
       recalcUrlPreview(watchId);
     }
@@ -3698,7 +3813,11 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       const base_price = hasPrice ? parsedBase : null;
       const shipping_fee = parseFloat(document.getElementById(`uf-ship-${watchId}`).value) || 0;
       const site_fee = parseFloat(document.getElementById(`uf-site-${watchId}`).value) || 0;
-      const customs_fee = parseFloat(document.getElementById(`uf-cust-${watchId}`).value) || 0;
+      const has_customs = document.getElementById(`uf-has-cust-${watchId}`).value === 'yes';
+      const rawCust = parseFloat(document.getElementById(`uf-cust-${watchId}`).value) || 0;
+      const customs_fee = has_customs
+        ? (rawCust > 0 ? rawCust : (hasPrice ? computeCustomsFee(base_price, shipping_fee) : 0))
+        : 0;
       const total_price = hasPrice
         ? Math.round((base_price + shipping_fee + site_fee + customs_fee) * 100) / 100
         : null;
@@ -3717,6 +3836,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         base_price,
         shipping_fee,
         site_fee,
+        has_customs,
         customs_fee,
         total_price,
         title: (meta && meta.title) || '',
@@ -3820,6 +3940,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       const ship = inspected.shipping_fee ?? 0;
       const site = inspected.site_fee ?? 0;
       const cust = inspected.customs_fee ?? 0;
+      const hasCust = (inspected.ruleType === 'japan_import') || (Number(cust) > 0);
       const hasPrice = inspected.base_price !== null && inspected.base_price !== undefined;
       const total = hasPrice ? Math.round((inspected.base_price + ship + site + cust) * 100) / 100 : null;
 
@@ -3830,6 +3951,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         base_price: hasPrice ? inspected.base_price : null,
         shipping_fee: ship,
         site_fee: site,
+        has_customs: hasCust,
         customs_fee: cust,
         total_price: total,
         asin: inspected.asin || '',
@@ -3900,6 +4022,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             base_price: npFetchedInitialOffer.base_price,
             shipping_fee: npFetchedInitialOffer.shipping_fee,
             site_fee: npFetchedInitialOffer.site_fee,
+            has_customs: Boolean(npFetchedInitialOffer.has_customs),
             customs_fee: npFetchedInitialOffer.customs_fee,
             total_price: npFetchedInitialOffer.total_price,
             title: npFetchedInitialOffer.title || name,
@@ -3914,6 +4037,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             base_price: null,
             shipping_fee: rules.ship ?? 0,
             site_fee: rules.site ?? 0,
+            has_customs: rules.ruleType === 'japan_import' || Number(rules.cust || 0) > 0,
             customs_fee: rules.cust ?? 0,
             total_price: null,
             title: name,
@@ -4121,6 +4245,10 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           }
           lines.push(`        shipping_fee: ${Number(u.shipping_fee || 0)}`);
           lines.push(`        site_fee: ${Number(u.site_fee || 0)}`);
+          const uHasCust = (u.has_customs !== undefined && u.has_customs !== null)
+            ? Boolean(u.has_customs)
+            : (Number(u.customs_fee || 0) > 0);
+          lines.push(`        has_customs: ${uHasCust}`);
           lines.push(`        customs_fee: ${Number(u.customs_fee || 0)}`);
         });
         if (w.suggested_urls && w.suggested_urls.length > 0) {
