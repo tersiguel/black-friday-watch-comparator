@@ -29,6 +29,7 @@ watches:
         manual_price: 412.16
         shipping_fee: 24
         site_fee: 0
+        has_customs: true
         customs_fee: 106.19
       - url: "https://www.chrono24.fr/citizen/-cb0264-55eh145-a5k0g03--id48767527.htm?searchHash=fddeda0b_UPaDe3&pos=1"
         merchant: "Chrono24"
@@ -36,13 +37,15 @@ watches:
         manual_price: 276
         shipping_fee: 0
         site_fee: 0
+        has_customs: false
         customs_fee: 0
       - url: "https://www.catawiki.com/en/l/108630860-citizen-kizashi-collection-limited-1-200-pieces-super-titanium-new-unworn-no-reserve-price-cb0264-55e-men-2026"
         merchant: "Catawiki"
         condition: "used"
-        manual_price: 130.3
+        manual_price: 130
         shipping_fee: 40
-        site_fee: 14.73
+        site_fee: 14.7
+        has_customs: false
         customs_fee: 0
     suggested_urls:
       - url: "https://www.amazon.fr/s?k=Citizen%20CB0264-55E"
@@ -94,6 +97,7 @@ watches:
         manual_price: 761.76
         shipping_fee: 24
         site_fee: 0
+        has_customs: true
         customs_fee: 176.11
     suggested_urls:
       - url: "https://www.amazon.fr/s?k=Citizen%20CB3035-72E"
@@ -145,6 +149,7 @@ watches:
         manual_price: 402.96
         shipping_fee: 24
         site_fee: 0
+        has_customs: true
         customs_fee: 104.35
     suggested_urls:
       - url: "https://www.amazon.fr/s?k=Citizen%2015594-"
@@ -197,12 +202,14 @@ watches:
         manual_price: 736
         shipping_fee: 24
         site_fee: 0
+        has_customs: true
         customs_fee: 170.96
       - url: "https://www.amazon.fr/Citizen-CB3046-76E-Montre-multifonction-homme/dp/B0F5BS88Y4"
         merchant: "Amazon.fr"
         condition: "new"
         shipping_fee: 0
         site_fee: 0
+        has_customs: false
         customs_fee: 0
       - url: "https://www.grimoldiwatches.com/en/citizen-spaceship-h128-dlc-blue-watch-cb3046-76e.html"
         merchant: "Grimoldiwatches"
@@ -210,6 +217,7 @@ watches:
         manual_price: 647.54
         shipping_fee: 0
         site_fee: 0
+        has_customs: false
         customs_fee: 0
     suggested_urls:
       - url: "https://www.amazon.fr/s?k=Citizen%20CB3046-76E"
@@ -261,6 +269,7 @@ watches:
         manual_price: 516.12
         shipping_fee: 24
         site_fee: 0
+        has_customs: true
         customs_fee: 126.98
     suggested_urls:
       - url: "https://www.amazon.fr/s?k=Citizen%20CB3045-61E"
@@ -312,6 +321,7 @@ watches:
         manual_price: 448.96
         shipping_fee: 24
         site_fee: 0
+        has_customs: true
         customs_fee: 113.55
     suggested_urls:
       - url: "https://www.amazon.fr/s?k=Citizen%20CB3015-53E"
@@ -369,6 +379,7 @@ watches:
         manual_price: 309.12
         shipping_fee: 24
         site_fee: 0
+        has_customs: true
         customs_fee: 85.58
       - url: "https://www.zeitlounge.com/fr/citizen-eco-drive-cb1160-55e-montre-radio-pilotee-pour-hommes-eco-drive-montre-radio/a-169883"
         merchant: "Zeitlounge"
@@ -376,6 +387,7 @@ watches:
         manual_price: 435.89
         shipping_fee: 0
         site_fee: 0
+        has_customs: false
         customs_fee: 0
       - url: "https://www.horlogerie4you.fr/products/citizen-cb1160-55e"
         merchant: "Horlogerie4you"
@@ -383,6 +395,7 @@ watches:
         manual_price: 479
         shipping_fee: 9.5
         site_fee: 0
+        has_customs: false
         customs_fee: 0
       - url: "https://www.chrono24.fr/citizen/citizen-citizen-cb1160-55e-jdm-375-mm-radio-controlled-watch-super-titanium-solar--worldwide--id44975296.htm"
         merchant: "Chrono24"
@@ -390,6 +403,7 @@ watches:
         manual_price: 357
         shipping_fee: 0
         site_fee: 0
+        has_customs: false
         customs_fee: 0
     suggested_urls:
       - url: "https://www.luna-time.fr/Citizen-CB1160-55E-Montre-Bracelet-Hommes-Solaire-Eco-Drive"
@@ -449,6 +463,7 @@ watches:
         manual_price: 312
         shipping_fee: 24
         site_fee: 0
+        has_customs: true
         customs_fee: 86.16
       - url: "https://www.chrono24.fr/citizen/eco-drive-super-titanium-cb1160-55l--id49411070.htm"
         merchant: "Chrono24 (UE)"
@@ -456,6 +471,7 @@ watches:
         manual_price: 483
         shipping_fee: 0
         site_fee: 0
+        has_customs: false
         customs_fee: 0
       - url: "https://www.zeitlounge.com/fr/citizen-eco-drive-cb1160-55l-funkuhr-eco-drive-funkuhr/a-169884/"
         merchant: "Zeitlounge"
@@ -463,6 +479,7 @@ watches:
         manual_price: 479
         shipping_fee: 0
         site_fee: 0
+        has_customs: false
         customs_fee: 0
     suggested_urls:
       - url: "https://www.chrono24.fr/citizen/cb1160-55l-eco-drive-solar-funkarmbanduhr-unisex-titan-blau--id49391729.htm"
@@ -504,6 +521,7 @@ watches:
         manual_price: 297
         shipping_fee: 24
         site_fee: 0
+        has_customs: true
         customs_fee: 82.36
     suggested_urls:
       - url: "https://www.chrono24.fr/search/index.htm?query=SBTM323&usedOrNew=used"
