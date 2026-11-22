@@ -12,6 +12,58 @@ settings:
     carrier_fee_eur: 18
 
 watches:
+  - id: "citizen-cb3040-56h"
+    name: "Citizen Attesa ACT Line CB3040-56H"
+    brand: "Citizen"
+    reference: "CB3040-56H"
+    image_url: "https://www.sakurawatches.com/image/cache/webp/catalog/watches/6/ages-amazon-com-images-I-91CR6dPNIhL-_UL1500_-jpg-90x90.webp"
+    features: "Citizen Attesa ACT Line CB3040-56H - men's watch made by Citizen. It is equipped with Japanese solar quartz movement and H128 calibre. Super titanium, duratect treatment case of round shape. Case dimensions are 39 mm. in diameter and 9.7 mm. in thickness. The"
+    specs:
+      "Référence": "CB3040-56H"
+    target_price_new: 489
+    reference_price: 532.42
+    urls:
+      - url: "https://www.sakurawatches.com/citizen-attesa-act-line-cb3040-56h"
+        merchant: "Sakura Watches (Tokyo)"
+        condition: "new"
+        manual_price: 403.88
+        shipping_fee: 24
+        site_fee: 0
+        has_customs: true
+        customs_fee: 104.54
+    suggested_urls:
+      - url: "https://www.amazon.fr/s?k=Citizen%20CB3040-56H"
+        merchant: "Amazon.fr"
+        title: "Rechercher Citizen CB3040-56H sur Amazon.fr"
+        condition: "new"
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Livraison UE • 0 € douane"
+      - url: "https://ocarat.com/recherche?controller=search&s=Citizen%20CB3040-56H"
+        merchant: "Ocarat"
+        title: "Citizen CB3040-56H chez Ocarat France"
+        condition: "new"
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Boutique agréée France • 0 € douane"
+      - url: "https://www.chrono24.fr/search/index.htm?query=CB3040-56H&usedOrNew=used"
+        merchant: "Chrono24 (Occasion)"
+        title: "Annonces Occasion Citizen CB3040-56H"
+        condition: "used"
+        shipping_fee: 15
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Protection acheteur Chrono24 incluse"
+      - url: "https://www.catawiki.com/fr/s?q=Citizen%20CB3040-56H"
+        merchant: "Catawiki"
+        title: "Enchères Citizen CB3040-56H"
+        condition: "used"
+        shipping_fee: 18
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Frais Catawiki 9 % + 3 € pré-calculés"
   - id: "citizen-cb3035-72e"
     name: "Citizen Attesa ACT Line CB3035-72E"
     brand: "Citizen"
