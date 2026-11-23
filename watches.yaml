@@ -12,6 +12,58 @@ settings:
     carrier_fee_eur: 18
 
 watches:
+  - id: "seiko-sbtm347"
+    name: "Seiko Selection Solar Radio SBTM347"
+    brand: "Seiko"
+    reference: "sbtm347"
+    image_url: "https://www.sakurawatches.com/image/cache/webp/catalog/SBTM347-1000x1000.webp"
+    features: "Seiko Selection Solar Radio SBTM347 - men's watch manufactured by Seiko. It has Japanese solar quartz movement and 7B72 calibre. Stainless steel case of round shape. Case dimensions are 39.8 mm. in diameter and 9.5 mm. in thickness. The dial of this Seiko watc"
+    specs:
+      "Référence": "sbtm347"
+    target_price_new: 413
+    reference_price: 449.62
+    urls:
+      - url: "https://www.sakurawatches.com/seiko-selection-solar-radio-sbtm347"
+        merchant: "Sakura Watches (Tokyo)"
+        condition: "new"
+        manual_price: 334.88
+        shipping_fee: 24
+        site_fee: 0
+        has_customs: true
+        customs_fee: 90.74
+    suggested_urls:
+      - url: "https://www.amazon.fr/s?k=Seiko%20sbtm347"
+        merchant: "Amazon.fr"
+        title: "Rechercher Seiko sbtm347 sur Amazon.fr"
+        condition: "new"
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Livraison UE • 0 € douane"
+      - url: "https://ocarat.com/recherche?controller=search&s=Seiko%20sbtm347"
+        merchant: "Ocarat"
+        title: "Seiko sbtm347 chez Ocarat France"
+        condition: "new"
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Boutique agréée France • 0 € douane"
+      - url: "https://www.chrono24.fr/search/index.htm?query=sbtm347&usedOrNew=used"
+        merchant: "Chrono24 (Occasion)"
+        title: "Annonces Occasion Seiko sbtm347"
+        condition: "used"
+        shipping_fee: 15
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Protection acheteur Chrono24 incluse"
+      - url: "https://www.catawiki.com/fr/s?q=Seiko%20sbtm347"
+        merchant: "Catawiki"
+        title: "Enchères Seiko sbtm347"
+        condition: "used"
+        shipping_fee: 18
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Frais Catawiki 9 % + 3 € pré-calculés"
   - id: "seiko-sbtm363"
     name: "Seiko Selection Men's Solar Radio Controlled 2026 Raise The Furture Limited Edition SBTM363"
     brand: "Seiko"
