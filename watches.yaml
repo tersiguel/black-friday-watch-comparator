@@ -12,6 +12,58 @@ settings:
     carrier_fee_eur: 18
 
 watches:
+  - id: "seiko-15646"
+    name: "Seiko Selection Men's Solar Radio Controlled 2026 Raise The Furture Limited Edition SBTM363"
+    brand: "Seiko"
+    reference: "15646-"
+    image_url: "http://www.sakurawatches.com/image/catalog/watches/s/SBTM363/!SBTM3631.png"
+    features: "Seiko Selection Men's Solar Radio Controlled 2026 Raise The Furture Limited Edition SBTM363 - men's watch made by Seiko. It is equipped with Japanese solar quartz movement and 7B62 calibre. Stainless steel case of round shape. Case dimensions are 37 mm. in diameter and 8.7 mm. in"
+    specs:
+      "Référence": "15646-"
+    target_price_new: 293
+    reference_price: 319.04
+    urls:
+      - url: "https://www.sakurawatches.com/seiko-selection-men-s-solar-radio-controlled-2026-raise-the-furture-limited-edition-sbtm363"
+        merchant: "Sakura Watches (Tokyo)"
+        condition: "new"
+        manual_price: 226.07
+        shipping_fee: 24
+        site_fee: 0
+        has_customs: true
+        customs_fee: 68.97
+    suggested_urls:
+      - url: "https://www.amazon.fr/s?k=Seiko%2015646-"
+        merchant: "Amazon.fr"
+        title: "Rechercher Seiko 15646- sur Amazon.fr"
+        condition: "new"
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Livraison UE • 0 € douane"
+      - url: "https://ocarat.com/recherche?controller=search&s=Seiko%2015646-"
+        merchant: "Ocarat"
+        title: "Seiko 15646- chez Ocarat France"
+        condition: "new"
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Boutique agréée France • 0 € douane"
+      - url: "https://www.chrono24.fr/search/index.htm?query=15646-&usedOrNew=used"
+        merchant: "Chrono24 (Occasion)"
+        title: "Annonces Occasion Seiko 15646-"
+        condition: "used"
+        shipping_fee: 15
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Protection acheteur Chrono24 incluse"
+      - url: "https://www.catawiki.com/fr/s?q=Seiko%2015646-"
+        merchant: "Catawiki"
+        title: "Enchères Seiko 15646-"
+        condition: "used"
+        shipping_fee: 18
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Frais Catawiki 9 % + 3 € pré-calculés"
   - id: "citizen-cb3040-56h"
     name: "Citizen Attesa ACT Line CB3040-56H"
     brand: "Citizen"
