@@ -1,20 +1,27 @@
 {
-  "updated_at": "2026-11-22T20:31:01.978087+00:00",
-  "watches_count": 8,
+  "updated_at": "2026-11-23T09:56:53.889425+00:00",
+  "watches_count": 9,
   "watches": [
+    {
+      "id": "seiko-sbtm363",
+      "reference": "SBTM363",
+      "target_price_new": 293.0,
+      "target_price_used": null,
+      "urls_count": 1
+    },
+    {
+      "id": "citizen-cb3040-56h",
+      "reference": "CB3040-56H",
+      "target_price_new": 489.0,
+      "target_price_used": null,
+      "urls_count": 2
+    },
     {
       "id": "citizen-cb3035-72e",
       "reference": "CB3035-72E",
       "target_price_new": 884.0,
       "target_price_used": null,
       "urls_count": 1
-    },
-    {
-      "id": "citizen-15594",
-      "reference": "15594-",
-      "target_price_new": 488.0,
-      "target_price_used": null,
-      "urls_count": 2
     },
     {
       "id": "citizen-cb3046-76e",
