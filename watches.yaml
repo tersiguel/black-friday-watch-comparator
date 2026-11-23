@@ -31,6 +31,14 @@ watches:
         site_fee: 0
         has_customs: true
         customs_fee: 90.74
+      - url: "https://www.watches111.com/%E2%80%8Breloj-solar-radio-control-hombre-Seiko-Selection-SBTM347-JDM-39-8mm-cristal-de-zafiro-100m-WR-correa-de-acero-JDM-mercado-interior-japon%C3%A9s-p703203122"
+        merchant: "Watches111"
+        condition: "new"
+        manual_price: 415
+        shipping_fee: 0
+        site_fee: 0
+        has_customs: false
+        customs_fee: 0
     suggested_urls:
       - url: "https://www.amazon.fr/s?k=Seiko%20sbtm347"
         merchant: "Amazon.fr"
