@@ -1,7 +1,14 @@
 {
-  "updated_at": "2026-11-23T09:56:53.889425+00:00",
-  "watches_count": 9,
+  "updated_at": "2026-11-24T01:19:32.329954+00:00",
+  "watches_count": 10,
   "watches": [
+    {
+      "id": "seiko-sbtm347",
+      "reference": "sbtm347",
+      "target_price_new": 413.0,
+      "target_price_used": null,
+      "urls_count": 2
+    },
     {
       "id": "seiko-sbtm363",
       "reference": "SBTM363",
