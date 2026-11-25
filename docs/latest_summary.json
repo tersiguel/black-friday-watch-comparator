@@ -1,7 +1,14 @@
 {
-  "updated_at": "2026-11-25T10:38:43.068081+00:00",
-  "watches_count": 10,
+  "updated_at": "2026-11-25T22:53:35.095047+00:00",
+  "watches_count": 11,
   "watches": [
+    {
+      "id": "varioeveryday-1945-a11-35-wh",
+      "reference": "1945_A11_35_WH",
+      "target_price_new": 184.0,
+      "target_price_used": null,
+      "urls_count": 2
+    },
     {
       "id": "seiko-sbtm347",
       "reference": "sbtm347",
