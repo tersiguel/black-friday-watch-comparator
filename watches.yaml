@@ -12,6 +12,58 @@ settings:
     carrier_fee_eur: 18
 
 watches:
+  - id: "varioeveryday-1945-a11-35-wh"
+    name: "Vario 1945 A-11S Solar Quartz Heron White Field Watch"
+    brand: "VARIOeveryday"
+    reference: "1945_A11_35_WH"
+    image_url: "https://vario.sg/cdn/shop/files/A11S_white.jpg?v=1748417547&width=1024"
+    features: "Vario 1945 A-11S watch remix history with a message of peace. The iconic American-designed A-11’s hacking center seconds hand revolutionized precision timing, allowing soldiers to synchronize their actions during critical battlefield maneuvers. The removal of the center seconds h"
+    specs:
+      "Référence": "1945_A11_35_WH"
+    target_price_new: 184
+    reference_price: 200.56
+    urls:
+      - url: "https://vario.sg/products/vario-1945-a-11s-solar-quartz-heron-white-field-watch?variant=41955962847326"
+        merchant: "Vario"
+        condition: "new"
+        manual_price: 200.56
+        shipping_fee: 0
+        site_fee: 0
+        has_customs: false
+        customs_fee: 0
+    suggested_urls:
+      - url: "https://www.amazon.fr/s?k=VARIOeveryday%201945_A11_35_WH"
+        merchant: "Amazon.fr"
+        title: "Rechercher VARIOeveryday 1945_A11_35_WH sur Amazon.fr"
+        condition: "new"
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Livraison UE • 0 € douane"
+      - url: "https://ocarat.com/recherche?controller=search&s=VARIOeveryday%201945_A11_35_WH"
+        merchant: "Ocarat"
+        title: "VARIOeveryday 1945_A11_35_WH chez Ocarat France"
+        condition: "new"
+        shipping_fee: 0
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Boutique agréée France • 0 € douane"
+      - url: "https://www.chrono24.fr/search/index.htm?query=1945_A11_35_WH&usedOrNew=used"
+        merchant: "Chrono24 (Occasion)"
+        title: "Annonces Occasion VARIOeveryday 1945_A11_35_WH"
+        condition: "used"
+        shipping_fee: 15
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Protection acheteur Chrono24 incluse"
+      - url: "https://www.catawiki.com/fr/s?q=VARIOeveryday%201945_A11_35_WH"
+        merchant: "Catawiki"
+        title: "Enchères VARIOeveryday 1945_A11_35_WH"
+        condition: "used"
+        shipping_fee: 18
+        site_fee: 0
+        customs_fee: 0
+        fee_hint: "Frais Catawiki 9 % + 3 € pré-calculés"
   - id: "seiko-sbtm347"
     name: "Seiko Selection Solar Radio SBTM347"
     brand: "Seiko"
