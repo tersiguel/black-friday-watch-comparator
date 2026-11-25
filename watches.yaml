@@ -31,6 +31,14 @@ watches:
         site_fee: 0
         has_customs: false
         customs_fee: 0
+      - url: "https://www.thewatchgallery.fr/products/vario-1945-a-11s-heron-white-solar-quartz-field-watch"
+        merchant: "Thewatchgallery"
+        condition: "new"
+        manual_price: 195
+        shipping_fee: 10
+        site_fee: 0
+        has_customs: false
+        customs_fee: 0
     suggested_urls:
       - url: "https://www.amazon.fr/s?k=VARIOeveryday%201945_A11_35_WH"
         merchant: "Amazon.fr"
