@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-11-26T10:09:23.702471+00:00",
-  "watches_count": 11,
+  "updated_at": "2026-11-26T22:40:57.221416+00:00",
+  "watches_count": 9,
   "watches": [
     {
       "id": "varioeveryday-1945-a11-35-wh",
@@ -57,20 +57,6 @@
       "target_price_new": 539.0,
       "target_price_used": null,
       "urls_count": 1
-    },
-    {
-      "id": "citizen-cb1160-55e",
-      "reference": "CB1160-55E",
-      "target_price_new": 425.0,
-      "target_price_used": 330.0,
-      "urls_count": 4
-    },
-    {
-      "id": "citizen-cb1160-55l",
-      "reference": "CB1160-55L",
-      "target_price_new": 425.0,
-      "target_price_used": 335.0,
-      "urls_count": 3
     },
     {
       "id": "seiko-solar-radio-sbtm323",
